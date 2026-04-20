@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ResearchProposalController;
+use App\Http\Controllers\Api\InstitutionController;
+
+// Public routes
+Route::post('/auth/login', [AuthController::class, 'login']);
+
+// Protected routes
+Route::middleware('auth:sanctum')->group(function () {
+    // Auth
+    Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    // Research Proposals
+    Route::get('/proposals', [ResearchProposalController::class, 'index']);
+    Route::post('/proposals', [ResearchProposalController::class, 'store']);
+    Route::get('/proposals/{proposal}', [ResearchProposalController::class, 'show']);
+    Route::put('/proposals/{proposal}', [ResearchProposalController::class, 'update']);
+    Route::delete('/proposals/{proposal}', [ResearchProposalController::class, 'destroy']);
+    Route::post('/proposals/{proposal}/review', [ResearchProposalController::class, 'review']);
+
+    // Institutions (SuperAdmin/CHED only)
+    Route::get('/institutions', [InstitutionController::class, 'index']);
+    Route::post('/institutions', [InstitutionController::class, 'store']);
+    Route::get('/institutions/{institution}', [InstitutionController::class, 'show']);
+    Route::put('/institutions/{institution}', [InstitutionController::class, 'update']);
+    Route::delete('/institutions/{institution}', [InstitutionController::class, 'destroy']);
+});
