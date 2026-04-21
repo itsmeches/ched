@@ -75,14 +75,14 @@ export default function HEIDashboard() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-5 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
-        <div className="flex flex-wrap gap-3">
-          <button className="px-4 py-2 bg-[#2c5282] text-white rounded-lg text-sm font-medium hover:bg-[#1a365d] transition-colors">Submit New Proposal</button>
-          <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">View Guidelines</button>
-          <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">Contact CHED</button>
+        <div className="bg-white rounded-xl p-5 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+            <div className="flex flex-wrap gap-3">
+            <button className="px-4 py-2 bg-[#2c5282] text-white rounded-lg text-sm font-medium hover:bg-[#1a365d] transition-colors">Submit New Proposal</button>
+            <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">View Guidelines</button>
+            <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">Contact CHED</button>
+            </div>
         </div>
-      </div>
-    </div>
-  )
+        </div>
+    )
 }

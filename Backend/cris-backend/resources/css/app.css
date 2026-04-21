@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+	background:
+		radial-gradient(circle at top left, rgba(15, 118, 110, 0.08), transparent 28%),
+		radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 26%),
+		linear-gradient(180deg, #f8fafc 0%, #eef6f5 100%);
+}
+
+.admin-dashboard-shell {
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.72));
+	backdrop-filter: blur(10px);
+}
+
+.admin-dashboard-hero {
+	background:
+		radial-gradient(circle at 15% 10%, rgba(15, 118, 110, 0.2), transparent 24%),
+		radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.22), transparent 24%),
+		linear-gradient(135deg, #082f49 0%, #115e59 55%, #134e4a 100%);
+}
