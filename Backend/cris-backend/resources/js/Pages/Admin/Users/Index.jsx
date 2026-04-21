@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
-import { Alert, Avatar, Button, Card, Col, Input, Modal, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, Avatar, Button, Card, Col, Input, Modal, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
 
 const roleColorMap = { super_admin: 'purple', ched: 'blue', hei: 'green' };
@@ -10,6 +10,20 @@ export default function UsersIndex({ users, filters }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [role, setRole] = useState(filters.role ?? '');
+    const [tableData, setTableData] = useState(users.data ?? []);
+
+    useEffect(() => {
+        setTableData(users.data ?? []);
+    }, [users.data]);
+
+    useEffect(() => {
+        if (flash?.success) {
+            message.success(flash.success);
+        }
+        if (flash?.error) {
+            message.error(flash.error);
+        }
+    }, [flash?.success, flash?.error]);
 
     const columns = useMemo(() => [
         {
@@ -66,7 +80,22 @@ export default function UsersIndex({ users, filters }) {
             content: 'This action cannot be undone.',
             okText: 'Delete',
             okButtonProps: { danger: true },
-            onOk: () => router.delete(route('admin.users.destroy', id), { preserveScroll: true }),
+            onOk: () => {
+                const previous = tableData;
+                setTableData((current) => current.filter((item) => item.id !== id));
+
+                router.delete(route('admin.users.destroy', id), {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        message.success('User deleted.');
+                        router.reload({ only: ['users'] });
+                    },
+                    onError: () => {
+                        setTableData(previous);
+                        message.error('Delete failed. Restored previous table state.');
+                    },
+                });
+            },
         });
     }
 
@@ -98,7 +127,7 @@ export default function UsersIndex({ users, filters }) {
                     </Card>
 
                     <Card className="admin-dashboard-shell" bordered={false}>
-                        <Table rowKey="id" columns={columns} dataSource={users.data} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} />
+                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} />
                     </Card>
                 </div>
             </div>

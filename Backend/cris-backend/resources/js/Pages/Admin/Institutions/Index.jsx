@@ -1,12 +1,26 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
-import { Alert, Button, Card, Col, Input, Modal, Row, Space, Table, Tag, Typography } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, Button, Card, Col, Input, Modal, Row, Space, Table, Tag, Typography, message } from 'antd';
 import { BankOutlined, ExclamationCircleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 
 export default function InstitutionsIndex({ institutions, filters }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search ?? '');
+    const [tableData, setTableData] = useState(institutions.data ?? []);
+
+    useEffect(() => {
+        setTableData(institutions.data ?? []);
+    }, [institutions.data]);
+
+    useEffect(() => {
+        if (flash?.success) {
+            message.success(flash.success);
+        }
+        if (flash?.error) {
+            message.error(flash.error);
+        }
+    }, [flash?.success, flash?.error]);
 
     const columns = useMemo(() => [
         {
@@ -51,7 +65,22 @@ export default function InstitutionsIndex({ institutions, filters }) {
             content: 'This action cannot be undone.',
             okText: 'Delete',
             okButtonProps: { danger: true },
-            onOk: () => router.delete(route('admin.institutions.destroy', id), { preserveScroll: true }),
+            onOk: () => {
+                const previous = tableData;
+                setTableData((current) => current.filter((item) => item.id !== id));
+
+                router.delete(route('admin.institutions.destroy', id), {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        message.success('Institution deleted.');
+                        router.reload({ only: ['institutions'] });
+                    },
+                    onError: () => {
+                        setTableData(previous);
+                        message.error('Delete failed. Restored previous table state.');
+                    },
+                });
+            },
         });
     }
 
@@ -82,7 +111,7 @@ export default function InstitutionsIndex({ institutions, filters }) {
                     </Card>
 
                     <Card className="admin-dashboard-shell" bordered={false}>
-                        <Table rowKey="id" columns={columns} dataSource={institutions.data} pagination={{ current: institutions.current_page, pageSize: institutions.per_page, total: institutions.total, onChange: (page) => router.get(route('admin.institutions.index'), { search, page }, { preserveState: true, replace: true }) }} scroll={{ x: 860 }} />
+                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: institutions.current_page, pageSize: institutions.per_page, total: institutions.total, onChange: (page) => router.get(route('admin.institutions.index'), { search, page }, { preserveState: true, replace: true }) }} scroll={{ x: 860 }} />
                     </Card>
                 </div>
             </div>
