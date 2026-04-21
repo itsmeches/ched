@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
-import { Alert, Button, Card, Col, List, Row, Space, Statistic, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Col, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, InboxOutlined, StopOutlined } from '@ant-design/icons';
 
 const statItems = [
@@ -11,7 +11,55 @@ const statItems = [
     { key: 'total', label: 'Total Papers', color: '#0f766e', icon: <InboxOutlined /> },
 ];
 
-export default function CHEDDashboard({ stats, forReview }) {
+export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
+    const pendingColumns = [
+        {
+            title: 'Title',
+            dataIndex: 'title',
+            key: 'title',
+            render: (value, row) => <Link href={route('research.show', row.id)}>{value}</Link>,
+        },
+        {
+            title: 'Institution',
+            key: 'institution',
+            render: (_, row) => row.institution?.name ?? 'Unknown institution',
+        },
+        { title: 'Year', dataIndex: 'year', key: 'year', width: 100 },
+        {
+            title: 'Submitted',
+            dataIndex: 'created_at',
+            key: 'created_at',
+            width: 150,
+            render: (value) => new Date(value).toLocaleDateString(),
+        },
+    ];
+
+    const decisionsColumns = [
+        {
+            title: 'Title',
+            dataIndex: 'title',
+            key: 'title',
+            render: (value, row) => <Link href={route('research.show', row.id)}>{value}</Link>,
+        },
+        {
+            title: 'Institution',
+            key: 'institution',
+            render: (_, row) => row.institution?.name ?? 'Unknown institution',
+        },
+        {
+            title: 'Decision',
+            dataIndex: 'status',
+            key: 'status',
+            render: (value) => <StatusBadge status={value} />,
+        },
+        {
+            title: 'Reviewed At',
+            dataIndex: 'reviewed_at',
+            key: 'reviewed_at',
+            render: (value) => (value ? new Date(value).toLocaleDateString() : '—'),
+        },
+    ];
+
     return (
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">CHED Review Dashboard</h2>}>
             <Head title="CHED Dashboard" />
@@ -35,7 +83,7 @@ export default function CHEDDashboard({ stats, forReview }) {
                             </Col>
                             <Col xs={24} lg={8}>
                                 <Space direction="vertical" style={{ width: '100%' }} size={12}>
-                                    <Link href={route('research.index', { status: 'submitted' })}>
+                                    <Link href={route('research.index', { status: 'pending' })}>
                                         <Button type="primary" size="large" block icon={<FileSearchOutlined />}>
                                             Open Review Queue
                                         </Button>
@@ -60,22 +108,53 @@ export default function CHEDDashboard({ stats, forReview }) {
                         ))}
                     </Row>
 
-                    <Card title="Needs Your Review" extra={<Link href={route('research.index', { status: 'submitted' })}>View all</Link>} className="admin-dashboard-shell">
+                    <Row gutter={[16, 16]}>
+                        <Col xs={24} xl={12}>
+                            <Card className="admin-dashboard-shell" title="Review Performance" bordered={false}>
+                                <Space direction="vertical" style={{ width: '100%' }} size={14}>
+                                    <Statistic title="Reviewed Today" value={stats.reviewedToday} />
+                                    <div>
+                                        <Typography.Text type="secondary">Approval Rate</Typography.Text>
+                                        <Progress percent={Number(stats.approvalRate)} strokeColor="#2563eb" />
+                                    </div>
+                                </Space>
+                            </Card>
+                        </Col>
+                        <Col xs={24} xl={12}>
+                            <Card className="admin-dashboard-shell" title="Queue Snapshot" bordered={false}>
+                                {forReview.length === 0 ? (
+                                    <Alert type="success" showIcon message="No pending papers pending review. The current queue is clear." />
+                                ) : (
+                                    <Table rowKey="id" columns={pendingColumns} dataSource={forReview.slice(0, 5)} pagination={false} size="small" />
+                                )}
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    <Card title="Needs Your Review" extra={<Link href={route('research.index', { status: 'pending' })}>View all</Link>} className="admin-dashboard-shell">
                         {forReview.length === 0 ? (
                             <Alert type="success" showIcon message="No papers pending review. The current queue is clear." />
                         ) : (
-                            <List
-                                itemLayout="horizontal"
+                            <Table
+                                rowKey="id"
+                                columns={pendingColumns}
                                 dataSource={forReview}
-                                renderItem={(paper) => (
-                                    <List.Item actions={[<Link key="review" href={route('research.show', paper.id)}>Review</Link>]}>
-                                        <List.Item.Meta title={<Link href={route('research.show', paper.id)}>{paper.title}</Link>} description={`${paper.institution?.name ?? 'Unknown institution'} · ${new Date(paper.created_at).toLocaleDateString()}`} />
-                                        <Space>
-                                            <StatusBadge status={paper.status} />
-                                            <Tag color="blue">CHED</Tag>
-                                        </Space>
-                                    </List.Item>
-                                )}
+                                pagination={false}
+                                scroll={{ x: 820 }}
+                            />
+                        )}
+                    </Card>
+
+                    <Card title="Recent Decisions" className="admin-dashboard-shell">
+                        {recentDecisions.length === 0 ? (
+                            <Alert type="info" showIcon message="No approved/rejected decisions yet." />
+                        ) : (
+                            <Table
+                                rowKey="id"
+                                columns={decisionsColumns}
+                                dataSource={recentDecisions}
+                                pagination={false}
+                                scroll={{ x: 820 }}
                             />
                         )}
                     </Card>

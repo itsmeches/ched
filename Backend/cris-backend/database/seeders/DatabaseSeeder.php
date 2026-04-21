@@ -62,7 +62,7 @@ class DatabaseSeeder extends Seeder
             'institution_id' => $institution1->id,
             'category' => 'Education',
             'keywords' => 'K-12, Education, Curriculum, CALABARZON',
-            'status' => 'under_review',
+            'status' => 'pending',
             'submitted_by' => $heiUser->id,
         ]);
 
@@ -87,7 +87,7 @@ class DatabaseSeeder extends Seeder
             'institution_id' => $institution1->id,
             'category' => 'Education',
             'keywords' => 'Digital Transformation, Higher Education, Technology',
-            'status' => 'submitted',
+            'status' => 'pending',
             'submitted_by' => $heiUser->id,
         ]);
     }

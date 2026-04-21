@@ -7,24 +7,65 @@ use App\Http\Requests\UpdateResearchProposalRequest;
 use App\Models\ResearchProposal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ResearchProposalController extends Controller
 {
+    public function publicIndex(Request $request): Response
+    {
+        $query = ResearchProposal::with(['institution:id,name'])
+            ->select(['id', 'title', 'authors', 'school', 'year', 'keywords', 'status', 'institution_id', 'approved_at', 'updated_at'])
+            ->where('status', ResearchProposal::STATUS_APPROVED)
+            ->orderByDesc('approved_at')
+            ->orderByDesc('updated_at');
+
+        $this->applySearchFilters($query, $request, includeStatus: false);
+
+        return Inertia::render('Research/PublicIndex', [
+            'proposals' => $query->paginate(12)->withQueryString(),
+            'filters'   => $request->only(['search', 'year', 'school']),
+        ]);
+    }
+
+    public function publicShow(ResearchProposal $proposal): Response
+    {
+        abort_unless($proposal->status === ResearchProposal::STATUS_APPROVED, 404);
+
+        $proposal->load(['institution:id,name', 'approver:id,name']);
+
+        return Inertia::render('Research/PublicShow', [
+            'proposal' => $proposal,
+        ]);
+    }
+
+    public function publicDownloadFile(ResearchProposal $proposal): BinaryFileResponse
+    {
+        abort_unless($proposal->status === ResearchProposal::STATUS_APPROVED, 404);
+        abort_if(empty($proposal->file_path), 404);
+        abort_unless(Storage::disk('public')->exists($proposal->file_path), 404);
+
+        $absolutePath = Storage::disk('public')->path($proposal->file_path);
+        $downloadName = $this->safePdfFileName($proposal);
+
+        return response()->file($absolutePath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $downloadName . '"',
+        ]);
+    }
+
     public function index(Request $request): Response
     {
         $user = $request->user();
 
         $query = ResearchProposal::with(['submitter:id,name', 'institution:id,name'])
-            ->when($request->search, fn ($q, $s) =>
-                $q->where('title', 'like', "%{$s}%")
-                  ->orWhere('authors', 'like', "%{$s}%")
-                  ->orWhere('keywords', 'like', "%{$s}%")
-            )
-            ->when($request->status, fn ($q, $s) => $q->where('status', $s))
+            ->select(['id', 'title', 'authors', 'year', 'school', 'keywords', 'status', 'institution_id', 'submitted_by', 'updated_at'])
             ->orderByDesc('updated_at');
+
+        $this->applySearchFilters($query, $request, includeStatus: true);
 
         // HEI only sees own papers
         if ($user->isHEI()) {
@@ -33,9 +74,37 @@ class ResearchProposalController extends Controller
 
         return Inertia::render('Research/Index', [
             'proposals'  => $query->paginate(15)->withQueryString(),
-            'filters'    => $request->only(['search', 'status']),
+            'filters'    => $request->only(['search', 'status', 'year', 'school']),
             'canCreate'  => $user->isHEI(),
         ]);
+    }
+
+    private function applySearchFilters($query, Request $request, bool $includeStatus): void
+    {
+        $search = trim((string) $request->input('search', ''));
+
+        if ($search !== '') {
+            $query->where(function ($inner) use ($search) {
+                $inner->where('title', 'like', "%{$search}%")
+                    ->orWhere('authors', 'like', "%{$search}%")
+                    ->orWhere('keywords', 'like', "%{$search}%");
+            });
+        }
+
+        $year = (int) $request->input('year');
+        $minYear = 1900;
+        $maxYear = (int) date('Y') + 1;
+
+        if ($request->filled('year') && $year > 0) {
+            $year = max($minYear, min($maxYear, $year));
+            $query->where('year', $year);
+        }
+
+        $query->when($request->filled('school'), fn ($q) => $q->where('school', 'like', '%' . trim((string) $request->input('school')) . '%'));
+
+        if ($includeStatus) {
+            $query->when($request->filled('status'), fn ($q) => $q->where('status', (string) $request->input('status')));
+        }
     }
 
     public function create(): Response
@@ -60,24 +129,51 @@ class ResearchProposalController extends Controller
             ...$data,
             'submitted_by'   => $request->user()->id,
             'institution_id' => $request->user()->institution_id,
-            'status'         => ResearchProposal::STATUS_DRAFT,
+            'status'         => ResearchProposal::STATUS_PENDING,
         ]);
 
         return redirect()->route('research.show', $proposal)
-            ->with('success', 'Research paper saved as draft.');
+            ->with('success', 'Research paper submitted and marked as pending review.');
     }
 
     public function show(ResearchProposal $proposal): Response
     {
         $this->authorize('view', $proposal);
+        $user = request()->user();
 
-        $proposal->load(['submitter:id,name', 'reviewer:id,name', 'institution:id,name']);
+        $proposal->load(['submitter:id,name', 'reviewer:id,name', 'approver:id,name', 'institution:id,name']);
 
         return Inertia::render('Research/Show', [
             'proposal' => $proposal,
-            'canEdit'  => auth()->user()->can('update', $proposal),
-            'canReview' => auth()->user()->can('review', $proposal),
+            'canEdit'  => $user?->can('update', $proposal) ?? false,
+            'canReview' => $user?->can('review', $proposal) ?? false,
         ]);
+    }
+
+    public function downloadFile(ResearchProposal $proposal): BinaryFileResponse
+    {
+        $this->authorize('view', $proposal);
+        abort_if(empty($proposal->file_path), 404);
+        abort_unless(Storage::disk('public')->exists($proposal->file_path), 404);
+
+        $absolutePath = Storage::disk('public')->path($proposal->file_path);
+        $downloadName = $this->safePdfFileName($proposal);
+
+        return response()->file($absolutePath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $downloadName . '"',
+        ]);
+    }
+
+    private function safePdfFileName(ResearchProposal $proposal): string
+    {
+        $slug = Str::slug($proposal->title ?? 'research-paper');
+
+        if ($slug === '') {
+            $slug = 'research-paper-' . $proposal->id;
+        }
+
+        return $slug . '.pdf';
     }
 
     public function edit(ResearchProposal $proposal): Response
@@ -123,20 +219,14 @@ class ResearchProposalController extends Controller
             ->with('success', 'Research paper deleted.');
     }
 
-    /** HEI submits a draft for review */
-    public function submit(ResearchProposal $proposal): RedirectResponse
-    {
-        $this->authorize('submit', $proposal);
-
-        $proposal->update(['status' => ResearchProposal::STATUS_SUBMITTED]);
-
-        return back()->with('success', 'Paper submitted for review.');
-    }
-
     /** CHED / Super Admin reviews a paper */
     public function review(Request $request, ResearchProposal $proposal): RedirectResponse
     {
         $this->authorize('review', $proposal);
+
+        if (! $proposal->isPending()) {
+            return back()->with('error', 'Only pending papers can be reviewed.');
+        }
 
         $request->validate([
             'action'   => ['required', 'in:approve,reject'],
@@ -149,6 +239,8 @@ class ResearchProposalController extends Controller
                 : ResearchProposal::STATUS_REJECTED,
             'reviewed_by' => $request->user()->id,
             'reviewed_at' => now(),
+            'approved_by' => $request->action === 'approve' ? $request->user()->id : null,
+            'approved_at' => $request->action === 'approve' ? now() : null,
             'comments'    => $request->comments,
         ]);
 

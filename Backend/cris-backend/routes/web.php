@@ -18,6 +18,13 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/public/research', [ResearchProposalController::class, 'publicIndex'])
+    ->name('research.public.index');
+Route::get('/public/research/{proposal}', [ResearchProposalController::class, 'publicShow'])
+    ->name('research.public.show');
+Route::get('/public/research/{proposal}/file', [ResearchProposalController::class, 'publicDownloadFile'])
+    ->name('research.public.file');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -34,12 +41,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/hei/dashboard', [DashboardController::class, 'hei'])->name('hei.dashboard');
 
         Route::resource('research', ResearchProposalController::class)->except(['index', 'show']);
-        Route::post('research/{proposal}/submit', [ResearchProposalController::class, 'submit'])
-            ->name('research.submit');
     });
 
     // ── CHED ─────────────────────────────────────────────────────────────────
-    Route::middleware('role:ched,super_admin')->group(function () {
+    Route::middleware('role:ched')->group(function () {
         Route::get('/ched/dashboard', [DashboardController::class, 'ched'])->name('ched.dashboard');
 
         Route::post('research/{proposal}/review', [ResearchProposalController::class, 'review'])
@@ -49,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Shared: any authenticated user can list/view research
     Route::get('/research', [ResearchProposalController::class, 'index'])->name('research.index');
     Route::get('/research/{proposal}', [ResearchProposalController::class, 'show'])->name('research.show');
+    Route::get('/research/{proposal}/file', [ResearchProposalController::class, 'downloadFile'])->name('research.file');
 
     // ── SUPER ADMIN ───────────────────────────────────────────────────────────
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {

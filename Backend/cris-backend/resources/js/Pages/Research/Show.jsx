@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
-import { Alert, Button, Card, Descriptions, Divider, Input, Modal, Space, Tag, Typography, message } from 'antd';
+import { Alert, Button, Card, Descriptions, Divider, Input, Popconfirm, Space, Typography, message } from 'antd';
 import { useEffect } from 'react';
 
 export default function ResearchShow({ proposal, canEdit, canReview }) {
@@ -20,15 +20,6 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
     function submitReview(action) {
         reviewForm.setData('action', action);
         reviewForm.post(route('research.review', proposal.id));
-    }
-
-    function submitPaper() {
-        Modal.confirm({
-            title: 'Submit this paper for review?',
-            content: 'After submission, editing may be restricted until review is completed.',
-            okText: 'Submit',
-            onOk: () => router.post(route('research.submit', proposal.id)),
-        });
     }
 
     return (
@@ -56,6 +47,8 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
                             <Descriptions.Item label="Keywords">{proposal.keywords || '—'}</Descriptions.Item>
                             <Descriptions.Item label="Institution">{proposal.institution?.name ?? '—'}</Descriptions.Item>
                             <Descriptions.Item label="Submitted By">{proposal.submitter?.name ?? '—'}</Descriptions.Item>
+                            <Descriptions.Item label="Approved By">{proposal.approver?.name ?? '—'}</Descriptions.Item>
+                            <Descriptions.Item label="Approved At">{proposal.approved_at ? new Date(proposal.approved_at).toLocaleString() : '—'}</Descriptions.Item>
                         </Descriptions>
 
                         <Divider />
@@ -64,7 +57,7 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
 
                         <Space wrap>
                             {proposal.file_path && (
-                                <a href={`/storage/${proposal.file_path}`} target="_blank" rel="noreferrer">
+                                <a href={route('research.file', proposal.id)} target="_blank" rel="noreferrer">
                                     <Button>View PDF</Button>
                                 </a>
                             )}
@@ -73,10 +66,6 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
                                 <Link href={route('research.edit', proposal.id)}>
                                     <Button>Edit</Button>
                                 </Link>
-                            )}
-
-                            {canEdit && proposal.status === 'draft' && (
-                                <Button type="primary" onClick={submitPaper}>Submit for Review</Button>
                             )}
                         </Space>
                     </Card>
@@ -97,7 +86,7 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
                         />
                     )}
 
-                    {canReview && ['submitted', 'under_review'].includes(proposal.status) && (
+                    {canReview && proposal.status === 'pending' && (
                         <Card className="admin-dashboard-shell" bordered={false} title="Review Decision">
                             <Space direction="vertical" style={{ width: '100%' }} size={16}>
                                 <Input.TextArea
@@ -107,12 +96,24 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
                                     placeholder="Provide feedback to the researcher"
                                 />
                                 <Space>
-                                    <Button type="primary" onClick={() => submitReview('approve')} loading={reviewForm.processing}>
-                                        Approve
-                                    </Button>
-                                    <Button danger onClick={() => submitReview('reject')} loading={reviewForm.processing}>
-                                        Reject
-                                    </Button>
+                                    <Popconfirm
+                                        title="Approve this submission?"
+                                        onConfirm={() => submitReview('approve')}
+                                        okText="Approve"
+                                    >
+                                        <Button type="primary" loading={reviewForm.processing}>
+                                            Approve
+                                        </Button>
+                                    </Popconfirm>
+                                    <Popconfirm
+                                        title="Reject this submission?"
+                                        onConfirm={() => submitReview('reject')}
+                                        okText="Reject"
+                                    >
+                                        <Button danger loading={reviewForm.processing}>
+                                            Reject
+                                        </Button>
+                                    </Popconfirm>
                                 </Space>
                             </Space>
                         </Card>

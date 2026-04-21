@@ -44,11 +44,11 @@ class ResearchProposalController extends Controller
             ...$validated,
             'institution_id' => $request->user()->institution_id,
             'submitted_by' => $request->user()->id,
-            'status' => 'submitted',
+            'status' => 'pending',
         ]);
 
         return response()->json([
-            'message' => 'Proposal submitted successfully',
+            'message' => 'Proposal submitted and marked as pending',
             'proposal' => $proposal->load('institution'),
         ], 201);
     }
@@ -59,14 +59,14 @@ class ResearchProposalController extends Controller
         return response()->json($proposal->load(['institution', 'submitter', 'reviewer']));
     }
 
-    // HEI: Update own proposal (only if draft)
+    // HEI: Update own proposal while pending
     public function update(Request $request, ResearchProposal $proposal)
     {
         if ($request->user()->isHEI() && $proposal->submitted_by !== $request->user()->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        if ($proposal->status !== 'draft' && $proposal->status !== 'rejected') {
+        if ($proposal->status !== 'pending') {
             return response()->json(['error' => 'Cannot update proposal in current status'], 400);
         }
 
@@ -90,7 +90,7 @@ class ResearchProposalController extends Controller
     public function review(Request $request, ResearchProposal $proposal)
     {
         $validated = $request->validate([
-            'status' => 'required|in:approved,rejected,under_review',
+            'status' => 'required|in:approved,rejected',
             'comments' => 'nullable|string',
         ]);
 
@@ -107,15 +107,15 @@ class ResearchProposalController extends Controller
         ]);
     }
 
-    // HEI: Delete own draft proposal
+    // HEI: Delete own pending proposal
     public function destroy(Request $request, ResearchProposal $proposal)
     {
         if ($proposal->submitted_by !== $request->user()->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        if ($proposal->status !== 'draft') {
-            return response()->json(['error' => 'Can only delete draft proposals'], 400);
+        if ($proposal->status !== 'pending') {
+            return response()->json(['error' => 'Can only delete pending proposals'], 400);
         }
 
         $proposal->delete();

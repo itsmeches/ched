@@ -9,6 +9,8 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const [year, setYear] = useState(filters.year ?? '');
+    const [school, setSchool] = useState(filters.school ?? '');
 
     useEffect(() => {
         if (flash?.success) {
@@ -53,7 +55,7 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
     ], []);
 
     function applyFilters() {
-        router.get(route('research.index'), { search, status }, { preserveState: true });
+        router.get(route('research.index'), { search, status, year, school }, { preserveState: true });
     }
 
     return (
@@ -88,13 +90,27 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                             placeholder="All statuses"
                                             allowClear
                                             options={[
-                                                { value: 'draft', label: 'Draft' },
-                                                { value: 'submitted', label: 'Submitted' },
-                                                { value: 'under_review', label: 'Under Review' },
+                                                { value: 'pending', label: 'Pending' },
                                                 { value: 'approved', label: 'Approved' },
                                                 { value: 'rejected', label: 'Rejected' },
                                             ]}
                                             onChange={(value) => setStatus(value ?? '')}
+                                        />
+                                    </Col>
+                                    <Col xs={24} md={6}>
+                                        <Input
+                                            placeholder="Filter by year"
+                                            value={year}
+                                            onChange={(event) => setYear(event.target.value.replace(/\D/g, ''))}
+                                            onPressEnter={applyFilters}
+                                        />
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <Input
+                                            placeholder="Filter by school"
+                                            value={school}
+                                            onChange={(event) => setSchool(event.target.value)}
+                                            onPressEnter={applyFilters}
                                         />
                                     </Col>
                                     <Col xs={12} md={3}>
@@ -121,7 +137,7 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                 current: proposals.current_page,
                                 pageSize: proposals.per_page,
                                 total: proposals.total,
-                                onChange: (page) => router.get(route('research.index'), { search, status, page }, { preserveState: true }),
+                                onChange: (page) => router.get(route('research.index'), { search, status, year, school, page }, { preserveState: true }),
                             }}
                             scroll={{ x: 920 }}
                         />

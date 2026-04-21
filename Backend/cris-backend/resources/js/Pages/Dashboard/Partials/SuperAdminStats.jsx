@@ -9,6 +9,7 @@ const statCards = [
     { key: 'admins', label: 'Super Admins', icon: <CrownOutlined />, routeName: 'admin.users.index', params: { role: 'super_admin' }, color: '#9333ea' },
     { key: 'institutions', label: 'Institutions', icon: <BankOutlined />, routeName: 'admin.institutions.index', color: '#d97706' },
     { key: 'proposals', label: 'Research Records', icon: <FileTextOutlined />, routeName: 'research.index', color: '#0f766e' },
+    { key: 'rejected', label: 'Rejected Papers', icon: <FileTextOutlined />, routeName: 'research.index', params: { status: 'rejected' }, color: '#dc2626' },
 ];
 
 export default function SuperAdminStats({ stats }) {

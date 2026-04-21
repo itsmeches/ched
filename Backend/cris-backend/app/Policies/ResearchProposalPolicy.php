@@ -39,12 +39,6 @@ class ResearchProposalPolicy
 
     public function review(User $user, ResearchProposal $proposal): bool
     {
-        return $user->isCHED() || $user->isSuperAdmin();
-    }
-
-    public function submit(User $user, ResearchProposal $proposal): bool
-    {
-        return $proposal->submitted_by === $user->id
-            && $proposal->status === ResearchProposal::STATUS_DRAFT;
+        return $user->isCHED();
     }
 }

@@ -3,8 +3,6 @@ import {
     Alert,
     Skeleton,
 } from 'antd';
-import {
-    } from '@ant-design/icons';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { lazy, Suspense } from 'react';
 
@@ -13,7 +11,7 @@ const SuperAdminStats = lazy(() => import('./Partials/SuperAdminStats'));
 const SuperAdminAccountPanel = lazy(() => import('./Partials/SuperAdminAccountPanel'));
 const SuperAdminUsersTable = lazy(() => import('./Partials/SuperAdminUsersTable'));
 
-export default function SuperAdminDashboard({ stats, recentUsers, institutions, roles }) {
+export default function SuperAdminDashboard({ stats, recentUsers, recentProposals, institutionOverview, institutions, roles }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -57,7 +55,7 @@ export default function SuperAdminDashboard({ stats, recentUsers, institutions, 
                     </Suspense>
 
                     <Suspense fallback={sectionFallback}>
-                        <SuperAdminUsersTable recentUsers={recentUsers} />
+                        <SuperAdminUsersTable recentUsers={recentUsers} recentProposals={recentProposals} institutionOverview={institutionOverview} />
                     </Suspense>
                 </div>
             </div>

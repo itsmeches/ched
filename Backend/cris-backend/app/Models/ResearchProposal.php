@@ -9,11 +9,9 @@ class ResearchProposal extends Model
 {
     use HasFactory;
 
-    public const STATUS_DRAFT        = 'draft';
-    public const STATUS_SUBMITTED    = 'submitted';
-    public const STATUS_UNDER_REVIEW = 'under_review';
-    public const STATUS_APPROVED     = 'approved';
-    public const STATUS_REJECTED     = 'rejected';
+    public const STATUS_PENDING  = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
 
     protected $fillable = [
         'title',
@@ -31,12 +29,15 @@ class ResearchProposal extends Model
         'submitted_by',
         'reviewed_by',
         'reviewed_at',
+        'approved_by',
+        'approved_at',
         'comments',
     ];
 
     protected $casts = [
         'year'        => 'integer',
         'reviewed_at' => 'datetime',
+        'approved_at' => 'datetime',
     ];
 
     public function institution()
@@ -54,13 +55,18 @@ class ResearchProposal extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
     public function isPending(): bool
     {
-        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_SUBMITTED], true);
+        return $this->status === self::STATUS_PENDING;
     }
 
     public function isEditable(): bool
     {
-        return in_array($this->status, [self::STATUS_DRAFT], true);
+        return $this->status === self::STATUS_PENDING;
     }
 }

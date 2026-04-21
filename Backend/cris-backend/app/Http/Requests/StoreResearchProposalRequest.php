@@ -22,7 +22,7 @@ class StoreResearchProposalRequest extends FormRequest
             'category'   => ['required', 'string', 'max:100'],
             'school'     => ['required', 'string', 'max:255'],
             'year'       => ['required', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
-            'pdf_file'   => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10 MB
+            'pdf_file'   => ['required', 'file', 'mimes:pdf', 'max:10240'], // 10 MB
         ];
     }
 }

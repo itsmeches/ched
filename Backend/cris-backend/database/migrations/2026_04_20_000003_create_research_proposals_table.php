@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('institution_id')->constrained()->onDelete('cascade');
             $table->string('category');
             $table->text('keywords')->nullable();
-            $table->enum('status', ['draft', 'submitted', 'under_review', 'approved', 'rejected'])->default('draft');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->string('file_path')->nullable();
             $table->foreignId('submitted_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->onDelete('set null');
