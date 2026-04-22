@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
+import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, InboxOutlined, StopOutlined } from '@ant-design/icons';
 
@@ -30,7 +31,7 @@ export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
             dataIndex: 'created_at',
             key: 'created_at',
             width: 150,
-            render: (value) => new Date(value).toLocaleDateString(),
+            render: (value) => formatDate(value),
         },
     ];
 
@@ -56,7 +57,7 @@ export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
             title: 'Reviewed At',
             dataIndex: 'reviewed_at',
             key: 'reviewed_at',
-            render: (value) => (value ? new Date(value).toLocaleDateString() : '—'),
+            render: (value) => formatDate(value),
         },
     ];
 
@@ -66,7 +67,7 @@ export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
 
             <div className="py-8">
                 <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
-                    <Card bordered={false} className="admin-dashboard-hero" bodyStyle={{ padding: 32 }}>
+                    <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                         <Row gutter={[24, 24]} align="middle">
                             <Col xs={24} lg={16}>
                                 <Space direction="vertical" size={10}>
@@ -122,11 +123,12 @@ export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
                         </Col>
                         <Col xs={24} xl={12}>
                             <Card className="admin-dashboard-shell" title="Queue Snapshot" bordered={false}>
-                                {forReview.length === 0 ? (
-                                    <Alert type="success" showIcon message="No pending papers pending review. The current queue is clear." />
-                                ) : (
-                                    <Table rowKey="id" columns={pendingColumns} dataSource={forReview.slice(0, 5)} pagination={false} size="small" />
-                                )}
+                                <Space direction="vertical" style={{ width: '100%' }} size={14}>
+                                    <Statistic title="Papers awaiting review" value={stats.pending} prefix={<ClockCircleOutlined style={{ color: '#d97706' }} />} />
+                                    <Link href={route('research.index', { status: 'pending' })}>
+                                        <Button type="primary" block icon={<FileSearchOutlined />}>Open Review Queue</Button>
+                                    </Link>
+                                </Space>
                             </Card>
                         </Col>
                     </Row>

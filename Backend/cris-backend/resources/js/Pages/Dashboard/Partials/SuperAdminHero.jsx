@@ -2,7 +2,7 @@ import { Card, Col, Progress, Row, Space, Statistic, Tag, Typography } from 'ant
 
 export default function SuperAdminHero({ stats }) {
     return (
-        <Card bordered={false} className="admin-dashboard-hero" bodyStyle={{ padding: 32 }}>
+        <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
             <Row gutter={[24, 24]} align="middle">
                 <Col xs={24} lg={15}>
                     <Space direction="vertical" size={8}>

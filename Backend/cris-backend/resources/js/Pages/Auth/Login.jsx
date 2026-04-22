@@ -25,8 +25,15 @@ export default function Login({ status, canResetPassword }) {
         <GuestLayout>
             <Head title="Log in" />
 
+            <div className="mb-5">
+                <h1 className="text-xl font-semibold text-slate-900">Sign in to CRIS</h1>
+                <p className="mt-2 text-sm text-slate-600">
+                    Access research submissions, review tools, and administrative controls.
+                </p>
+            </div>
+
             {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
+                <div className="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
                     {status}
                 </div>
             )}

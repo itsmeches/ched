@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreResearchProposalRequest;
 use App\Http\Requests\UpdateResearchProposalRequest;
 use App\Models\ResearchProposal;
+use App\Notifications\ResearchProposalReviewed;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -41,7 +42,9 @@ class ResearchProposalController extends Controller
         $proposal->load(['institution:id,name', 'approver:id,name']);
 
         return Inertia::render('Research/PublicShow', [
-            'proposal' => $proposal,
+            'proposal'    => $proposal,
+            'canLogin'    => Route::has('login'),
+            'canRegister' => Route::has('register'),
         ]);
     }
 
@@ -53,10 +56,11 @@ class ResearchProposalController extends Controller
 
         $absolutePath = Storage::disk('public')->path($proposal->file_path);
         $downloadName = $this->safePdfFileName($proposal);
+        $disposition = request()->boolean('download') ? 'attachment' : 'inline';
 
         return response()->file($absolutePath, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . $downloadName . '"',
+            'Content-Disposition' => $disposition . '; filename="' . $downloadName . '"',
         ]);
     }
 
@@ -161,10 +165,11 @@ class ResearchProposalController extends Controller
 
         $absolutePath = Storage::disk('public')->path($proposal->file_path);
         $downloadName = $this->safePdfFileName($proposal);
+        $disposition = request()->boolean('download') ? 'attachment' : 'inline';
 
         return response()->file($absolutePath, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . $downloadName . '"',
+            'Content-Disposition' => $disposition . '; filename="' . $downloadName . '"',
         ]);
     }
 
@@ -246,6 +251,12 @@ class ResearchProposalController extends Controller
             'approved_at' => $request->action === 'approve' ? now() : null,
             'comments'    => $request->comments,
         ]);
+
+        $proposal->loadMissing('submitter:id,name,email');
+
+        if ($proposal->submitter && $proposal->submitter->email) {
+            $proposal->submitter->notify(new ResearchProposalReviewed($proposal));
+        }
 
         return back()->with('success', 'Review saved.');
     }

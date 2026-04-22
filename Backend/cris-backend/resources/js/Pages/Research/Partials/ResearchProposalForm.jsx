@@ -1,6 +1,7 @@
 import { Alert, Button, Col, Form, Input, InputNumber, Row, Space, Upload } from 'antd';
+import { Link } from '@inertiajs/react';
 import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function parseCoAuthors(value) {
     return String(value ?? '')
@@ -18,11 +19,19 @@ export default function ResearchProposalForm({
     submitLabel,
     currentFileName,
     showCurrentFile = false,
+    cancelHref,
+    cancelLabel = 'Cancel',
 }) {
     const [coAuthorInputs, setCoAuthorInputs] = useState(() => {
         const parsed = parseCoAuthors(data.co_authors);
         return parsed.length ? parsed : [''];
     });
+
+    // Sync local inputs if the parent resets or replaces co_authors.
+    useEffect(() => {
+        const parsed = parseCoAuthors(data.co_authors);
+        setCoAuthorInputs(parsed.length ? parsed : ['']);
+    }, [data.co_authors]);
 
     const updateCoAuthorValue = (index, value) => {
         const next = [...coAuthorInputs];
@@ -170,6 +179,11 @@ export default function ResearchProposalForm({
             </Form.Item>
 
             <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                {cancelHref && (
+                    <Link href={cancelHref}>
+                        <Button>{cancelLabel}</Button>
+                    </Link>
+                )}
                 <Button type="primary" htmlType="submit" loading={processing}>
                     {submitLabel}
                 </Button>

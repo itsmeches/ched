@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Button, Card, Col, Input, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { BookOutlined, FileSearchOutlined, ReadOutlined, SearchOutlined } from '@ant-design/icons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export default function PublicResearchIndex({ proposals, filters, canLogin, canRegister }) {
     const { auth } = usePage().props;
@@ -9,6 +9,7 @@ export default function PublicResearchIndex({ proposals, filters, canLogin, canR
     const [year, setYear] = useState(filters.year ?? '');
     const [school, setSchool] = useState(filters.school ?? '');
     const hasActiveFilters = Boolean(search || year || school);
+    const isLiveFilterEnabled = useRef(false);
 
     const columns = useMemo(() => [
         {
@@ -72,9 +73,27 @@ export default function PublicResearchIndex({ proposals, filters, canLogin, canR
         router.get(route('research.public.index'), { search, year, school, page }, { preserveState: true, replace: true });
     }
 
+    useEffect(() => {
+        if (!isLiveFilterEnabled.current) {
+            return;
+        }
+
+        const timeoutId = window.setTimeout(() => {
+            applyFilters(1);
+        }, 450);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [search, year, school]);
+
     return (
         <>
-            <Head title="CRIS - Calabarzon Research Information System" />
+            <Head title="CRIS - Calabarzon Research Information System">
+                <meta
+                    head-key="description"
+                    name="description"
+                    content="Search approved research papers in CRIS, the Calabarzon Research Information System public archive for Region IV-A institutions."
+                />
+            </Head>
 
             <div
                 style={{
@@ -88,9 +107,7 @@ export default function PublicResearchIndex({ proposals, filters, canLogin, canR
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                             <div>
                                 <Space size={10} align="center" style={{ marginBottom: 2 }}>
-                                    <Tag color="cyan" style={{ borderRadius: 999, fontWeight: 700, marginInlineEnd: 0 }}>
-                                        CRIS
-                                    </Tag>
+                                    <img src="/cris-mark.svg" alt="CRIS" style={{ width: 38, height: 38, borderRadius: 10 }} />
                                     <Typography.Title level={4} style={{ margin: 0, color: '#0f172a' }}>
                                         Calabarzon Research Information System
                                     </Typography.Title>
@@ -141,7 +158,10 @@ export default function PublicResearchIndex({ proposals, filters, canLogin, canR
                                         placeholder="Try: digital education, climate adaptation, public health"
                                         value={search}
                                         prefix={<SearchOutlined />}
-                                        onChange={(event) => setSearch(event.target.value)}
+                                        onChange={(event) => {
+                                            isLiveFilterEnabled.current = true;
+                                            setSearch(event.target.value);
+                                        }}
                                         onPressEnter={() => applyFilters()}
                                     />
                                     <Button size="large" type="primary" onClick={() => applyFilters()}>
@@ -172,7 +192,10 @@ export default function PublicResearchIndex({ proposals, filters, canLogin, canR
                                 <Input
                                     placeholder="Year"
                                     value={year}
-                                    onChange={(event) => setYear(event.target.value.replace(/\D/g, ''))}
+                                    onChange={(event) => {
+                                        isLiveFilterEnabled.current = true;
+                                        setYear(event.target.value.replace(/\D/g, ''));
+                                    }}
                                     onPressEnter={() => applyFilters()}
                                 />
                             </Col>
@@ -180,13 +203,16 @@ export default function PublicResearchIndex({ proposals, filters, canLogin, canR
                                 <Input
                                     placeholder="School or institution"
                                     value={school}
-                                    onChange={(event) => setSchool(event.target.value)}
+                                    onChange={(event) => {
+                                        isLiveFilterEnabled.current = true;
+                                        setSchool(event.target.value);
+                                    }}
                                     onPressEnter={() => applyFilters()}
                                 />
                             </Col>
                             <Col xs={24} lg={6}>
                                 <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-                                    <Button onClick={() => { setSearch(''); setYear(''); setSchool(''); router.get(route('research.public.index')); }}>
+                                    <Button onClick={() => { setSearch(''); setYear(''); setSchool(''); router.get(route('research.public.index'), {}, { replace: true }); }}>
                                         Clear
                                     </Button>
                                     <Button type="primary" onClick={() => applyFilters()}>

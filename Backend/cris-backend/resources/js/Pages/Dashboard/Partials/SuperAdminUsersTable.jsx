@@ -1,5 +1,6 @@
 import { Avatar, Button, Card, Col, Row, Space, Table, Tag } from 'antd';
 import { router } from '@inertiajs/react';
+import { formatDate } from '@/utils/date';
 
 const roleColorMap = { super_admin: 'purple', ched: 'blue', hei: 'green' };
 
@@ -33,7 +34,7 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
             title: 'Created',
             dataIndex: 'created_at',
             key: 'created_at',
-            render: (value) => new Date(value).toLocaleDateString(),
+            render: (value) => formatDate(value),
         },
         {
             title: 'Action',
@@ -102,7 +103,7 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
             title: 'Last Submission',
             dataIndex: 'proposals_max_created_at',
             key: 'proposals_max_created_at',
-            render: (value) => value ? new Date(value).toLocaleDateString() : '—',
+            render: (value) => formatDate(value),
         },
     ];
 

@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
+import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, FileAddOutlined, FileTextOutlined, StopOutlined } from '@ant-design/icons';
 
@@ -36,7 +37,7 @@ export default function HEIDashboard({ stats, recentUploads, pendingQueue }) {
             title: 'Updated',
             dataIndex: 'updated_at',
             key: 'updated_at',
-            render: (value) => new Date(value).toLocaleDateString(),
+            render: (value) => formatDate(value),
         },
     ];
 
@@ -52,7 +53,7 @@ export default function HEIDashboard({ stats, recentUploads, pendingQueue }) {
             dataIndex: 'created_at',
             key: 'created_at',
             width: 160,
-            render: (value) => new Date(value).toLocaleDateString(),
+            render: (value) => formatDate(value),
         },
     ];
 
@@ -62,7 +63,7 @@ export default function HEIDashboard({ stats, recentUploads, pendingQueue }) {
 
             <div className="py-8">
                 <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
-                    <Card bordered={false} className="admin-dashboard-hero" bodyStyle={{ padding: 32 }}>
+                    <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                         <Row gutter={[24, 24]} align="middle">
                             <Col xs={24} lg={16}>
                                 <Space direction="vertical" size={10}>

@@ -1,7 +1,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
+import { formatDateTime } from '@/utils/date';
 import { Alert, Button, Card, Descriptions, Divider, Input, Popconfirm, Space, Typography, message } from 'antd';
+import { DownloadOutlined } from '@ant-design/icons';
 import { useEffect } from 'react';
 
 export default function ResearchShow({ proposal, canEdit, canReview }) {
@@ -48,7 +50,7 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
                             <Descriptions.Item label="Institution">{proposal.institution?.name ?? '—'}</Descriptions.Item>
                             <Descriptions.Item label="Submitted By">{proposal.submitter?.name ?? '—'}</Descriptions.Item>
                             <Descriptions.Item label="Approved By">{proposal.approver?.name ?? '—'}</Descriptions.Item>
-                            <Descriptions.Item label="Approved At">{proposal.approved_at ? new Date(proposal.approved_at).toLocaleString() : '—'}</Descriptions.Item>
+                            <Descriptions.Item label="Approved At">{formatDateTime(proposal.approved_at)}</Descriptions.Item>
                         </Descriptions>
 
                         <Divider />
@@ -59,6 +61,12 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
                             {proposal.file_path && (
                                 <a href={route('research.file', proposal.id)} target="_blank" rel="noreferrer">
                                     <Button>View PDF</Button>
+                                </a>
+                            )}
+
+                            {proposal.file_path && (
+                                <a href={route('research.file', { proposal: proposal.id, download: 1 })}>
+                                    <Button icon={<DownloadOutlined />}>Download PDF</Button>
                                 </a>
                             )}
 

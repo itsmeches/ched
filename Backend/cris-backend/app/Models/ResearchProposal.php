@@ -20,7 +20,6 @@ class ResearchProposal extends Model
         'year',
         'school',
         'abstract',
-        'researchers',
         'institution_id',
         'category',
         'keywords',

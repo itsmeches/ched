@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">CRIS Logo</title>
+  <desc id="desc">Calabarzon Research Information System logo mark</desc>
+  <defs>
+    <linearGradient id="bg" x1="10%" y1="10%" x2="90%" y2="90%">
+      <stop offset="0%" stop-color="#0f766e"/>
+      <stop offset="100%" stop-color="#155e75"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#bg)"/>
+  <path d="M38 35h36c11 0 20 8 20 19 0 8-5 15-13 18l17 21H80L66 75H54v18H38V35Zm16 14v14h18c4 0 7-3 7-7s-3-7-7-7H54Z" fill="#fff"/>
+  <circle cx="92" cy="36" r="7" fill="#f59e0b"/>
+</svg>

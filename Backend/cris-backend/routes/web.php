@@ -7,15 +7,17 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\InstitutionManagementController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [ResearchProposalController::class, 'publicIndex'])
-    ->name('research.public.index');
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/', [ResearchProposalController::class, 'publicIndex'])
+        ->name('research.public.index');
 
-Route::get('/public/research', [ResearchProposalController::class, 'publicIndex'])
-    ->name('research.public.archive');
-Route::get('/public/research/{proposal}', [ResearchProposalController::class, 'publicShow'])
-    ->name('research.public.show');
-Route::get('/public/research/{proposal}/file', [ResearchProposalController::class, 'publicDownloadFile'])
-    ->name('research.public.file');
+    Route::get('/public/research', [ResearchProposalController::class, 'publicIndex'])
+        ->name('research.public.archive');
+    Route::get('/public/research/{proposal}', [ResearchProposalController::class, 'publicShow'])
+        ->name('research.public.show');
+    Route::get('/public/research/{proposal}/file', [ResearchProposalController::class, 'publicDownloadFile'])
+        ->name('research.public.file');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

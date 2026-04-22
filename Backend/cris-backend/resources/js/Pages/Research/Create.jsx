@@ -42,7 +42,16 @@ export default function ResearchCreate() {
                     </Card>
 
                     <Card className="admin-dashboard-shell" bordered={false}>
-                        <ResearchProposalForm data={data} setData={setData} errors={errors} processing={processing} onSubmit={submit} submitLabel="Submit Paper" />
+                        <ResearchProposalForm
+                            data={data}
+                            setData={setData}
+                            errors={errors}
+                            processing={processing}
+                            onSubmit={submit}
+                            submitLabel="Submit Paper"
+                            cancelHref={route('research.index')}
+                            cancelLabel="Back to Papers"
+                        />
                     </Card>
                 </div>
             </div>

@@ -59,6 +59,8 @@ export default function ResearchEdit({ proposal }) {
                             submitLabel="Update Paper"
                             showCurrentFile={true}
                             currentFileName={proposal.file_path ? proposal.file_path.split('/').pop() : ''}
+                            cancelHref={route('research.show', proposal.id)}
+                            cancelLabel="Back to Record"
                         />
                     </Card>
                 </div>

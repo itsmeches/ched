@@ -116,6 +116,12 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                     <Col xs={12} md={3}>
                                         <Button block type="primary" onClick={applyFilters}>Search</Button>
                                     </Col>
+                                    <Col xs={12} md={3}>
+                                        <Button block onClick={() => {
+                                            setSearch(''); setStatus(''); setYear(''); setSchool('');
+                                            router.get(route('research.index'), {}, { replace: true });
+                                        }}>Clear</Button>
+                                    </Col>
                                     {canCreate && (
                                         <Col xs={12} md={3}>
                                             <Link href={route('research.create')}>

@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { formatDate } from '@/utils/date';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Avatar, Button, Card, Col, Input, Modal, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
@@ -54,7 +55,7 @@ export default function UsersIndex({ users, filters }) {
             title: 'Joined',
             dataIndex: 'created_at',
             key: 'created_at',
-            render: (value) => new Date(value).toLocaleDateString(),
+            render: (value) => formatDate(value),
         },
         {
             title: 'Action',
