@@ -39,6 +39,7 @@ class UserManagementController extends Controller
         return Inertia::render('Admin/Users/Create', [
             'institutions' => Institution::select('id', 'name')->get(),
             'roles'        => [
+                ['value' => 'pending',     'label' => 'Pending Approval'],
                 ['value' => 'hei',         'label' => 'HEI'],
                 ['value' => 'ched',        'label' => 'CHED'],
                 ['value' => 'super_admin', 'label' => 'Super Admin'],
@@ -52,7 +53,7 @@ class UserManagementController extends Controller
             'name'           => ['required', 'string', 'max:255'],
             'email'          => ['required', 'email', 'unique:users,email'],
             'password'       => ['required', 'confirmed', Password::defaults()],
-            'role'           => ['required', 'in:hei,ched,super_admin'],
+            'role'           => ['required', 'in:pending,hei,ched,super_admin'],
             'institution_id' => [Rule::requiredIf(fn () => $request->input('role') === 'hei'), 'nullable', 'exists:institutions,id'],
             'redirect_to'    => ['nullable', 'in:dashboard,index'],
         ]);
@@ -83,6 +84,7 @@ class UserManagementController extends Controller
             'user'         => $user->only(['id', 'name', 'email', 'role', 'institution_id']),
             'institutions' => Institution::select('id', 'name')->get(),
             'roles'        => [
+                ['value' => 'pending',     'label' => 'Pending Approval'],
                 ['value' => 'hei',         'label' => 'HEI'],
                 ['value' => 'ched',        'label' => 'CHED'],
                 ['value' => 'super_admin', 'label' => 'Super Admin'],
@@ -95,7 +97,7 @@ class UserManagementController extends Controller
         $data = $request->validate([
             'name'           => ['required', 'string', 'max:255'],
             'email'          => ['required', 'email', "unique:users,email,{$user->id}"],
-            'role'           => ['required', 'in:hei,ched,super_admin'],
+            'role'           => ['required', 'in:pending,hei,ched,super_admin'],
             'institution_id' => [Rule::requiredIf(fn () => $request->input('role') === 'hei'), 'nullable', 'exists:institutions,id'],
             'password'       => ['nullable', 'confirmed', Password::defaults()],
         ]);

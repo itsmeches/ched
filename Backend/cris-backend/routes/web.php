@@ -36,7 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('research', ResearchProposalController::class)
             ->parameters(['research' => 'proposal'])
-            ->except(['index', 'show']);
+            ->except(['index', 'show', 'destroy']);
     });
 
     // ── CHED ─────────────────────────────────────────────────────────────────
@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Shared: any authenticated user can list/view research
     Route::get('/research', [ResearchProposalController::class, 'index'])->name('research.index');
     Route::get('/research/{proposal}', [ResearchProposalController::class, 'show'])->name('research.show');
+    Route::delete('/research/{proposal}', [ResearchProposalController::class, 'destroy'])->name('research.destroy');
     Route::get('/research/{proposal}/file', [ResearchProposalController::class, 'downloadFile'])->name('research.file');
 
     // ── SUPER ADMIN ───────────────────────────────────────────────────────────

@@ -34,6 +34,7 @@ class ResearchProposalPolicy
     public function delete(User $user, ResearchProposal $proposal): bool
     {
         return ($proposal->submitted_by === $user->id && $proposal->isEditable())
+            || ($user->isCHED() && $proposal->status === ResearchProposal::STATUS_APPROVED)
             || $user->isSuperAdmin();
     }
 

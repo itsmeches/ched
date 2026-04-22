@@ -11,6 +11,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
 
+    public const ROLE_PENDING = 'pending';
     public const ROLE_SUPER_ADMIN = 'super_admin';
     public const ROLE_CHED = 'ched';
     public const ROLE_HEI = 'hei';
@@ -54,6 +55,11 @@ class User extends Authenticatable
     public function isHEI()
     {
         return $this->role === self::ROLE_HEI;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->role === self::ROLE_PENDING;
     }
 
     public function hasAnyRole(array $roles): bool

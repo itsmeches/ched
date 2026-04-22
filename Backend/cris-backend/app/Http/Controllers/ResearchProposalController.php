@@ -179,6 +179,7 @@ class ResearchProposalController extends Controller
             'proposal' => $proposal,
             'canEdit'  => $user?->can('update', $proposal) ?? false,
             'canReview' => $user?->can('review', $proposal) ?? false,
+            'canDelete' => $user?->can('delete', $proposal) ?? false,
         ]);
     }
 

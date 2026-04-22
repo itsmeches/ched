@@ -27,7 +27,7 @@ export default function Register() {
 
             <div className="mb-8">
                 <h2 className="text-2xl font-bold text-slate-900">Create your account</h2>
-                <p className="mt-1 text-sm text-slate-500">Set up your CRIS access in a few quick steps</p>
+                <p className="mt-1 text-sm text-slate-500">Set up your CRIS account. Access starts after Super Admin approval.</p>
             </div>
 
             <form onSubmit={submit} className="space-y-5">

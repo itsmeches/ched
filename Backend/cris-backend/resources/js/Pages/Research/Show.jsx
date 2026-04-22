@@ -1,14 +1,16 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { formatDateTime } from '@/utils/date';
 import { Alert, Button, Card, Divider, Input, Popconfirm, Space, Tag, Typography, message } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-export default function ResearchShow({ proposal, canEdit, canReview }) {
+export default function ResearchShow({ proposal, canEdit, canReview, canDelete }) {
     const { flash } = usePage().props;
     const reviewForm = useForm({ action: '', comments: '' });
+    const deleteForm = useForm({});
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
     useEffect(() => {
         if (flash?.success) {
@@ -20,8 +22,18 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
     }, [flash?.success, flash?.error]);
 
     function submitReview(action) {
-        reviewForm.setData('action', action);
-        reviewForm.post(route('research.review', proposal.id));
+        setIsSubmittingReview(true);
+
+        router.post(
+            route('research.review', proposal.id),
+            {
+                action,
+                comments: reviewForm.data.comments,
+            },
+            {
+                onFinish: () => setIsSubmittingReview(false),
+            },
+        );
     }
 
     const metadataItems = [
@@ -81,6 +93,18 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
                                         <Link href={route('research.edit', proposal.id)}>
                                             <Button>Edit</Button>
                                         </Link>
+                                    )}
+
+                                    {canDelete && (
+                                        <Popconfirm
+                                            title="Delete this research record?"
+                                            description="This action cannot be undone."
+                                            okText="Delete"
+                                            okButtonProps={{ danger: true, loading: deleteForm.processing }}
+                                            onConfirm={() => deleteForm.delete(route('research.destroy', proposal.id))}
+                                        >
+                                            <Button danger loading={deleteForm.processing}>Delete</Button>
+                                        </Popconfirm>
                                     )}
                                 </Space>
                             </div>
@@ -154,7 +178,7 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
                                         onConfirm={() => submitReview('approve')}
                                         okText="Approve"
                                     >
-                                        <Button type="primary" loading={reviewForm.processing}>
+                                        <Button type="primary" loading={isSubmittingReview}>
                                             Approve
                                         </Button>
                                     </Popconfirm>
@@ -163,7 +187,7 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
                                         onConfirm={() => submitReview('reject')}
                                         okText="Reject"
                                     >
-                                        <Button danger loading={reviewForm.processing}>
+                                        <Button danger loading={isSubmittingReview}>
                                             Reject
                                         </Button>
                                     </Popconfirm>

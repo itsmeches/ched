@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Alert, Avatar, Button, Card, Col, Input, Modal, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
 
-const roleColorMap = { super_admin: 'purple', ched: 'blue', hei: 'green' };
+const roleColorMap = { pending: 'orange', super_admin: 'purple', ched: 'blue', hei: 'green' };
 
 export default function UsersIndex({ users, filters }) {
     const { flash } = usePage().props;
@@ -119,7 +119,7 @@ export default function UsersIndex({ users, filters }) {
                             <Col xs={24} xl={12}>
                                 <Row gutter={[12, 12]}>
                                     <Col xs={24} md={12}><Input size="large" aria-label="Search users by name or email" value={search} placeholder="Search name or email" prefix={<SearchOutlined />} onChange={(event) => setSearch(event.target.value)} onPressEnter={applyFilter} /></Col>
-                                    <Col xs={24} md={8}><Select size="large" aria-label="Filter users by role" value={role || undefined} placeholder="All roles" allowClear options={[{ value: 'super_admin', label: 'Super Admin' }, { value: 'ched', label: 'CHED' }, { value: 'hei', label: 'HEI' }]} onChange={(value) => setRole(value ?? '')} style={{ width: '100%' }} /></Col>
+                                    <Col xs={24} md={8}><Select size="large" aria-label="Filter users by role" value={role || undefined} placeholder="All roles" allowClear options={[{ value: 'pending', label: 'Pending Approval' }, { value: 'super_admin', label: 'Super Admin' }, { value: 'ched', label: 'CHED' }, { value: 'hei', label: 'HEI' }]} onChange={(value) => setRole(value ?? '')} style={{ width: '100%' }} /></Col>
                                     <Col xs={24} md={4}><Button size="large" block type="primary" onClick={applyFilter} icon={<TeamOutlined />}>Apply</Button></Col>
                                 </Row>
                             </Col>

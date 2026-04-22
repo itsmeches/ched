@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Institution;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,6 +17,15 @@ class DashboardController extends Controller
     public function index(Request $request): Response|RedirectResponse
     {
         $user = $request->user();
+
+        if ($user?->role === User::ROLE_PENDING) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')
+                ->with('status', 'Your account is pending Super Admin approval.');
+        }
 
         return match ($user->role) {
             'super_admin' => redirect()->route('admin.dashboard'),
