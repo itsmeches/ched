@@ -85,19 +85,19 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
                     <Card title="Quick Actions" className="admin-dashboard-shell">
                         <Space direction="vertical" size={12} style={{ width: '100%' }}>
                             <Button block size="large" onClick={() => router.visit(route('admin.users.index'))} style={{ height: 'auto', paddingBlock: 12 }}>
-                                <div style={{ textAlign: 'left' }}>
+                                <div style={{ textAlign: 'left', width: '100%', lineHeight: 1.35 }}>
                                     <div style={{ fontWeight: 600 }}>Manage all users</div>
                                     <div style={{ fontSize: 12, color: '#64748b' }}>Edit, filter, and maintain account access.</div>
                                 </div>
                             </Button>
                             <Button block size="large" onClick={() => router.visit(route('admin.institutions.create'))} style={{ height: 'auto', paddingBlock: 12 }}>
-                                <div style={{ textAlign: 'left' }}>
+                                <div style={{ textAlign: 'left', width: '100%', lineHeight: 1.35 }}>
                                     <div style={{ fontWeight: 600 }}>Add institution</div>
                                     <div style={{ fontSize: 12, color: '#64748b' }}>Register a new school before assigning HEI accounts.</div>
                                 </div>
                             </Button>
                             <Button block size="large" onClick={() => router.visit(route('research.index'))} style={{ height: 'auto', paddingBlock: 12 }}>
-                                <div style={{ textAlign: 'left' }}>
+                                <div style={{ textAlign: 'left', width: '100%', lineHeight: 1.35 }}>
                                     <div style={{ fontWeight: 600 }}>Open research records</div>
                                     <div style={{ fontSize: 12, color: '#64748b' }}>Review submitted and approved proposals.</div>
                                 </div>

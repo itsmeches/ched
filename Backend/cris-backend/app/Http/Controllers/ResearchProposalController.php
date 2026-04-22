@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateResearchProposalRequest;
 use App\Models\ResearchProposal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -26,8 +27,10 @@ class ResearchProposalController extends Controller
         $this->applySearchFilters($query, $request, includeStatus: false);
 
         return Inertia::render('Research/PublicIndex', [
-            'proposals' => $query->paginate(12)->withQueryString(),
-            'filters'   => $request->only(['search', 'year', 'school']),
+            'proposals'    => $query->paginate(12)->withQueryString(),
+            'filters'      => $request->only(['search', 'year', 'school']),
+            'canLogin'     => Route::has('login'),
+            'canRegister'  => Route::has('register'),
         ]);
     }
 

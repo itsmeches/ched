@@ -5,21 +5,13 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResearchProposalController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\InstitutionManagementController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin'       => Route::has('login'),
-        'canRegister'    => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion'     => PHP_VERSION,
-    ]);
-});
+Route::get('/', [ResearchProposalController::class, 'publicIndex'])
+    ->name('research.public.index');
 
 Route::get('/public/research', [ResearchProposalController::class, 'publicIndex'])
-    ->name('research.public.index');
+    ->name('research.public.archive');
 Route::get('/public/research/{proposal}', [ResearchProposalController::class, 'publicShow'])
     ->name('research.public.show');
 Route::get('/public/research/{proposal}/file', [ResearchProposalController::class, 'publicDownloadFile'])

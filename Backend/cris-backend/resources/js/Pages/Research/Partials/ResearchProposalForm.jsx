@@ -1,5 +1,13 @@
 import { Alert, Button, Col, Form, Input, InputNumber, Row, Space, Upload } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { useState } from 'react';
+
+function parseCoAuthors(value) {
+    return String(value ?? '')
+        .split(',')
+        .map((name) => name.trim())
+        .filter(Boolean);
+}
 
 export default function ResearchProposalForm({
     data,
@@ -11,6 +19,45 @@ export default function ResearchProposalForm({
     currentFileName,
     showCurrentFile = false,
 }) {
+    const [coAuthorInputs, setCoAuthorInputs] = useState(() => {
+        const parsed = parseCoAuthors(data.co_authors);
+        return parsed.length ? parsed : [''];
+    });
+
+    const updateCoAuthorValue = (index, value) => {
+        const next = [...coAuthorInputs];
+        next[index] = value;
+        setCoAuthorInputs(next);
+
+        const serialized = next
+            .map((name) => name.trim())
+            .filter(Boolean)
+            .join(', ');
+
+        setData('co_authors', serialized);
+    };
+
+    const addCoAuthorField = () => {
+        if (coAuthorInputs.length >= 8) {
+            return;
+        }
+
+        setCoAuthorInputs([...coAuthorInputs, '']);
+    };
+
+    const removeCoAuthorField = (index) => {
+        const next = coAuthorInputs.filter((_, idx) => idx !== index);
+        const normalized = next.length ? next : [''];
+        setCoAuthorInputs(normalized);
+
+        const serialized = normalized
+            .map((name) => name.trim())
+            .filter(Boolean)
+            .join(', ');
+
+        setData('co_authors', serialized);
+    };
+
     return (
         <Form layout="vertical" onSubmitCapture={onSubmit}>
             <Row gutter={16}>
@@ -28,8 +75,36 @@ export default function ResearchProposalForm({
                     </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                    <Form.Item label="Co-Authors" validateStatus={errors.co_authors ? 'error' : ''} help={errors.co_authors}>
-                        <Input value={data.co_authors} onChange={(event) => setData('co_authors', event.target.value)} placeholder="Optional" />
+                    <Form.Item
+                        label="Co-Authors"
+                        validateStatus={errors.co_authors ? 'error' : ''}
+                        help={errors.co_authors || 'Add up to 8 co-authors. Leave empty if none.'}
+                    >
+                        <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                            {coAuthorInputs.map((name, index) => (
+                                <Space key={`co-author-${index}`} style={{ width: '100%' }}>
+                                    <Input
+                                        value={name}
+                                        placeholder={`Co-author ${index + 1}`}
+                                        onChange={(event) => updateCoAuthorValue(index, event.target.value)}
+                                    />
+                                    <Button
+                                        aria-label={`Remove co-author ${index + 1}`}
+                                        icon={<MinusCircleOutlined />}
+                                        disabled={coAuthorInputs.length === 1}
+                                        onClick={() => removeCoAuthorField(index)}
+                                    />
+                                </Space>
+                            ))}
+
+                            <Button
+                                icon={<PlusOutlined />}
+                                onClick={addCoAuthorField}
+                                disabled={coAuthorInputs.length >= 8}
+                            >
+                                Add Co-Author
+                            </Button>
+                        </Space>
                     </Form.Item>
                 </Col>
             </Row>
