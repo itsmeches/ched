@@ -59,11 +59,10 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
     }
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">Research Papers</h2>}>
+        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Research Papers</h2>}>
             <Head title="Research Papers" />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-6">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
@@ -76,6 +75,8 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                 <Row gutter={[12, 12]}>
                                     <Col xs={24} md={10}>
                                         <Input
+                                            size="large"
+                                            aria-label="Search research by title, author, or keyword"
                                             placeholder="Search title, author, keyword"
                                             value={search}
                                             prefix={<SearchOutlined />}
@@ -85,6 +86,8 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                     </Col>
                                     <Col xs={24} md={8}>
                                         <Select
+                                            size="large"
+                                            aria-label="Filter research by status"
                                             style={{ width: '100%' }}
                                             value={status || undefined}
                                             placeholder="All statuses"
@@ -99,6 +102,8 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                     </Col>
                                     <Col xs={24} md={6}>
                                         <Input
+                                            size="large"
+                                            aria-label="Filter research by year"
                                             placeholder="Filter by year"
                                             value={year}
                                             onChange={(event) => setYear(event.target.value.replace(/\D/g, ''))}
@@ -107,6 +112,8 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                     </Col>
                                     <Col xs={24} md={8}>
                                         <Input
+                                            size="large"
+                                            aria-label="Filter research by school"
                                             placeholder="Filter by school"
                                             value={school}
                                             onChange={(event) => setSchool(event.target.value)}
@@ -114,10 +121,10 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                         />
                                     </Col>
                                     <Col xs={12} md={3}>
-                                        <Button block type="primary" onClick={applyFilters}>Search</Button>
+                                        <Button size="large" block type="primary" onClick={applyFilters}>Search</Button>
                                     </Col>
                                     <Col xs={12} md={3}>
-                                        <Button block onClick={() => {
+                                        <Button size="large" block onClick={() => {
                                             setSearch(''); setStatus(''); setYear(''); setSchool('');
                                             router.get(route('research.index'), {}, { replace: true });
                                         }}>Clear</Button>
@@ -125,7 +132,7 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                     {canCreate && (
                                         <Col xs={12} md={3}>
                                             <Link href={route('research.create')}>
-                                                <Button block icon={<PlusOutlined />}>New</Button>
+                                                <Button size="large" block icon={<PlusOutlined />}>New</Button>
                                             </Link>
                                         </Col>
                                     )}
@@ -146,9 +153,9 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                 onChange: (page) => router.get(route('research.index'), { search, status, year, school, page }, { preserveState: true }),
                             }}
                             scroll={{ x: 920 }}
+                            locale={{ emptyText: 'No research papers found for the selected filters.' }}
                         />
                     </Card>
-                </div>
             </div>
         </AuthenticatedLayout>
     );

@@ -23,98 +23,89 @@ export default function Register() {
 
     return (
         <GuestLayout>
-            <Head title="Register" />
+            <Head title="Create Account" />
 
-            <form onSubmit={submit}>
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold text-slate-900">Create your account</h2>
+                <p className="mt-1 text-sm text-slate-500">Set up your CRIS access in a few quick steps</p>
+            </div>
+
+            <form onSubmit={submit} className="space-y-5">
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
-
+                    <InputLabel htmlFor="name" value="Full name" />
                     <TextInput
                         id="name"
                         name="name"
                         value={data.name}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full"
                         autoComplete="name"
                         isFocused={true}
+                        placeholder="Juan Dela Cruz"
                         onChange={(e) => setData('name', e.target.value)}
                         required
                     />
-
-                    <InputError message={errors.name} className="mt-2" />
+                    <InputError message={errors.name} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
-
+                <div>
+                    <InputLabel htmlFor="email" value="Email address" />
                     <TextInput
                         id="email"
                         type="email"
                         name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full"
                         autoComplete="username"
+                        placeholder="you@example.com"
                         onChange={(e) => setData('email', e.target.value)}
                         required
                     />
-
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
+                <div>
                     <InputLabel htmlFor="password" value="Password" />
-
                     <TextInput
                         id="password"
                         type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full"
                         autoComplete="new-password"
+                        placeholder="Create a strong password"
                         onChange={(e) => setData('password', e.target.value)}
                         required
                     />
-
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
+                <div>
+                    <InputLabel htmlFor="password_confirmation" value="Confirm password" />
                     <TextInput
                         id="password_confirmation"
                         type="password"
                         name="password_confirmation"
                         value={data.password_confirmation}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full"
                         autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
+                        placeholder="Re-enter your password"
+                        onChange={(e) => setData('password_confirmation', e.target.value)}
                         required
                     />
-
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
+                    <InputError message={errors.password_confirmation} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Already registered?
-                    </Link>
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton className="w-full justify-center py-2.5" disabled={processing}>
+                    {processing ? 'Creating account…' : 'Create account'}
+                </PrimaryButton>
             </form>
+
+            <p className="mt-6 text-center text-sm text-slate-500">
+                Already have an account?{' '}
+                <Link href={route('login')} className="font-medium text-teal-600 hover:text-teal-800">
+                    Sign in
+                </Link>
+            </p>
         </GuestLayout>
     );
 }

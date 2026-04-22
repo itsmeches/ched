@@ -12,16 +12,13 @@ export default function UsersCreate({ institutions, roles }) {
     }
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">Create User Account</h2>}>
+        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Create User Account</h2>}>
             <Head title="Create User" />
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="space-y-6">
                     <Card className="admin-dashboard-shell" bordered={false}>
-                        <Typography.Title level={4} style={{ marginTop: 0 }}>Account creation workspace</Typography.Title>
                         <Typography.Text type="secondary">The creation form opens in a drawer so you can stay close to the user list workflow.</Typography.Text>
                     </Card>
                     <UserFormDrawer title="Create User Account" subtitle="Set the user role, assign an institution for HEI accounts, and save the record directly into the system." open={true} onClose={() => router.visit(route('admin.users.index'))} onSubmit={submit} processing={processing} data={data} setData={setData} errors={errors} roles={roles} institutions={institutions} submitText="Create Account" />
-                </div>
             </div>
         </AuthenticatedLayout>
     );

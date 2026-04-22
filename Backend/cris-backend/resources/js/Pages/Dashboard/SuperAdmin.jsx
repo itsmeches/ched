@@ -34,11 +34,10 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
     const sectionFallback = <Skeleton active paragraph={{ rows: 4 }} />;
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">Super Admin Dashboard</h2>}>
+        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Super Admin Dashboard</h2>}>
             <Head title="Super Admin Dashboard" />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-8">
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminHero stats={stats} />
                     </Suspense>
@@ -57,7 +56,6 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminUsersTable recentUsers={recentUsers} recentProposals={recentProposals} institutionOverview={institutionOverview} />
                     </Suspense>
-                </div>
             </div>
         </AuthenticatedLayout>
     );

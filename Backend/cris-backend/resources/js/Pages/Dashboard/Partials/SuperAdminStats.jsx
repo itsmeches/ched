@@ -13,11 +13,30 @@ const statCards = [
 ];
 
 export default function SuperAdminStats({ stats }) {
+    const openRoute = (item) => {
+        router.visit(route(item.routeName, item.params ?? {}));
+    };
+
+    const onCardKeyDown = (event, item) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openRoute(item);
+        }
+    };
+
     return (
         <Row gutter={[16, 16]}>
             {statCards.map((item) => (
                 <Col xs={24} sm={12} xl={8} key={item.key}>
-                    <Card hoverable className="admin-dashboard-shell" onClick={() => router.visit(route(item.routeName, item.params ?? {}))}>
+                    <Card
+                        hoverable
+                        className="admin-dashboard-shell"
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Open ${item.label}`}
+                        onClick={() => openRoute(item)}
+                        onKeyDown={(event) => onCardKeyDown(event, item)}
+                    >
                         <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: '#0f172a' }} />
                     </Card>
                 </Col>

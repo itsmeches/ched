@@ -111,17 +111,17 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
         <Row gutter={[16, 16]}>
             <Col xs={24}>
                 <Card title="Recently Added Users" extra={<Button type="link" onClick={() => router.visit(route('admin.users.index'))}>View all</Button>} className="admin-dashboard-shell">
-                    <Table columns={userColumns} dataSource={recentUsers} rowKey="id" pagination={false} scroll={{ x: 760 }} />
+                    <Table columns={userColumns} dataSource={recentUsers} rowKey="id" pagination={false} scroll={{ x: 760 }} locale={{ emptyText: 'No recent users to display.' }} />
                 </Card>
             </Col>
             <Col xs={24} xl={12}>
                 <Card title="Recent Research Activity" extra={<Button type="link" onClick={() => router.visit(route('research.index'))}>Open research</Button>} className="admin-dashboard-shell">
-                    <Table columns={proposalColumns} dataSource={recentProposals} rowKey="id" pagination={false} scroll={{ x: 760 }} size="small" />
+                    <Table columns={proposalColumns} dataSource={recentProposals} rowKey="id" pagination={false} scroll={{ x: 760 }} size="small" locale={{ emptyText: 'No research activity yet.' }} />
                 </Card>
             </Col>
             <Col xs={24} xl={12}>
                 <Card title="Institution Performance" extra={<Button type="link" onClick={() => router.visit(route('admin.institutions.index'))}>View institutions</Button>} className="admin-dashboard-shell">
-                    <Table columns={institutionColumns} dataSource={institutionOverview} rowKey="id" pagination={false} scroll={{ x: 760 }} size="small" />
+                    <Table columns={institutionColumns} dataSource={institutionOverview} rowKey="id" pagination={false} scroll={{ x: 760 }} size="small" locale={{ emptyText: 'No institution performance data yet.' }} />
                 </Card>
             </Col>
         </Row>

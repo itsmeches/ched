@@ -34,16 +34,12 @@ export default function ResearchEdit({ proposal }) {
     }, [flash?.success, flash?.error]);
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">Edit Research Paper</h2>}>
+        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Edit Research Paper</h2>}>
             <Head title="Edit Research Paper" />
-            <div className="py-8">
-                <div className="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-6">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
                     <Card className="admin-dashboard-shell" bordered={false}>
-                        <Typography.Title level={3} style={{ marginTop: 0 }}>
-                            Edit Research Proposal
-                        </Typography.Title>
                         <Typography.Text type="secondary">
                             Update metadata or replace your PDF before submitting for review.
                         </Typography.Text>
@@ -63,7 +59,6 @@ export default function ResearchEdit({ proposal }) {
                             cancelLabel="Back to Record"
                         />
                     </Card>
-                </div>
             </div>
         </AuthenticatedLayout>
     );

@@ -23,85 +23,83 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <GuestLayout>
-            <Head title="Log in" />
+            <Head title="Sign In" />
 
-            <div className="mb-5">
-                <h1 className="text-xl font-semibold text-slate-900">Sign in to CRIS</h1>
-                <p className="mt-2 text-sm text-slate-600">
-                    Access research submissions, review tools, and administrative controls.
-                </p>
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold text-slate-900">Welcome back</h2>
+                <p className="mt-1 text-sm text-slate-500">Sign in to your account to continue</p>
             </div>
 
             {status && (
-                <div className="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                <div className="mb-5 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm font-medium text-emerald-700">
                     {status}
                 </div>
             )}
 
-            <form onSubmit={submit}>
+            <form onSubmit={submit} className="space-y-5">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
+                    <InputLabel htmlFor="email" value="Email address" />
                     <TextInput
                         id="email"
                         type="email"
                         name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full"
                         autoComplete="username"
                         isFocused={true}
+                        placeholder="you@example.com"
                         onChange={(e) => setData('email', e.target.value)}
                     />
-
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
+                <div>
+                    <div className="flex items-center justify-between">
+                        <InputLabel htmlFor="password" value="Password" />
+                        {canResetPassword && (
+                            <Link
+                                href={route('password.request')}
+                                className="text-xs text-teal-600 hover:text-teal-800 font-medium"
+                            >
+                                Forgot password?
+                            </Link>
+                        )}
+                    </div>
                     <TextInput
                         id="password"
                         type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full"
                         autoComplete="current-password"
+                        placeholder="••••••••"
                         onChange={(e) => setData('password', e.target.value)}
                     />
-
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4 block">
-                    <label className="flex items-center">
+                <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 cursor-pointer">
                         <Checkbox
                             name="remember"
                             checked={data.remember}
-                            onChange={(e) =>
-                                setData('remember', e.target.checked)
-                            }
+                            onChange={(e) => setData('remember', e.target.checked)}
                         />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Remember me
-                        </span>
+                        <span className="text-sm text-slate-600">Remember me</span>
                     </label>
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton className="w-full justify-center py-2.5" disabled={processing}>
+                    {processing ? 'Signing in…' : 'Sign in'}
+                </PrimaryButton>
             </form>
+
+            <p className="mt-6 text-center text-sm text-slate-500">
+                Don't have an account?{' '}
+                <Link href={route('register')} className="text-teal-600 hover:text-teal-800 font-medium">
+                    Register here
+                </Link>
+            </p>
         </GuestLayout>
     );
 }

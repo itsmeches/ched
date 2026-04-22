@@ -15,12 +15,12 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
                         <Row gutter={16}>
                             <Col xs={24} md={12}>
                                 <Form.Item label="Full Name" validateStatus={errors.name ? 'error' : ''} help={errors.name}>
-                                    <Input value={data.name} onChange={(event) => setData('name', event.target.value)} placeholder="Juan Dela Cruz" />
+                                    <Input size="large" value={data.name} onChange={(event) => setData('name', event.target.value)} placeholder="Juan Dela Cruz" />
                                 </Form.Item>
                             </Col>
                             <Col xs={24} md={12}>
                                 <Form.Item label="Email Address" validateStatus={errors.email ? 'error' : ''} help={errors.email}>
-                                    <Input type="email" value={data.email} onChange={(event) => setData('email', event.target.value)} placeholder="user@domain.edu.ph" />
+                                    <Input size="large" type="email" value={data.email} onChange={(event) => setData('email', event.target.value)} placeholder="user@domain.edu.ph" />
                                 </Form.Item>
                             </Col>
                         </Row>
@@ -29,6 +29,7 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
                             <Col xs={24} md={12}>
                                 <Form.Item label="Role" validateStatus={errors.role ? 'error' : ''} help={errors.role}>
                                     <Select
+                                        size="large"
                                         value={data.role}
                                         options={roles.map((role) => ({ value: role.value, label: role.label }))}
                                         onChange={(value) => {
@@ -43,6 +44,7 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
                             <Col xs={24} md={12}>
                                 <Form.Item label="Institution" validateStatus={errors.institution_id ? 'error' : ''} help={errors.institution_id}>
                                     <Select
+                                        size="large"
                                         value={data.institution_id || undefined}
                                         placeholder={data.role === 'hei' ? 'Select an institution' : 'Not required for this role'}
                                         disabled={data.role !== 'hei'}
@@ -57,12 +59,12 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
                         <Row gutter={16}>
                             <Col xs={24} md={12}>
                                 <Form.Item label="Password" validateStatus={errors.password ? 'error' : ''} help={errors.password}>
-                                    <Input.Password value={data.password} onChange={(event) => setData('password', event.target.value)} />
+                                    <Input.Password size="large" value={data.password} onChange={(event) => setData('password', event.target.value)} />
                                 </Form.Item>
                             </Col>
                             <Col xs={24} md={12}>
                                 <Form.Item label="Confirm Password" validateStatus={errors.password_confirmation ? 'error' : ''} help={errors.password_confirmation}>
-                                    <Input.Password value={data.password_confirmation} onChange={(event) => setData('password_confirmation', event.target.value)} />
+                                    <Input.Password size="large" value={data.password_confirmation} onChange={(event) => setData('password_confirmation', event.target.value)} />
                                 </Form.Item>
                             </Col>
                         </Row>
@@ -72,8 +74,8 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
                         <Space direction="vertical" size={16} style={{ width: '100%' }}>
                             <Alert type="info" showIcon message="HEI accounts must be linked to an institution. CHED and Super Admin accounts remain unassigned by design." />
                             <Space wrap style={{ justifyContent: 'space-between', width: '100%' }}>
-                                <Button icon={<PlusOutlined />} onClick={() => router.visit(route('admin.institutions.create'))}>Add Institution First</Button>
-                                <Button type="primary" htmlType="submit" loading={processing} icon={<UserAddOutlined />}>Create Account</Button>
+                                <Button size="large" icon={<PlusOutlined />} onClick={() => router.visit(route('admin.institutions.create'))}>Add Institution First</Button>
+                                <Button size="large" type="primary" htmlType="submit" loading={processing} icon={<UserAddOutlined />}>Create Account</Button>
                             </Space>
                         </Space>
                     </Form>
@@ -107,8 +109,8 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
 
                     <Card title="Profile Tools" className="admin-dashboard-shell">
                         <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                            <Link href={route('profile.edit')}><Button block>Update my profile</Button></Link>
-                            <Link href={route('admin.institutions.index')}><Button block>Browse institutions</Button></Link>
+                            <Link href={route('profile.edit')}><Button size="large" block>Update my profile</Button></Link>
+                            <Link href={route('admin.institutions.index')}><Button size="large" block>Browse institutions</Button></Link>
                         </Space>
                     </Card>
                 </Space>

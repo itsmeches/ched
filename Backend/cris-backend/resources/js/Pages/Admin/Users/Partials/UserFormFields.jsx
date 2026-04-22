@@ -6,12 +6,12 @@ export default function UserFormFields({ data, setData, errors, roles, instituti
             <Row gutter={16}>
                 <Col xs={24} md={12}>
                     <Form.Item label="Full Name" validateStatus={errors.name ? 'error' : ''} help={errors.name}>
-                        <Input value={data.name} onChange={(event) => setData('name', event.target.value)} placeholder="Juan Dela Cruz" />
+                        <Input size="large" value={data.name} onChange={(event) => setData('name', event.target.value)} placeholder="Juan Dela Cruz" />
                     </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                     <Form.Item label="Email Address" validateStatus={errors.email ? 'error' : ''} help={errors.email}>
-                        <Input type="email" value={data.email} onChange={(event) => setData('email', event.target.value)} placeholder="user@domain.edu.ph" />
+                        <Input size="large" type="email" value={data.email} onChange={(event) => setData('email', event.target.value)} placeholder="user@domain.edu.ph" />
                     </Form.Item>
                 </Col>
             </Row>
@@ -20,6 +20,7 @@ export default function UserFormFields({ data, setData, errors, roles, instituti
                 <Col xs={24} md={12}>
                     <Form.Item label="Role" validateStatus={errors.role ? 'error' : ''} help={errors.role}>
                         <Select
+                            size="large"
                             value={data.role}
                             options={roles.map((role) => ({ value: role.value, label: role.label }))}
                             onChange={(value) => {
@@ -34,6 +35,7 @@ export default function UserFormFields({ data, setData, errors, roles, instituti
                 <Col xs={24} md={12}>
                     <Form.Item label="Institution" validateStatus={errors.institution_id ? 'error' : ''} help={errors.institution_id}>
                         <Select
+                            size="large"
                             value={data.institution_id || undefined}
                             placeholder={data.role === 'hei' ? 'Select an institution' : 'Not required for this role'}
                             disabled={data.role !== 'hei'}
@@ -47,7 +49,7 @@ export default function UserFormFields({ data, setData, errors, roles, instituti
 
             {includePasswordHint && (
                 <Form.Item>
-                    <div style={{ color: '#64748b', fontSize: 13 }}>
+                    <div style={{ color: '#475569', fontSize: 13 }}>
                         Leave the password fields blank to keep the current password unchanged.
                     </div>
                 </Form.Item>
@@ -56,12 +58,12 @@ export default function UserFormFields({ data, setData, errors, roles, instituti
             <Row gutter={16}>
                 <Col xs={24} md={12}>
                     <Form.Item label={includePasswordHint ? 'New Password' : 'Password'} validateStatus={errors.password ? 'error' : ''} help={errors.password}>
-                        <Input.Password value={data.password} onChange={(event) => setData('password', event.target.value)} />
+                        <Input.Password size="large" value={data.password} onChange={(event) => setData('password', event.target.value)} placeholder={includePasswordHint ? 'Leave blank to keep current password' : 'Set account password'} />
                     </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                     <Form.Item label={includePasswordHint ? 'Confirm New Password' : 'Confirm Password'} validateStatus={errors.password_confirmation ? 'error' : ''} help={errors.password_confirmation}>
-                        <Input.Password value={data.password_confirmation} onChange={(event) => setData('password_confirmation', event.target.value)} />
+                        <Input.Password size="large" value={data.password_confirmation} onChange={(event) => setData('password_confirmation', event.target.value)} placeholder="Repeat password" />
                     </Form.Item>
                 </Col>
             </Row>

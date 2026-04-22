@@ -101,11 +101,10 @@ export default function UsersIndex({ users, filters }) {
     }
 
     return (
-        <AuthenticatedLayout header={<div className="flex items-center justify-between gap-4"><h2 className="text-xl font-semibold text-gray-800">User Management</h2><Link href={route('admin.users.create')}><Button type="primary" icon={<PlusOutlined />}>Create User</Button></Link></div>}>
+        <AuthenticatedLayout header={<div className="flex items-center justify-between gap-4"><h2 className="text-xl font-semibold text-slate-900">User Management</h2><Link href={route('admin.users.create')}><Button size="large" type="primary" icon={<PlusOutlined />}>Create User</Button></Link></div>}>
             <Head title="Users" />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-6">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
@@ -119,18 +118,17 @@ export default function UsersIndex({ users, filters }) {
                             </Col>
                             <Col xs={24} xl={12}>
                                 <Row gutter={[12, 12]}>
-                                    <Col xs={24} md={12}><Input value={search} placeholder="Search name or email" prefix={<SearchOutlined />} onChange={(event) => setSearch(event.target.value)} onPressEnter={applyFilter} /></Col>
-                                    <Col xs={24} md={8}><Select value={role || undefined} placeholder="All roles" allowClear options={[{ value: 'super_admin', label: 'Super Admin' }, { value: 'ched', label: 'CHED' }, { value: 'hei', label: 'HEI' }]} onChange={(value) => setRole(value ?? '')} style={{ width: '100%' }} /></Col>
-                                    <Col xs={24} md={4}><Button block type="primary" onClick={applyFilter} icon={<TeamOutlined />}>Apply</Button></Col>
+                                    <Col xs={24} md={12}><Input size="large" aria-label="Search users by name or email" value={search} placeholder="Search name or email" prefix={<SearchOutlined />} onChange={(event) => setSearch(event.target.value)} onPressEnter={applyFilter} /></Col>
+                                    <Col xs={24} md={8}><Select size="large" aria-label="Filter users by role" value={role || undefined} placeholder="All roles" allowClear options={[{ value: 'super_admin', label: 'Super Admin' }, { value: 'ched', label: 'CHED' }, { value: 'hei', label: 'HEI' }]} onChange={(value) => setRole(value ?? '')} style={{ width: '100%' }} /></Col>
+                                    <Col xs={24} md={4}><Button size="large" block type="primary" onClick={applyFilter} icon={<TeamOutlined />}>Apply</Button></Col>
                                 </Row>
                             </Col>
                         </Row>
                     </Card>
 
                     <Card className="admin-dashboard-shell" bordered={false}>
-                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} />
+                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: 'No users matched your filter criteria.' }} />
                     </Card>
-                </div>
             </div>
         </AuthenticatedLayout>
     );

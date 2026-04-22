@@ -12,16 +12,13 @@ export default function InstitutionsEdit({ institution }) {
     }
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">Edit Institution</h2>}>
+        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Edit Institution</h2>}>
             <Head title={`Edit ${institution.name}`} />
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="space-y-6">
                     <Card className="admin-dashboard-shell" bordered={false}>
-                        <Typography.Title level={4} style={{ marginTop: 0 }}>Editing {institution.name}</Typography.Title>
                         <Typography.Text type="secondary">Update institution details without leaving the management workflow.</Typography.Text>
                     </Card>
                     <InstitutionFormDrawer title={`Edit: ${institution.name}`} subtitle="Review institution details, contact information, and code assignments from the drawer." open={true} onClose={() => router.visit(route('admin.institutions.index'))} onSubmit={submit} processing={processing} data={data} setData={setData} errors={errors} submitText="Save Changes" />
-                </div>
             </div>
         </AuthenticatedLayout>
     );

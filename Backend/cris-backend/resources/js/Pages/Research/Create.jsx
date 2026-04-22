@@ -26,16 +26,12 @@ export default function ResearchCreate() {
     }, [flash?.success, flash?.error]);
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">Submit Research Paper</h2>}>
+        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Submit Research Paper</h2>}>
             <Head title="Submit Research Paper" />
-            <div className="py-8">
-                <div className="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-6">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
                     <Card className="admin-dashboard-shell" bordered={false}>
-                        <Typography.Title level={3} style={{ marginTop: 0 }}>
-                            New Research Proposal
-                        </Typography.Title>
                         <Typography.Text type="secondary">
                             Complete all required fields and upload your research paper in PDF format.
                         </Typography.Text>
@@ -53,7 +49,6 @@ export default function ResearchCreate() {
                             cancelLabel="Back to Papers"
                         />
                     </Card>
-                </div>
             </div>
         </AuthenticatedLayout>
     );

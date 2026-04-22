@@ -58,11 +58,10 @@ export default function HEIDashboard({ stats, recentUploads, pendingQueue }) {
     ];
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">My Research Dashboard</h2>}>
+        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">My Research Dashboard</h2>}>
             <Head title="HEI Dashboard" />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-8">
                     <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                         <Row gutter={[24, 24]} align="middle">
                             <Col xs={24} lg={16}>
@@ -144,10 +143,10 @@ export default function HEIDashboard({ stats, recentUploads, pendingQueue }) {
                                 dataSource={recentUploads}
                                 pagination={false}
                                 scroll={{ x: 840 }}
+                                locale={{ emptyText: 'No recent uploads yet.' }}
                             />
                         )}
                     </Card>
-                </div>
             </div>
         </AuthenticatedLayout>
     );

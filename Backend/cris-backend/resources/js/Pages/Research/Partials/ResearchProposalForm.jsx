@@ -68,11 +68,11 @@ export default function ResearchProposalForm({
     };
 
     return (
-        <Form layout="vertical" onSubmitCapture={onSubmit}>
+        <Form layout="vertical" onSubmitCapture={onSubmit} requiredMark={false}>
             <Row gutter={16}>
                 <Col xs={24}>
                     <Form.Item label="Title" validateStatus={errors.title ? 'error' : ''} help={errors.title}>
-                        <Input value={data.title} onChange={(event) => setData('title', event.target.value)} placeholder="Research title" />
+                        <Input size="large" value={data.title} onChange={(event) => setData('title', event.target.value)} placeholder="Research title" />
                     </Form.Item>
                 </Col>
             </Row>
@@ -80,7 +80,7 @@ export default function ResearchProposalForm({
             <Row gutter={16}>
                 <Col xs={24} md={12}>
                     <Form.Item label="Authors" validateStatus={errors.authors ? 'error' : ''} help={errors.authors}>
-                        <Input value={data.authors} onChange={(event) => setData('authors', event.target.value)} placeholder="Dr. Juan dela Cruz, Prof. Maria Santos" />
+                        <Input size="large" value={data.authors} onChange={(event) => setData('authors', event.target.value)} placeholder="Dr. Juan dela Cruz, Prof. Maria Santos" />
                     </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
@@ -93,6 +93,7 @@ export default function ResearchProposalForm({
                             {coAuthorInputs.map((name, index) => (
                                 <Space key={`co-author-${index}`} style={{ width: '100%' }}>
                                     <Input
+                                        size="large"
                                         value={name}
                                         placeholder={`Co-author ${index + 1}`}
                                         onChange={(event) => updateCoAuthorValue(index, event.target.value)}
@@ -101,6 +102,7 @@ export default function ResearchProposalForm({
                                         aria-label={`Remove co-author ${index + 1}`}
                                         icon={<MinusCircleOutlined />}
                                         disabled={coAuthorInputs.length === 1}
+                                        size="large"
                                         onClick={() => removeCoAuthorField(index)}
                                     />
                                 </Space>
@@ -110,6 +112,7 @@ export default function ResearchProposalForm({
                                 icon={<PlusOutlined />}
                                 onClick={addCoAuthorField}
                                 disabled={coAuthorInputs.length >= 8}
+                                size="large"
                             >
                                 Add Co-Author
                             </Button>
@@ -121,13 +124,14 @@ export default function ResearchProposalForm({
             <Row gutter={16}>
                 <Col xs={24} md={12}>
                     <Form.Item label="School / University" validateStatus={errors.school ? 'error' : ''} help={errors.school}>
-                        <Input value={data.school} onChange={(event) => setData('school', event.target.value)} />
+                        <Input size="large" value={data.school} onChange={(event) => setData('school', event.target.value)} placeholder="School or university" />
                     </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                     <Form.Item label="Year" validateStatus={errors.year ? 'error' : ''} help={errors.year}>
                         <InputNumber
                             style={{ width: '100%' }}
+                            size="large"
                             min={1900}
                             max={new Date().getFullYear() + 1}
                             value={data.year}
@@ -140,18 +144,18 @@ export default function ResearchProposalForm({
             <Row gutter={16}>
                 <Col xs={24} md={12}>
                     <Form.Item label="Category" validateStatus={errors.category ? 'error' : ''} help={errors.category}>
-                        <Input value={data.category} onChange={(event) => setData('category', event.target.value)} placeholder="Education, Environment, Health" />
+                        <Input size="large" value={data.category} onChange={(event) => setData('category', event.target.value)} placeholder="Education, Environment, Health" />
                     </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                     <Form.Item label="Keywords" validateStatus={errors.keywords ? 'error' : ''} help={errors.keywords}>
-                        <Input value={data.keywords} onChange={(event) => setData('keywords', event.target.value)} placeholder="Comma-separated keywords" />
+                        <Input size="large" value={data.keywords} onChange={(event) => setData('keywords', event.target.value)} placeholder="Comma-separated keywords" />
                     </Form.Item>
                 </Col>
             </Row>
 
             <Form.Item label="Abstract" validateStatus={errors.abstract ? 'error' : ''} help={errors.abstract}>
-                <Input.TextArea rows={6} value={data.abstract} onChange={(event) => setData('abstract', event.target.value)} />
+                <Input.TextArea rows={6} value={data.abstract} onChange={(event) => setData('abstract', event.target.value)} placeholder="Summarize your research objectives, methods, and expected outcomes" />
             </Form.Item>
 
             {showCurrentFile && currentFileName && (
@@ -174,17 +178,17 @@ export default function ResearchProposalForm({
                     fileList={data.pdf_file ? [data.pdf_file] : []}
                     onRemove={() => setData('pdf_file', null)}
                 >
-                    <Button icon={<UploadOutlined />}>Select PDF</Button>
+                    <Button size="large" icon={<UploadOutlined />}>Select PDF</Button>
                 </Upload>
             </Form.Item>
 
             <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
                 {cancelHref && (
                     <Link href={cancelHref}>
-                        <Button>{cancelLabel}</Button>
+                        <Button size="large">{cancelLabel}</Button>
                     </Link>
                 )}
-                <Button type="primary" htmlType="submit" loading={processing}>
+                <Button size="large" type="primary" htmlType="submit" loading={processing}>
                     {submitLabel}
                 </Button>
             </Space>

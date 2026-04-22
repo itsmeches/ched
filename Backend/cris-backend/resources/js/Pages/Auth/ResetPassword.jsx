@@ -25,31 +25,30 @@ export default function ResetPassword({ token, email }) {
         <GuestLayout>
             <Head title="Reset Password" />
 
-            <div className="mb-5">
-                <h1 className="text-xl font-semibold text-slate-900">Reset your password</h1>
-                <p className="mt-2 text-sm text-slate-600">
-                    Choose a new password for your CRIS account.
-                </p>
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold text-slate-900">Reset password</h2>
+                <p className="mt-1 text-sm text-slate-500">Create a new password for your account</p>
             </div>
 
-            <form onSubmit={submit}>
+            <form onSubmit={submit} className="space-y-5">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="Email address" />
 
                     <TextInput
                         id="email"
                         type="email"
                         name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full"
                         autoComplete="username"
+                        placeholder="you@example.com"
                         onChange={(e) => setData('email', e.target.value)}
                     />
 
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
+                <div>
                     <InputLabel htmlFor="password" value="Password" />
 
                     <TextInput
@@ -57,28 +56,27 @@ export default function ResetPassword({ token, email }) {
                         type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full"
                         autoComplete="new-password"
                         isFocused={true}
+                        placeholder="Create a strong password"
                         onChange={(e) => setData('password', e.target.value)}
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
+                <div>
+                    <InputLabel htmlFor="password_confirmation" value="Confirm password" />
 
                     <TextInput
                         type="password"
                         id="password_confirmation"
                         name="password_confirmation"
                         value={data.password_confirmation}
-                        className="mt-1 block w-full"
+                        className="mt-1.5 block w-full"
                         autoComplete="new-password"
+                        placeholder="Re-enter your password"
                         onChange={(e) =>
                             setData('password_confirmation', e.target.value)
                         }
@@ -86,19 +84,21 @@ export default function ResetPassword({ token, email }) {
 
                     <InputError
                         message={errors.password_confirmation}
-                        className="mt-2"
+                        className="mt-1.5"
                     />
                 </div>
 
-                <div className="mt-5 flex items-center justify-between gap-3">
-                    <Link href={route('login')} className="text-sm text-slate-600 underline transition hover:text-slate-900">
-                        Back to login
-                    </Link>
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Reset Password
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton className="w-full justify-center py-2.5" disabled={processing}>
+                    {processing ? 'Resetting password…' : 'Reset password'}
+                </PrimaryButton>
             </form>
+
+            <p className="mt-6 text-center text-sm text-slate-500">
+                Return to{' '}
+                <Link href={route('login')} className="font-medium text-teal-600 hover:text-teal-800">
+                    sign in
+                </Link>
+            </p>
         </GuestLayout>
     );
 }

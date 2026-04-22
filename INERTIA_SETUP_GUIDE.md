@@ -1,4 +1,4 @@
-# Inertia.js Integration Complete ✅
+# Inertia.js Integration Complete
 
 Your Laravel + React stack has been successfully configured to use **Inertia.js**!
 

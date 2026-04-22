@@ -62,11 +62,10 @@ export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
     ];
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-gray-800">CHED Review Dashboard</h2>}>
+        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">CHED Review Dashboard</h2>}>
             <Head title="CHED Dashboard" />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-8">
                     <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                         <Row gutter={[24, 24]} align="middle">
                             <Col xs={24} lg={16}>
@@ -143,6 +142,7 @@ export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
                                 dataSource={forReview}
                                 pagination={false}
                                 scroll={{ x: 820 }}
+                                locale={{ emptyText: 'No papers are currently waiting for review.' }}
                             />
                         )}
                     </Card>
@@ -157,10 +157,10 @@ export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
                                 dataSource={recentDecisions}
                                 pagination={false}
                                 scroll={{ x: 820 }}
+                                locale={{ emptyText: 'No recent decisions yet.' }}
                             />
                         )}
                     </Card>
-                </div>
             </div>
         </AuthenticatedLayout>
     );

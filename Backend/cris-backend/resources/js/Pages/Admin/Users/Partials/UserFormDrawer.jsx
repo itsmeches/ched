@@ -10,17 +10,18 @@ export default function UserFormDrawer({ title, subtitle, open, onClose, onSubmi
             open={open}
             onClose={onClose}
             destroyOnClose={false}
+            styles={{ body: { paddingTop: 16, paddingBottom: 20 } }}
             extra={
                 <Space>
-                    <Button onClick={onClose}>Cancel</Button>
-                    <Button type="primary" onClick={onSubmit} loading={processing}>
+                    <Button size="large" onClick={onClose}>Cancel</Button>
+                    <Button size="large" type="primary" onClick={onSubmit} loading={processing}>
                         {submitText}
                     </Button>
                 </Space>
             }
         >
             <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                {subtitle && <div style={{ color: '#64748b' }}>{subtitle}</div>}
+                {subtitle && <div style={{ color: '#475569', fontSize: 14 }}>{subtitle}</div>}
                 <Alert type="info" showIcon message="HEI accounts require an institution. CHED and Super Admin accounts remain global." />
                 <Form layout="vertical" onSubmitCapture={onSubmit}>
                     <UserFormFields

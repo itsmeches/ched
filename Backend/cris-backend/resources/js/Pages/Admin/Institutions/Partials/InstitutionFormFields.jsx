@@ -4,18 +4,18 @@ export default function InstitutionFormFields({ data, setData, errors }) {
     return (
         <>
             <Form.Item label="Institution Name" validateStatus={errors.name ? 'error' : ''} help={errors.name}>
-                <Input value={data.name} onChange={(event) => setData('name', event.target.value)} placeholder="Batangas State University" />
+                <Input size="large" value={data.name} onChange={(event) => setData('name', event.target.value)} placeholder="Batangas State University" />
             </Form.Item>
 
             <Row gutter={16}>
                 <Col xs={24} md={12}>
                     <Form.Item label="Code" validateStatus={errors.code ? 'error' : ''} help={errors.code}>
-                        <Input value={data.code} onChange={(event) => setData('code', event.target.value)} placeholder="BatStateU" />
+                        <Input size="large" value={data.code} onChange={(event) => setData('code', event.target.value)} placeholder="BatStateU" />
                     </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                     <Form.Item label="Contact Email" validateStatus={errors.contact_email ? 'error' : ''} help={errors.contact_email}>
-                        <Input type="email" value={data.contact_email} onChange={(event) => setData('contact_email', event.target.value)} placeholder="admin@school.edu.ph" />
+                        <Input size="large" type="email" value={data.contact_email} onChange={(event) => setData('contact_email', event.target.value)} placeholder="admin@school.edu.ph" />
                     </Form.Item>
                 </Col>
             </Row>
@@ -25,7 +25,7 @@ export default function InstitutionFormFields({ data, setData, errors }) {
             </Form.Item>
 
             <Form.Item label="Contact Phone" validateStatus={errors.contact_phone ? 'error' : ''} help={errors.contact_phone}>
-                <Input value={data.contact_phone} onChange={(event) => setData('contact_phone', event.target.value)} placeholder="(043) 123-4567" />
+                <Input size="large" value={data.contact_phone} onChange={(event) => setData('contact_phone', event.target.value)} placeholder="(043) 123-4567" />
             </Form.Item>
         </>
     );

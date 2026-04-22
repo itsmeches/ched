@@ -1,24 +1,56 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link } from '@inertiajs/react';
 
 export default function GuestLayout({ children }) {
     return (
-        <div className="flex min-h-screen flex-col items-center bg-[linear-gradient(180deg,#f8fbfd_0%,#edf4f7_100%)] px-4 py-6 sm:justify-center sm:py-0">
-            <div className="mb-6 text-center">
-                <Link href="/" className="inline-flex items-center gap-3">
-                    <ApplicationLogo className="h-14 w-14 rounded-2xl shadow-sm" />
-                    <div className="text-left">
-                        <div className="text-xs font-semibold uppercase tracking-[0.28em] text-teal-700">CRIS</div>
-                        <div className="text-lg font-semibold text-slate-900">Calabarzon Research Information System</div>
-                    </div>
+        <div className="flex min-h-screen">
+            <a
+                href="#guest-main-content"
+                className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-900"
+            >
+                Skip to main content
+            </a>
+            {/* Left branding panel */}
+            <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-gradient-to-br from-teal-600 via-teal-700 to-slate-800 px-12 py-10 text-white">
+                <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+                    <img src="/cris-mark.svg" alt="CRIS" className="h-10 w-10" />
+                    <span className="text-xl font-bold tracking-wide">CRIS</span>
                 </Link>
-                <p className="mt-3 max-w-xl text-sm text-slate-600">
-                    Secure access for research submission, institutional review, and public discovery.
+
+                <div>
+                    <h1 className="text-4xl font-bold leading-tight">
+                        Calabarzon Research<br />
+                        <span className="text-teal-200">Information System</span>
+                    </h1>
+                    <p className="mt-4 text-base text-teal-100/80 max-w-sm leading-relaxed">
+                        A unified platform for research submission, institutional review, and public discovery across the CALABARZON region.
+                    </p>
+
+                   
+                </div>
+
+                <p className="text-xs text-teal-300/60">
+                    &copy; {new Date().getFullYear()} CHED CALABARZON. All rights reserved.
                 </p>
             </div>
 
-            <div className="w-full overflow-hidden rounded-2xl bg-white/95 px-6 py-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 backdrop-blur sm:max-w-md">
-                {children}
+            {/* Right form panel */}
+            <div className="flex w-full lg:w-1/2 flex-col items-center justify-center bg-slate-50 px-6 py-10">
+                {/* Mobile logo */}
+                <div className="mb-8 lg:hidden flex items-center gap-3">
+                    <img src="/cris-mark.svg" alt="CRIS" className="h-10 w-10" />
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-teal-700">CRIS</p>
+                        <p className="text-sm font-semibold text-slate-900">Calabarzon Research Information System</p>
+                    </div>
+                </div>
+
+                <main id="guest-main-content" tabIndex={-1} className="w-full max-w-sm">
+                    {children}
+                </main>
+
+                <p className="mt-8 text-xs text-slate-400 lg:hidden">
+                    &copy; {new Date().getFullYear()} CHED CALABARZON
+                </p>
             </div>
         </div>
     );

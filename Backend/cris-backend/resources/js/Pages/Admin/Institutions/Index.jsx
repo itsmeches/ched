@@ -85,11 +85,10 @@ export default function InstitutionsIndex({ institutions, filters }) {
     }
 
     return (
-        <AuthenticatedLayout header={<div className="flex items-center justify-between gap-4"><h2 className="text-xl font-semibold text-gray-800">Institution Management</h2><Link href={route('admin.institutions.create')}><Button type="primary" icon={<PlusOutlined />}>Add Institution</Button></Link></div>}>
+        <AuthenticatedLayout header={<div className="flex items-center justify-between gap-4"><h2 className="text-xl font-semibold text-slate-900">Institution Management</h2><Link href={route('admin.institutions.create')}><Button size="large" type="primary" icon={<PlusOutlined />}>Add Institution</Button></Link></div>}>
             <Head title="Institutions" />
 
-            <div className="py-8">
-                <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-6">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
@@ -103,17 +102,16 @@ export default function InstitutionsIndex({ institutions, filters }) {
                             </Col>
                             <Col xs={24} xl={12}>
                                 <Row gutter={[12, 12]}>
-                                    <Col xs={24} md={18}><Input value={search} placeholder="Search by name or code" prefix={<SearchOutlined />} onChange={(event) => setSearch(event.target.value)} onPressEnter={applyFilter} /></Col>
-                                    <Col xs={24} md={6}><Button block type="primary" onClick={applyFilter} icon={<BankOutlined />}>Apply</Button></Col>
+                                    <Col xs={24} md={18}><Input size="large" aria-label="Search institutions by name or code" value={search} placeholder="Search by name or code" prefix={<SearchOutlined />} onChange={(event) => setSearch(event.target.value)} onPressEnter={applyFilter} /></Col>
+                                    <Col xs={24} md={6}><Button size="large" block type="primary" onClick={applyFilter} icon={<BankOutlined />}>Apply</Button></Col>
                                 </Row>
                             </Col>
                         </Row>
                     </Card>
 
                     <Card className="admin-dashboard-shell" bordered={false}>
-                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: institutions.current_page, pageSize: institutions.per_page, total: institutions.total, onChange: (page) => router.get(route('admin.institutions.index'), { search, page }, { preserveState: true, replace: true }) }} scroll={{ x: 860 }} />
+                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: institutions.current_page, pageSize: institutions.per_page, total: institutions.total, onChange: (page) => router.get(route('admin.institutions.index'), { search, page }, { preserveState: true, replace: true }) }} scroll={{ x: 860 }} locale={{ emptyText: 'No institutions matched your search.' }} />
                     </Card>
-                </div>
             </div>
         </AuthenticatedLayout>
     );
