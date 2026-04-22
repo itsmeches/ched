@@ -1,14 +1,16 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Card, Col, Input, Row, Select, Space, Table, Typography, message } from 'antd';
+import { Alert, Button, Card, Col, Input, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
+import { formatDateTime } from '@/utils/date';
 
 export default function ResearchIndex({ proposals, filters, canCreate }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const [editability, setEditability] = useState(filters.editability ?? '');
     const [year, setYear] = useState(filters.year ?? '');
     const [school, setSchool] = useState(filters.school ?? '');
 
@@ -42,6 +44,30 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
             render: (value) => <StatusBadge status={value} />,
         },
         {
+            title: 'Editability',
+            key: 'editability',
+            render: (_, row) => {
+                const isLocked = row.status !== 'pending' || !!row.viewed_at;
+
+                if (!isLocked) {
+                    return <Tag color="green">Editable</Tag>;
+                }
+
+                if (row.status === 'pending' && row.viewed_at) {
+                    return (
+                        <Space direction="vertical" size={2}>
+                            <Tag color="volcano" style={{ marginInlineEnd: 0 }}>Locked (Viewed by CHED)</Tag>
+                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                {formatDateTime(row.viewed_at) || 'Viewed'}
+                            </Typography.Text>
+                        </Space>
+                    );
+                }
+
+                return <Tag color="default">Locked ({row.status})</Tag>;
+            },
+        },
+        {
             title: 'Institution',
             key: 'institution',
             render: (_, row) => row.institution?.name ?? '—',
@@ -55,7 +81,7 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
     ], []);
 
     function applyFilters() {
-        router.get(route('research.index'), { search, status, year, school }, { preserveState: true });
+        router.get(route('research.index'), { search, status, editability, year, school }, { preserveState: true });
     }
 
     return (
@@ -100,6 +126,21 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                             onChange={(value) => setStatus(value ?? '')}
                                         />
                                     </Col>
+                                    <Col xs={24} md={8}>
+                                        <Select
+                                            size="large"
+                                            aria-label="Filter research by editability"
+                                            style={{ width: '100%' }}
+                                            value={editability || undefined}
+                                            placeholder="All editability"
+                                            allowClear
+                                            options={[
+                                                { value: 'editable', label: 'Editable' },
+                                                { value: 'locked', label: 'Locked' },
+                                            ]}
+                                            onChange={(value) => setEditability(value ?? '')}
+                                        />
+                                    </Col>
                                     <Col xs={24} md={6}>
                                         <Input
                                             size="large"
@@ -125,7 +166,7 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                     </Col>
                                     <Col xs={12} md={3}>
                                         <Button size="large" block onClick={() => {
-                                            setSearch(''); setStatus(''); setYear(''); setSchool('');
+                                            setSearch(''); setStatus(''); setEditability(''); setYear(''); setSchool('');
                                             router.get(route('research.index'), {}, { replace: true });
                                         }}>Clear</Button>
                                     </Col>
@@ -150,7 +191,7 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                 current: proposals.current_page,
                                 pageSize: proposals.per_page,
                                 total: proposals.total,
-                                onChange: (page) => router.get(route('research.index'), { search, status, year, school, page }, { preserveState: true }),
+                                onChange: (page) => router.get(route('research.index'), { search, status, editability, year, school, page }, { preserveState: true }),
                             }}
                             scroll={{ x: 920 }}
                             locale={{ emptyText: 'No research papers found for the selected filters.' }}

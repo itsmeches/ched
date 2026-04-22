@@ -26,6 +26,8 @@ class ResearchProposal extends Model
         'status',
         'file_path',
         'submitted_by',
+        'viewed_by',
+        'viewed_at',
         'reviewed_by',
         'reviewed_at',
         'approved_by',
@@ -35,6 +37,7 @@ class ResearchProposal extends Model
 
     protected $casts = [
         'year'        => 'integer',
+        'viewed_at'   => 'datetime',
         'reviewed_at' => 'datetime',
         'approved_at' => 'datetime',
     ];
@@ -54,6 +57,11 @@ class ResearchProposal extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
+    public function viewer()
+    {
+        return $this->belongsTo(User::class, 'viewed_by');
+    }
+
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
@@ -66,6 +74,7 @@ class ResearchProposal extends Model
 
     public function isEditable(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === self::STATUS_PENDING
+            && is_null($this->viewed_at);
     }
 }

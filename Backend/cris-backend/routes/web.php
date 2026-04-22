@@ -34,7 +34,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:hei,super_admin')->group(function () {
         Route::get('/hei/dashboard', [DashboardController::class, 'hei'])->name('hei.dashboard');
 
-        Route::resource('research', ResearchProposalController::class)->except(['index', 'show']);
+        Route::resource('research', ResearchProposalController::class)
+            ->parameters(['research' => 'proposal'])
+            ->except(['index', 'show']);
     });
 
     // ── CHED ─────────────────────────────────────────────────────────────────

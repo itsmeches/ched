@@ -9,6 +9,7 @@ use App\Notifications\ResearchProposalReviewed;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -69,7 +70,7 @@ class ResearchProposalController extends Controller
         $user = $request->user();
 
         $query = ResearchProposal::with(['submitter:id,name', 'institution:id,name'])
-            ->select(['id', 'title', 'authors', 'year', 'school', 'keywords', 'status', 'institution_id', 'submitted_by', 'updated_at'])
+            ->select(['id', 'title', 'authors', 'year', 'school', 'keywords', 'status', 'institution_id', 'submitted_by', 'viewed_at', 'updated_at'])
             ->orderByDesc('updated_at');
 
         $this->applySearchFilters($query, $request, includeStatus: true);
@@ -79,9 +80,20 @@ class ResearchProposalController extends Controller
             $query->where('submitted_by', $user->id);
         }
 
+        $editability = (string) $request->input('editability', '');
+        if ($editability === 'editable') {
+            $query->where('status', ResearchProposal::STATUS_PENDING)
+                ->whereNull('viewed_at');
+        } elseif ($editability === 'locked') {
+            $query->where(function ($inner) {
+                $inner->where('status', '!=', ResearchProposal::STATUS_PENDING)
+                    ->orWhereNotNull('viewed_at');
+            });
+        }
+
         return Inertia::render('Research/Index', [
             'proposals'  => $query->paginate(15)->withQueryString(),
-            'filters'    => $request->only(['search', 'status', 'year', 'school']),
+            'filters'    => $request->only(['search', 'status', 'year', 'school', 'editability']),
             'canCreate'  => $user->isHEI(),
         ]);
     }
@@ -139,7 +151,7 @@ class ResearchProposalController extends Controller
             'status'         => ResearchProposal::STATUS_PENDING,
         ]);
 
-        return redirect()->route('research.show', $proposal)
+        return redirect()->route('research.show', ['proposal' => $proposal->id])
             ->with('success', 'Research paper submitted and marked as pending review.');
     }
 
@@ -148,7 +160,20 @@ class ResearchProposalController extends Controller
         $this->authorize('view', $proposal);
         $user = request()->user();
 
-        $proposal->load(['submitter:id,name', 'reviewer:id,name', 'approver:id,name', 'institution:id,name']);
+        if ($user?->isCHED() && is_null($proposal->viewed_at)) {
+            // Lock HEI editing after CHED has first opened the submission.
+            DB::table('research_proposals')
+                ->where('id', $proposal->id)
+                ->whereNull('viewed_at')
+                ->update([
+                    'viewed_by' => $user->id,
+                    'viewed_at' => now(),
+                ]);
+
+            $proposal->refresh();
+        }
+
+        $proposal->load(['submitter:id,name', 'viewer:id,name', 'reviewer:id,name', 'approver:id,name', 'institution:id,name']);
 
         return Inertia::render('Research/Show', [
             'proposal' => $proposal,
@@ -184,9 +209,12 @@ class ResearchProposalController extends Controller
         return $slug . '.pdf';
     }
 
-    public function edit(ResearchProposal $proposal): Response
+    public function edit(ResearchProposal $proposal): Response|RedirectResponse
     {
-        $this->authorize('update', $proposal);
+        if (! request()->user()?->can('update', $proposal)) {
+            return redirect()->route('research.show', ['proposal' => $proposal->id])
+                ->with('error', 'This submission can no longer be edited because it was already viewed by CHED.');
+        }
 
         return Inertia::render('Research/Edit', [
             'proposal' => $proposal,
@@ -195,6 +223,11 @@ class ResearchProposalController extends Controller
 
     public function update(UpdateResearchProposalRequest $request, ResearchProposal $proposal): RedirectResponse
     {
+        if (! $request->user()->can('update', $proposal)) {
+            return redirect()->route('research.show', ['proposal' => $proposal->id])
+                ->with('error', 'This submission can no longer be edited because it was already viewed by CHED.');
+        }
+
         $data = $request->validated();
 
         if ($request->hasFile('pdf_file')) {
@@ -209,7 +242,7 @@ class ResearchProposalController extends Controller
         unset($data['pdf_file']);
         $proposal->update($data);
 
-        return redirect()->route('research.show', $proposal)
+        return redirect()->route('research.show', ['proposal' => $proposal->id])
             ->with('success', 'Research paper updated.');
     }
 

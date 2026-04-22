@@ -31,6 +31,8 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
         { label: 'Keywords', value: proposal.keywords || '—' },
         { label: 'Institution', value: proposal.institution?.name ?? '—' },
         { label: 'Submitted By', value: proposal.submitter?.name ?? '—' },
+        { label: 'Viewed By CHED', value: proposal.viewer?.name ?? 'Not viewed yet' },
+        { label: 'Viewed At', value: formatDateTime(proposal.viewed_at) || 'Not viewed yet' },
         { label: 'Approved By', value: proposal.approver?.name ?? '—' },
         { label: 'Approved At', value: formatDateTime(proposal.approved_at) || '—' },
     ];
@@ -125,6 +127,15 @@ export default function ResearchShow({ proposal, canEdit, canReview }) {
                                     )}
                                 </div>
                             }
+                        />
+                    )}
+
+                    {!canEdit && proposal.status === 'pending' && proposal.viewed_at && (
+                        <Alert
+                            type="info"
+                            showIcon
+                            message="Editing Locked"
+                            description="This submission can no longer be edited because CHED has already viewed it."
                         />
                     )}
 
