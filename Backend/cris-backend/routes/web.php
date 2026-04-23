@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── CHED ─────────────────────────────────────────────────────────────────
     Route::middleware('role:ched')->group(function () {
         Route::get('/ched/dashboard', [DashboardController::class, 'ched'])->name('ched.dashboard');
+        Route::get('/ched/decisions', [DashboardController::class, 'chedDecisions'])->name('ched.decisions');
 
         Route::post('research/{proposal}/review', [ResearchProposalController::class, 'review'])
             ->name('research.review');

@@ -91,16 +91,22 @@ class DashboardController extends Controller
             ->limit(10)
             ->get(['id', 'title', 'authors', 'year', 'school', 'status', 'submitted_by', 'institution_id', 'created_at']);
 
-        $recentDecisions = ResearchProposal::with('reviewer:id,name', 'institution:id,name')
+        return Inertia::render('Dashboard/CHED', [
+            'stats'     => $stats,
+            'forReview' => $forReview,
+        ]);
+    }
+
+    public function chedDecisions(Request $request): Response
+    {
+        $decisions = ResearchProposal::with('reviewer:id,name', 'institution:id,name')
             ->whereIn('status', ['approved', 'rejected'])
             ->orderByDesc('reviewed_at')
-            ->limit(10)
+            ->limit(50)
             ->get(['id', 'title', 'status', 'institution_id', 'reviewed_by', 'reviewed_at']);
 
-        return Inertia::render('Dashboard/CHED', [
-            'stats'           => $stats,
-            'forReview'       => $forReview,
-            'recentDecisions' => $recentDecisions,
+        return Inertia::render('Dashboard/CHEDDecisions', [
+            'decisions' => $decisions,
         ]);
     }
 

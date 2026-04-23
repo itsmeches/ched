@@ -1,6 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
-import { StatusBadge } from '@/Components/StatusBadge';
 import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, InboxOutlined, StopOutlined } from '@ant-design/icons';
@@ -12,7 +11,7 @@ const statItems = [
     { key: 'total', label: 'Total Papers', color: '#0f766e', icon: <InboxOutlined /> },
 ];
 
-export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
+export default function CHEDDashboard({ stats, forReview }) {
     const pendingColumns = [
         {
             title: 'Title',
@@ -31,32 +30,6 @@ export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
             dataIndex: 'created_at',
             key: 'created_at',
             width: 150,
-            render: (value) => formatDate(value),
-        },
-    ];
-
-    const decisionsColumns = [
-        {
-            title: 'Title',
-            dataIndex: 'title',
-            key: 'title',
-            render: (value, row) => <Link href={route('research.show', row.id)}>{value}</Link>,
-        },
-        {
-            title: 'Institution',
-            key: 'institution',
-            render: (_, row) => row.institution?.name ?? 'Unknown institution',
-        },
-        {
-            title: 'Decision',
-            dataIndex: 'status',
-            key: 'status',
-            render: (value) => <StatusBadge status={value} />,
-        },
-        {
-            title: 'Reviewed At',
-            dataIndex: 'reviewed_at',
-            key: 'reviewed_at',
             render: (value) => formatDate(value),
         },
     ];
@@ -86,6 +59,11 @@ export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
                                     <Link href={route('research.index', { status: 'pending' })}>
                                         <Button type="primary" size="large" block icon={<FileSearchOutlined />}>
                                             Open Review Queue
+                                        </Button>
+                                    </Link>
+                                    <Link href={route('ched.decisions')}>
+                                        <Button size="large" block>
+                                            Open My Decisions
                                         </Button>
                                     </Link>
                                     <Link href={route('research.index')}>
@@ -147,20 +125,6 @@ export default function CHEDDashboard({ stats, forReview, recentDecisions }) {
                         )}
                     </Card>
 
-                    <Card title="Recent Decisions" className="admin-dashboard-shell">
-                        {recentDecisions.length === 0 ? (
-                            <Alert type="info" showIcon message="No approved/rejected decisions yet." />
-                        ) : (
-                            <Table
-                                rowKey="id"
-                                columns={decisionsColumns}
-                                dataSource={recentDecisions}
-                                pagination={false}
-                                scroll={{ x: 820 }}
-                                locale={{ emptyText: 'No recent decisions yet.' }}
-                            />
-                        )}
-                    </Card>
             </div>
         </AuthenticatedLayout>
     );

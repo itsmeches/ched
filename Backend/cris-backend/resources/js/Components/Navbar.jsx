@@ -22,30 +22,42 @@ export default function Navbar() {
 
     const getNavItems = () => {
         const commonItems = [
-            { label: 'Dashboard', href: route('dashboard') },
+            {
+                label: 'Dashboard',
+                href: route('dashboard'),
+                activePatterns: ['dashboard', 'admin.dashboard', 'ched.dashboard', 'hei.dashboard'],
+            },
         ];
 
         if (user.role === 'super_admin') {
             return [
                 ...commonItems,
-                { label: 'User Management', href: route('admin.users.index') },
-                { label: 'Institutions', href: route('admin.institutions.index') },
+                { label: 'User Management', href: route('admin.users.index'), activePatterns: ['admin.users.*'] },
+                { label: 'Institutions', href: route('admin.institutions.index'), activePatterns: ['admin.institutions.*'] },
             ];
         }
 
         if (user.role === 'ched') {
             return [
                 ...commonItems,
-                { label: 'Research Queue', href: route('research.index') },
-                { label: 'My Decisions', href: route('dashboard') },
+                {
+                    label: 'Research Queue',
+                    href: route('research.index'),
+                    activePatterns: ['research.index', 'research.show', 'research.file'],
+                },
+                { label: 'My Decisions', href: route('ched.decisions'), activePatterns: ['ched.decisions'] },
             ];
         }
 
         if (user.role === 'hei') {
             return [
                 ...commonItems,
-                { label: 'My Research', href: route('research.index') },
-                { label: 'Submit Paper', href: route('research.create') },
+                {
+                    label: 'My Research',
+                    href: route('research.index'),
+                    activePatterns: ['research.index', 'research.show', 'research.edit', 'research.update', 'research.destroy'],
+                },
+                { label: 'Submit Paper', href: route('research.create'), activePatterns: ['research.create', 'research.store'] },
             ];
         }
 
@@ -53,7 +65,7 @@ export default function Navbar() {
     };
 
     const navItems = getNavItems();
-    const isActive = (href) => route().current() === href.split('/').pop();
+    const isActive = (item) => item.activePatterns?.some((pattern) => route().current(pattern));
 
     return (
         <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white shadow-sm">
@@ -75,7 +87,7 @@ export default function Navbar() {
                                     key={item.href}
                                     href={item.href}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                        isActive(item.href)
+                                        isActive(item)
                                             ? 'bg-teal-50 text-teal-700 border-b-2 border-teal-600'
                                             : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                                     }`}
@@ -88,8 +100,8 @@ export default function Navbar() {
 
                     {/* Right Section: User Info & Dropdown */}
                     <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex items-center gap-2">
-                            <p className="text-sm font-semibold text-slate-900">{user.name}</p>
+                        <div className="hidden sm:flex h-9 items-center px-3">
+                            <span className="text-sm font-medium leading-5 text-slate-700">{user.name}</span>
                         </div>
 
                         {/* User Dropdown */}
@@ -149,7 +161,7 @@ export default function Navbar() {
                                     key={item.href}
                                     href={item.href}
                                     className={`block px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                        isActive(item.href)
+                                        isActive(item)
                                             ? 'bg-teal-50 text-teal-700'
                                             : 'text-slate-600 hover:bg-white hover:text-slate-900'
                                     }`}
@@ -159,9 +171,9 @@ export default function Navbar() {
                                 </Link>
                             ))}
                         </div>
-                        <div className="border-t border-slate-200 mt-2 pt-2 px-4 py-2">
-                            <p className="text-sm font-semibold text-slate-900">{user.name}</p>
-                            <p className="text-xs text-slate-500 mb-2">{user.email}</p>
+                        <div className="border-t border-slate-200 mt-2 px-4 py-3">
+                            <p className="text-sm font-semibold leading-none text-slate-900">{user.name}</p>
+                            <p className="mt-1 text-xs leading-none text-slate-500 mb-2">{user.email}</p>
                             <Link
                                 href={route('profile.edit')}
                                 className="block text-sm text-slate-600 hover:text-slate-900 mb-2"

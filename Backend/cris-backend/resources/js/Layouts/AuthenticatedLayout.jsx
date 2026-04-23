@@ -1,6 +1,6 @@
 import Navbar from '@/Components/Navbar';
 
-export default function AuthenticatedLayout({ header, children }) {
+export default function AuthenticatedLayout({ header, children, showHeader = false }) {
     return (
         <div className="min-h-screen bg-slate-50">
             <a
@@ -11,7 +11,7 @@ export default function AuthenticatedLayout({ header, children }) {
             </a>
             <Navbar />
 
-            {header && (
+            {showHeader && header && (
                 <header className="bg-white border-b border-slate-200">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                         {header}
