@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 
 class ResearchProposal extends Model
@@ -75,6 +76,11 @@ class ResearchProposal extends Model
     public function keywordItems(): BelongsToMany
     {
         return $this->belongsToMany(Keyword::class);
+    }
+
+    public function histories(): HasMany
+    {
+        return $this->hasMany(ResearchProposalHistory::class)->orderByDesc('performed_at');
     }
 
     public function isPending(): bool

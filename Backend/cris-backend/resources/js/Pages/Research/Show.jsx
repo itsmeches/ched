@@ -226,6 +226,7 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete }
                             </Space>
                         </Card>
                     )}
+
             </div>
         </AuthenticatedLayout>
     );

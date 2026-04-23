@@ -166,9 +166,6 @@ export default function UsersIndex({ users, filters, roleCounts }) {
                                         <div>
                                             <div className="text-sm font-semibold text-slate-900">{item.label}</div>
                                         </div>
-                                        <Tag color={item.key === 'all' ? 'default' : roleColorMap[item.key]} style={{ marginInlineEnd: 0 }}>
-                                            {item.count}
-                                        </Tag>
                                     </div>
                                     <div className="mt-3 text-2xl font-semibold" style={{ color: item.color }}>{item.count}</div>
                                 </button>

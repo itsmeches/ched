@@ -35,6 +35,7 @@ export default function Navbar() {
                 { label: 'User Management', href: route('admin.users.index'), activePatterns: ['admin.users.*'] },
                 { label: 'Institutions', href: route('admin.institutions.index'), activePatterns: ['admin.institutions.*'] },
                 { label: 'Keywords', href: route('admin.keywords.index'), activePatterns: ['admin.keywords.*'] },
+                { label: 'History', href: route('history.index'), activePatterns: ['history.index'] },
             ];
         }
 
@@ -47,6 +48,7 @@ export default function Navbar() {
                     activePatterns: ['research.index', 'research.show', 'research.file', 'research.edit', 'research.update', 'research.destroy'],
                 },
                 { label: 'My Decisions', href: route('ched.decisions'), activePatterns: ['ched.decisions'] },
+                { label: 'History', href: route('history.index'), activePatterns: ['history.index'] },
             ];
         }
 
@@ -59,6 +61,7 @@ export default function Navbar() {
                     activePatterns: ['research.index', 'research.show', 'research.edit', 'research.update', 'research.destroy'],
                 },
                 { label: 'Submit Paper', href: route('research.create'), activePatterns: ['research.create', 'research.store'] },
+                { label: 'History', href: route('history.index'), activePatterns: ['history.index'] },
             ];
         }
 

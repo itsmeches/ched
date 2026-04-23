@@ -6,6 +6,7 @@ use App\Http\Requests\StoreResearchProposalRequest;
 use App\Http\Requests\UpdateResearchProposalRequest;
 use App\Models\Keyword;
 use App\Models\ResearchProposal;
+use App\Models\ResearchProposalHistory;
 use App\Notifications\ResearchProposalReviewed;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -159,6 +160,8 @@ class ResearchProposalController extends Controller
 
         $this->syncKeywords($proposal, $normalizedKeywords);
 
+        $this->logHistory($proposal, $request->user()->id, 'created', null, $this->trackedValues($proposal));
+
         return redirect()->route('research.show', ['proposal' => $proposal->id])
             ->with('success', 'Research paper submitted and marked as pending review.');
     }
@@ -252,8 +255,14 @@ class ResearchProposalController extends Controller
         }
 
         unset($data['pdf_file']);
+
+        $oldValues = $this->trackedValues($proposal);
+
         $proposal->update($data);
         $this->syncKeywords($proposal, $normalizedKeywords);
+
+        $newValues = $this->trackedValues($proposal->fresh());
+        $this->logHistory($proposal, $request->user()->id, 'updated', $oldValues, $newValues);
 
         return redirect()->route('research.show', ['proposal' => $proposal->id])
             ->with('success', 'Research paper updated.');
@@ -262,6 +271,8 @@ class ResearchProposalController extends Controller
     public function destroy(ResearchProposal $proposal): RedirectResponse
     {
         $this->authorize('delete', $proposal);
+
+        $this->logHistory($proposal, request()->user()?->id, 'deleted', $this->trackedValues($proposal), null);
 
         if ($proposal->file_path) {
             Storage::disk('public')->delete($proposal->file_path);
@@ -344,6 +355,11 @@ class ResearchProposalController extends Controller
             'comments'    => $request->comments,
         ]);
 
+        $this->logHistory($proposal, $request->user()->id, $request->action === 'approve' ? 'approved' : 'rejected', null, [
+            'status'   => $proposal->status,
+            'comments' => $proposal->comments,
+        ]);
+
         $proposal->loadMissing('submitter:id,name,email');
 
         if ($proposal->submitter && $proposal->submitter->email) {
@@ -351,5 +367,58 @@ class ResearchProposalController extends Controller
         }
 
         return back()->with('success', 'Review saved.');
+    }
+
+    /** @return array<string, mixed> */
+    private function trackedValues(ResearchProposal $proposal): array
+    {
+        return $proposal->only([
+            'title', 'authors', 'author_email', 'author_phone',
+            'co_authors', 'co_author_emails', 'co_author_phones',
+            'year', 'school', 'abstract', 'category', 'keywords',
+            'status', 'comments',
+        ]);
+    }
+
+    /**
+     * @param array<string, mixed>|null $oldValues
+     * @param array<string, mixed>|null $newValues
+     */
+    private function logHistory(
+        ResearchProposal $proposal,
+        ?int $userId,
+        string $action,
+        ?array $oldValues,
+        ?array $newValues,
+    ): void {
+        // For "updated" entries, only store fields that actually changed
+        if ($action === 'updated' && $oldValues !== null && $newValues !== null) {
+            $changedOld = [];
+            $changedNew = [];
+
+            foreach ($newValues as $key => $newVal) {
+                $oldVal = $oldValues[$key] ?? null;
+                if ($oldVal !== $newVal) {
+                    $changedOld[$key] = $oldVal;
+                    $changedNew[$key] = $newVal;
+                }
+            }
+
+            if ($changedOld === []) {
+                return; // nothing changed — skip log entry
+            }
+
+            $oldValues = $changedOld;
+            $newValues = $changedNew;
+        }
+
+        ResearchProposalHistory::create([
+            'research_proposal_id' => $proposal->id,
+            'user_id'              => $userId,
+            'action'               => $action,
+            'old_values'           => $oldValues,
+            'new_values'           => $newValues,
+            'performed_at'         => now(),
+        ]);
     }
 }

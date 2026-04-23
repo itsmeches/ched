@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResearchProposalController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -56,6 +57,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/research/{proposal}', [ResearchProposalController::class, 'show'])->name('research.show');
     Route::delete('/research/{proposal}', [ResearchProposalController::class, 'destroy'])->name('research.destroy');
     Route::get('/research/{proposal}/file', [ResearchProposalController::class, 'downloadFile'])->name('research.file');
+
+    // History (scoped per role inside controller)
+    Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
+    Route::get('/history/export', [HistoryController::class, 'exportCsv'])->name('history.export');
 
     // ── SUPER ADMIN ───────────────────────────────────────────────────────────
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {
