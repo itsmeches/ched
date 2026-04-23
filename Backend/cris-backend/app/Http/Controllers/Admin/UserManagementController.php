@@ -17,6 +17,11 @@ class UserManagementController extends Controller
 {
     public function index(Request $request): Response
     {
+        $roleCounts = User::query()
+            ->selectRaw('role, COUNT(*) as total')
+            ->groupBy('role')
+            ->pluck('total', 'role');
+
         $users = User::with('institution:id,name')
             ->when($request->search, fn ($q, $s) =>
                 $q->where('name', 'like', "%{$s}%")
@@ -31,6 +36,13 @@ class UserManagementController extends Controller
             'users'        => $users,
             'institutions' => Institution::select('id', 'name')->get(),
             'filters'      => $request->only(['search', 'role']),
+            'roleCounts'   => [
+                'all' => User::count(),
+                'pending' => (int) ($roleCounts['pending'] ?? 0),
+                'super_admin' => (int) ($roleCounts['super_admin'] ?? 0),
+                'ched' => (int) ($roleCounts['ched'] ?? 0),
+                'hei' => (int) ($roleCounts['hei'] ?? 0),
+            ],
         ]);
     }
 

@@ -27,6 +27,10 @@ class ResearchProposalPolicy
 
     public function update(User $user, ResearchProposal $proposal): bool
     {
+        if ($user->isCHED()) {
+            return true;
+        }
+
         return $proposal->submitted_by === $user->id
             && $proposal->isEditable();
     }
@@ -34,7 +38,7 @@ class ResearchProposalPolicy
     public function delete(User $user, ResearchProposal $proposal): bool
     {
         return ($proposal->submitted_by === $user->id && $proposal->isEditable())
-            || ($user->isCHED() && $proposal->status === ResearchProposal::STATUS_APPROVED)
+            || $user->isCHED()
             || $user->isSuperAdmin();
     }
 

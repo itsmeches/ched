@@ -9,6 +9,11 @@ class UpdateResearchProposalRequest extends FormRequest
     public function authorize(): bool
     {
         $proposal = $this->route('proposal');
+
+        if ($this->user()?->isCHED()) {
+            return true;
+        }
+
         return $proposal
             && $proposal->submitted_by === $this->user()->id
             && $proposal->isEditable();

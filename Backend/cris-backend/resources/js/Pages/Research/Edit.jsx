@@ -4,7 +4,14 @@ import { Alert, Card, message, Typography } from 'antd';
 import { useEffect } from 'react';
 import ResearchProposalForm from './Partials/ResearchProposalForm';
 
-export default function ResearchEdit({ proposal }) {
+function parseKeywordItems(value) {
+    return String(value ?? '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
+
+export default function ResearchEdit({ proposal, keywordOptions = [] }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
         _method:           'PUT',
@@ -19,6 +26,7 @@ export default function ResearchEdit({ proposal }) {
         year:       proposal.year       ?? new Date().getFullYear(),
         category:   proposal.category   ?? '',
         keywords:   proposal.keywords   ?? '',
+        keyword_items: parseKeywordItems(proposal.keywords),
         abstract:   proposal.abstract   ?? '',
         pdf_file:   null,
     });
@@ -56,6 +64,7 @@ export default function ResearchEdit({ proposal }) {
                             errors={errors}
                             processing={processing}
                             onSubmit={submit}
+                            keywordOptions={keywordOptions}
                             submitLabel="Update Paper"
                             showCurrentFile={true}
                             currentFileName={proposal.file_path ? proposal.file_path.split('/').pop() : ''}

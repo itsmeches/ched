@@ -6,12 +6,27 @@ import { Alert, Avatar, Button, Card, Col, Input, Modal, Row, Select, Space, Tab
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
 
 const roleColorMap = { pending: 'orange', super_admin: 'purple', ched: '#0033a0', hei: '#0047d4' };
+const roleLabelMap = {
+    all: 'All Users',
+    pending: 'Pending Approval',
+    super_admin: 'Super Admin',
+    ched: 'CHED',
+    hei: 'HEI',
+};
 
-export default function UsersIndex({ users, filters }) {
+export default function UsersIndex({ users, filters, roleCounts }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [role, setRole] = useState(filters.role ?? '');
     const [tableData, setTableData] = useState(users.data ?? []);
+
+    const categoryItems = useMemo(() => [
+        { key: 'all', label: roleLabelMap.all, count: roleCounts?.all ?? 0, color: '#0f172a' },
+        { key: 'pending', label: roleLabelMap.pending, count: roleCounts?.pending ?? 0, color: '#d97706' },
+        { key: 'super_admin', label: roleLabelMap.super_admin, count: roleCounts?.super_admin ?? 0, color: '#7c3aed' },
+        { key: 'ched', label: roleLabelMap.ched, count: roleCounts?.ched ?? 0, color: '#0033a0' },
+        { key: 'hei', label: roleLabelMap.hei, count: roleCounts?.hei ?? 0, color: '#0047d4' },
+    ], [roleCounts]);
 
     useEffect(() => {
         setTableData(users.data ?? []);
@@ -74,6 +89,12 @@ export default function UsersIndex({ users, filters }) {
         router.get(route('admin.users.index'), { search, role }, { preserveState: true, replace: true });
     }
 
+    function applyRoleCategory(nextRole) {
+        const normalizedRole = nextRole === 'all' ? '' : nextRole;
+        setRole(normalizedRole);
+        router.get(route('admin.users.index'), { search, role: normalizedRole }, { preserveState: true, replace: true });
+    }
+
     function deleteUser(id) {
         Modal.confirm({
             title: 'Delete this user?',
@@ -126,8 +147,47 @@ export default function UsersIndex({ users, filters }) {
                         </Row>
                     </Card>
 
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+                        {categoryItems.map((item) => {
+                            const isActive = (role || 'all') === item.key;
+
+                            return (
+                                <button
+                                    key={item.key}
+                                    type="button"
+                                    onClick={() => applyRoleCategory(item.key)}
+                                    className={`w-full rounded-2xl border px-4 py-4 text-left transition-all ${
+                                        isActive
+                                            ? 'border-slate-300 bg-white shadow-sm'
+                                            : 'border-slate-200/80 bg-white/70 hover:border-slate-300 hover:bg-white'
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <div className="text-sm font-semibold text-slate-900">{item.label}</div>
+                                        </div>
+                                        <Tag color={item.key === 'all' ? 'default' : roleColorMap[item.key]} style={{ marginInlineEnd: 0 }}>
+                                            {item.count}
+                                        </Tag>
+                                    </div>
+                                    <div className="mt-3 text-2xl font-semibold" style={{ color: item.color }}>{item.count}</div>
+                                </button>
+                            );
+                        })}
+                    </div>
+
                     <Card className="admin-dashboard-shell" bordered={false}>
-                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: 'No users matched your filter criteria.' }} />
+                        <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <Typography.Title level={5} style={{ margin: 0 }}>
+                                    {roleLabelMap[role || 'all']}
+                                </Typography.Title>
+                                <Typography.Text type="secondary">
+                                    {users.total} user{users.total === 1 ? '' : 's'} in this category
+                                </Typography.Text>
+                            </div>
+                            <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: 'No users matched your filter criteria.' }} />
+                        </Space>
                     </Card>
             </div>
         </AuthenticatedLayout>

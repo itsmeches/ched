@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
 
 class ResearchProposal extends Model
@@ -69,6 +70,11 @@ class ResearchProposal extends Model
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function keywordItems(): BelongsToMany
+    {
+        return $this->belongsToMany(Keyword::class);
     }
 
     public function isPending(): bool

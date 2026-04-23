@@ -34,6 +34,7 @@ export default function Navbar() {
                 ...commonItems,
                 { label: 'User Management', href: route('admin.users.index'), activePatterns: ['admin.users.*'] },
                 { label: 'Institutions', href: route('admin.institutions.index'), activePatterns: ['admin.institutions.*'] },
+                { label: 'Keywords', href: route('admin.keywords.index'), activePatterns: ['admin.keywords.*'] },
             ];
         }
 
@@ -43,7 +44,7 @@ export default function Navbar() {
                 {
                     label: 'Research Queue',
                     href: route('research.index'),
-                    activePatterns: ['research.index', 'research.show', 'research.file'],
+                    activePatterns: ['research.index', 'research.show', 'research.file', 'research.edit', 'research.update', 'research.destroy'],
                 },
                 { label: 'My Decisions', href: route('ched.decisions'), activePatterns: ['ched.decisions'] },
             ];

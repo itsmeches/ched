@@ -4,13 +4,13 @@ import { Alert, Card, message, Typography } from 'antd';
 import { useEffect } from 'react';
 import ResearchProposalForm from './Partials/ResearchProposalForm';
 
-export default function ResearchCreate() {
+export default function ResearchCreate({ keywordOptions = [] }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
         title: '', authors: '', author_email: '', author_phone: '',
         co_authors: '', co_author_emails: '', co_author_phones: '',
         school: '', year: new Date().getFullYear(),
-        category: '', keywords: '', abstract: '', pdf_file: null,
+        category: '', keywords: '', keyword_items: [], abstract: '', pdf_file: null,
     });
 
     function submit(e) {
@@ -46,6 +46,7 @@ export default function ResearchCreate() {
                             errors={errors}
                             processing={processing}
                             onSubmit={submit}
+                            keywordOptions={keywordOptions}
                             submitLabel="Submit Paper"
                             cancelHref={route('research.index')}
                             cancelLabel="Back to Papers"

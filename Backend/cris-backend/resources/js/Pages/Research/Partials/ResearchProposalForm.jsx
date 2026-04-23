@@ -1,4 +1,4 @@
-import { Alert, Button, Col, Divider, Form, Input, InputNumber, Row, Space, Typography, Upload } from 'antd';
+import { Alert, Button, Col, Divider, Form, Input, InputNumber, Row, Select, Space, Typography, Upload } from 'antd';
 import { Link } from '@inertiajs/react';
 import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
@@ -33,6 +33,7 @@ export default function ResearchProposalForm({
     errors,
     processing,
     onSubmit,
+    keywordOptions = [],
     submitLabel,
     currentFileName,
     showCurrentFile = false,
@@ -68,6 +69,12 @@ export default function ResearchProposalForm({
         const { co_authors, co_author_emails, co_author_phones } = serializeCoAuthors(next);
         setData((prev) => ({ ...prev, co_authors, co_author_emails, co_author_phones }));
     };
+
+    const keywordItems = Array.isArray(data.keyword_items)
+        ? data.keyword_items
+        : parseCsv(data.keywords).filter(Boolean);
+
+    const keywordSelectOptions = keywordOptions.map((name) => ({ label: name, value: name }));
 
     return (
         <Form layout="vertical" onSubmitCapture={onSubmit} requiredMark={false}>
@@ -188,7 +195,24 @@ export default function ResearchProposalForm({
                 </Col>
                 <Col xs={24} md={12}>
                     <Form.Item label="Keywords" validateStatus={errors.keywords ? 'error' : ''} help={errors.keywords}>
-                        <Input size="large" value={data.keywords} onChange={(event) => setData('keywords', event.target.value)} placeholder="Comma-separated keywords" />
+                        <Select
+                            mode="tags"
+                            size="large"
+                            value={keywordItems}
+                            options={keywordSelectOptions}
+                            placeholder="Select or type keywords"
+                            onChange={(values) => {
+                                const normalizedItems = values
+                                    .map((value) => String(value).trim())
+                                    .filter(Boolean);
+
+                                setData((prev) => ({
+                                    ...prev,
+                                    keyword_items: normalizedItems,
+                                    keywords: normalizedItems.join(', '),
+                                }));
+                            }}
+                        />
                     </Form.Item>
                 </Col>
             </Row>

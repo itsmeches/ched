@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreResearchProposalRequest;
 use App\Http\Requests\UpdateResearchProposalRequest;
+use App\Models\Keyword;
 use App\Models\ResearchProposal;
 use App\Notifications\ResearchProposalReviewed;
 use Illuminate\Http\RedirectResponse;
@@ -106,7 +107,8 @@ class ResearchProposalController extends Controller
             $query->where(function ($inner) use ($search) {
                 $inner->where('title', 'like', "%{$search}%")
                     ->orWhere('authors', 'like', "%{$search}%")
-                    ->orWhere('keywords', 'like', "%{$search}%");
+                    ->orWhere('keywords', 'like', "%{$search}%")
+                    ->orWhereHas('keywordItems', fn ($keywordQuery) => $keywordQuery->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -130,12 +132,16 @@ class ResearchProposalController extends Controller
     {
         $this->authorize('create', ResearchProposal::class);
 
-        return Inertia::render('Research/Create');
+        return Inertia::render('Research/Create', [
+            'keywordOptions' => Keyword::query()->orderBy('name')->pluck('name'),
+        ]);
     }
 
     public function store(StoreResearchProposalRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        $normalizedKeywords = $this->parseKeywords($data['keywords'] ?? null);
+        $data['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
 
         if ($request->hasFile('pdf_file')) {
             $data['file_path'] = $request->file('pdf_file')
@@ -150,6 +156,8 @@ class ResearchProposalController extends Controller
             'institution_id' => $request->user()->institution_id,
             'status'         => ResearchProposal::STATUS_PENDING,
         ]);
+
+        $this->syncKeywords($proposal, $normalizedKeywords);
 
         return redirect()->route('research.show', ['proposal' => $proposal->id])
             ->with('success', 'Research paper submitted and marked as pending review.');
@@ -214,11 +222,12 @@ class ResearchProposalController extends Controller
     {
         if (! request()->user()?->can('update', $proposal)) {
             return redirect()->route('research.show', ['proposal' => $proposal->id])
-                ->with('error', 'This submission can no longer be edited because it was already viewed by CHED.');
+                ->with('error', 'You are not allowed to edit this research paper.');
         }
 
         return Inertia::render('Research/Edit', [
             'proposal' => $proposal,
+            'keywordOptions' => Keyword::query()->orderBy('name')->pluck('name'),
         ]);
     }
 
@@ -226,10 +235,12 @@ class ResearchProposalController extends Controller
     {
         if (! $request->user()->can('update', $proposal)) {
             return redirect()->route('research.show', ['proposal' => $proposal->id])
-                ->with('error', 'This submission can no longer be edited because it was already viewed by CHED.');
+                ->with('error', 'You are not allowed to update this research paper.');
         }
 
         $data = $request->validated();
+        $normalizedKeywords = $this->parseKeywords($data['keywords'] ?? null);
+        $data['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
 
         if ($request->hasFile('pdf_file')) {
             // Remove old file
@@ -242,6 +253,7 @@ class ResearchProposalController extends Controller
 
         unset($data['pdf_file']);
         $proposal->update($data);
+        $this->syncKeywords($proposal, $normalizedKeywords);
 
         return redirect()->route('research.show', ['proposal' => $proposal->id])
             ->with('success', 'Research paper updated.');
@@ -259,6 +271,52 @@ class ResearchProposalController extends Controller
 
         return redirect()->route('research.index')
             ->with('success', 'Research paper deleted.');
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function parseKeywords(?string $keywords): array
+    {
+        if (! $keywords) {
+            return [];
+        }
+
+        $items = array_filter(array_map(
+            static fn (string $value) => trim($value),
+            explode(',', $keywords),
+        ));
+
+        $normalized = [];
+
+        foreach ($items as $item) {
+            $key = mb_strtolower($item);
+
+            if (! isset($normalized[$key])) {
+                $normalized[$key] = $item;
+            }
+        }
+
+        return array_values($normalized);
+    }
+
+    /**
+     * @param array<int, string> $keywordNames
+     */
+    private function syncKeywords(ResearchProposal $proposal, array $keywordNames): void
+    {
+        if ($keywordNames === []) {
+            $proposal->keywordItems()->sync([]);
+            return;
+        }
+
+        $keywordIds = [];
+
+        foreach ($keywordNames as $keywordName) {
+            $keywordIds[] = Keyword::query()->firstOrCreate(['name' => $keywordName])->id;
+        }
+
+        $proposal->keywordItems()->sync(array_values(array_unique($keywordIds)));
     }
 
     /** CHED / Super Admin reviews a paper */

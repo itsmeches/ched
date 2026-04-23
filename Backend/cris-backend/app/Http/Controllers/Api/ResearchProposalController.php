@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Keyword;
 use App\Models\ResearchProposal;
 use Illuminate\Http\Request;
 
@@ -40,12 +41,17 @@ class ResearchProposalController extends Controller
             'keywords' => 'nullable|string',
         ]);
 
+        $normalizedKeywords = $this->parseKeywords($validated['keywords'] ?? null);
+        $validated['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
+
         $proposal = ResearchProposal::create([
             ...$validated,
             'institution_id' => $request->user()->institution_id,
             'submitted_by' => $request->user()->id,
             'status' => 'pending',
         ]);
+
+        $this->syncKeywords($proposal, $normalizedKeywords);
 
         return response()->json([
             'message' => 'Proposal submitted and marked as pending',
@@ -78,7 +84,17 @@ class ResearchProposalController extends Controller
             'keywords' => 'nullable|string',
         ]);
 
+        $normalizedKeywords = $this->parseKeywords($validated['keywords'] ?? null);
+
+        if (array_key_exists('keywords', $validated)) {
+            $validated['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
+        }
+
         $proposal->update($validated);
+
+        if (array_key_exists('keywords', $validated)) {
+            $this->syncKeywords($proposal, $normalizedKeywords);
+        }
 
         return response()->json([
             'message' => 'Proposal updated',
@@ -121,5 +137,51 @@ class ResearchProposalController extends Controller
         $proposal->delete();
 
         return response()->json(['message' => 'Proposal deleted']);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function parseKeywords(?string $keywords): array
+    {
+        if (! $keywords) {
+            return [];
+        }
+
+        $items = array_filter(array_map(
+            static fn (string $value) => trim($value),
+            explode(',', $keywords),
+        ));
+
+        $normalized = [];
+
+        foreach ($items as $item) {
+            $key = mb_strtolower($item);
+
+            if (! isset($normalized[$key])) {
+                $normalized[$key] = $item;
+            }
+        }
+
+        return array_values($normalized);
+    }
+
+    /**
+     * @param array<int, string> $keywordNames
+     */
+    private function syncKeywords(ResearchProposal $proposal, array $keywordNames): void
+    {
+        if ($keywordNames === []) {
+            $proposal->keywordItems()->sync([]);
+            return;
+        }
+
+        $keywordIds = [];
+
+        foreach ($keywordNames as $keywordName) {
+            $keywordIds[] = Keyword::query()->firstOrCreate(['name' => $keywordName])->id;
+        }
+
+        $proposal->keywordItems()->sync(array_values(array_unique($keywordIds)));
     }
 }
