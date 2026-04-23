@@ -7,7 +7,9 @@ import ResearchProposalForm from './Partials/ResearchProposalForm';
 export default function ResearchCreate() {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
-        title: '', authors: '', co_authors: '', school: '', year: new Date().getFullYear(),
+        title: '', authors: '', author_email: '', author_phone: '',
+        co_authors: '', co_author_emails: '', co_author_phones: '',
+        school: '', year: new Date().getFullYear(),
         category: '', keywords: '', abstract: '', pdf_file: null,
     });
 

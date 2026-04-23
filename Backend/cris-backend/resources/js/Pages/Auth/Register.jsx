@@ -102,7 +102,9 @@ export default function Register() {
 
             <p className="mt-6 text-center text-sm text-slate-500">
                 Already have an account?{' '}
-                <Link href={route('login')} className="font-medium text-teal-600 hover:text-teal-800">
+                <Link href={route('login')} className="font-medium transition-colors" style={{ color: '#0033a0' }}
+                    onMouseEnter={(e) => e.target.style.color = '#001f66'}
+                    onMouseLeave={(e) => e.target.style.color = '#0033a0'}>
                     Sign in
                 </Link>
             </p>

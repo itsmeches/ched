@@ -2,7 +2,15 @@ import { Avatar, Button, Card, Col, Row, Space, Table, Tag } from 'antd';
 import { router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 
-const roleColorMap = { super_admin: 'purple', ched: 'blue', hei: 'green' };
+function getInstitutionDisplayLabel(institution) {
+    if (!institution) {
+        return '—';
+    }
+
+    return institution.code ? `${institution.name} (${institution.code})` : institution.name;
+}
+
+const roleColorMap = { super_admin: 'purple', ched: '#0033a0', hei: '#0047d4' };
 
 export default function SuperAdminUsersTable({ recentUsers, recentProposals, institutionOverview }) {
     const userColumns = [
@@ -11,7 +19,7 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
             key: 'user',
             render: (_, user) => (
                 <Space>
-                    <Avatar style={{ backgroundColor: '#115e59' }}>{user.name?.charAt(0)?.toUpperCase() ?? 'U'}</Avatar>
+                    <Avatar style={{ backgroundColor: '#0033a0' }}>{user.name?.charAt(0)?.toUpperCase() ?? 'U'}</Avatar>
                     <div>
                         <div style={{ fontWeight: 600, color: '#0f172a' }}>{user.name}</div>
                         <div style={{ fontSize: 12, color: '#64748b' }}>{user.email}</div>
@@ -28,7 +36,7 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
         {
             title: 'Institution',
             key: 'institution',
-            render: (_, user) => user.institution?.name ?? 'Global account',
+            render: (_, row) => getInstitutionDisplayLabel(row.institution),
         },
         {
             title: 'Created',
@@ -65,7 +73,7 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (status) => <Tag color={status === 'approved' ? 'green' : status === 'pending' ? 'gold' : 'red'}>{status.toUpperCase()}</Tag>,
+            render: (status) => <Tag color={status === 'approved' ? '#0033a0' : status === 'pending' ? 'orange' : 'red'}>{status.toUpperCase()}</Tag>,
         },
     ];
 
@@ -73,7 +81,7 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
         {
             title: 'Institution',
             key: 'institution',
-            render: (_, row) => row.code ? `${row.name} (${row.code})` : row.name,
+            render: (_, row) => getInstitutionDisplayLabel(row),
         },
         {
             title: 'HEI Users',

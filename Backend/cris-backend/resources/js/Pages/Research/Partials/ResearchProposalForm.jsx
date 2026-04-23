@@ -1,13 +1,30 @@
-import { Alert, Button, Col, Form, Input, InputNumber, Row, Space, Upload } from 'antd';
+import { Alert, Button, Col, Divider, Form, Input, InputNumber, Row, Space, Typography, Upload } from 'antd';
 import { Link } from '@inertiajs/react';
 import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 
-function parseCoAuthors(value) {
-    return String(value ?? '')
-        .split(',')
-        .map((name) => name.trim())
-        .filter(Boolean);
+function parseCsv(value) {
+    return String(value ?? '').split(',').map((s) => s.trim());
+}
+
+function buildCoAuthorRows(names, emails, phones) {
+    const nameArr = parseCsv(names).filter(Boolean);
+    if (!nameArr.length) return [{ name: '', email: '', phone: '' }];
+    const emailArr = parseCsv(emails);
+    const phoneArr = parseCsv(phones);
+    return nameArr.map((name, i) => ({
+        name,
+        email: emailArr[i] ?? '',
+        phone: phoneArr[i] ?? '',
+    }));
+}
+
+function serializeCoAuthors(rows) {
+    return {
+        co_authors:       rows.map((r) => r.name.trim()).join(', '),
+        co_author_emails: rows.map((r) => r.email.trim()).join(', '),
+        co_author_phones: rows.map((r) => r.phone.trim()).join(', '),
+    };
 }
 
 export default function ResearchProposalForm({
@@ -22,49 +39,34 @@ export default function ResearchProposalForm({
     cancelHref,
     cancelLabel = 'Cancel',
 }) {
-    const [coAuthorInputs, setCoAuthorInputs] = useState(() => {
-        const parsed = parseCoAuthors(data.co_authors);
-        return parsed.length ? parsed : [''];
-    });
+    const [coAuthorRows, setCoAuthorRows] = useState(() =>
+        buildCoAuthorRows(data.co_authors, data.co_author_emails, data.co_author_phones),
+    );
 
-    // Sync local inputs if the parent resets or replaces co_authors.
+    // Sync if parent resets the form values.
     useEffect(() => {
-        const parsed = parseCoAuthors(data.co_authors);
-        setCoAuthorInputs(parsed.length ? parsed : ['']);
+        setCoAuthorRows(buildCoAuthorRows(data.co_authors, data.co_author_emails, data.co_author_phones));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data.co_authors]);
 
-    const updateCoAuthorValue = (index, value) => {
-        const next = [...coAuthorInputs];
-        next[index] = value;
-        setCoAuthorInputs(next);
-
-        const serialized = next
-            .map((name) => name.trim())
-            .filter(Boolean)
-            .join(', ');
-
-        setData('co_authors', serialized);
+    const updateCoAuthorRow = (index, field, value) => {
+        const next = coAuthorRows.map((row, i) => (i === index ? { ...row, [field]: value } : row));
+        setCoAuthorRows(next);
+        const { co_authors, co_author_emails, co_author_phones } = serializeCoAuthors(next);
+        setData((prev) => ({ ...prev, co_authors, co_author_emails, co_author_phones }));
     };
 
-    const addCoAuthorField = () => {
-        if (coAuthorInputs.length >= 8) {
-            return;
-        }
-
-        setCoAuthorInputs([...coAuthorInputs, '']);
+    const addCoAuthorRow = () => {
+        if (coAuthorRows.length >= 8) return;
+        const next = [...coAuthorRows, { name: '', email: '', phone: '' }];
+        setCoAuthorRows(next);
     };
 
-    const removeCoAuthorField = (index) => {
-        const next = coAuthorInputs.filter((_, idx) => idx !== index);
-        const normalized = next.length ? next : [''];
-        setCoAuthorInputs(normalized);
-
-        const serialized = normalized
-            .map((name) => name.trim())
-            .filter(Boolean)
-            .join(', ');
-
-        setData('co_authors', serialized);
+    const removeCoAuthorRow = (index) => {
+        const next = coAuthorRows.length === 1 ? [{ name: '', email: '', phone: '' }] : coAuthorRows.filter((_, i) => i !== index);
+        setCoAuthorRows(next);
+        const { co_authors, co_author_emails, co_author_phones } = serializeCoAuthors(next);
+        setData((prev) => ({ ...prev, co_authors, co_author_emails, co_author_phones }));
     };
 
     return (
@@ -77,49 +79,86 @@ export default function ResearchProposalForm({
                 </Col>
             </Row>
 
+            {/* ── Author ──────────────────────────────────────────────────── */}
+            <Divider orientation="left" orientationMargin={0}>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>Author</Typography.Text>
+            </Divider>
+
             <Row gutter={16}>
-                <Col xs={24} md={12}>
-                    <Form.Item label="Authors" validateStatus={errors.authors ? 'error' : ''} help={errors.authors}>
-                        <Input size="large" value={data.authors} onChange={(event) => setData('authors', event.target.value)} placeholder="Dr. Juan dela Cruz, Prof. Maria Santos" />
+                <Col xs={24} md={8}>
+                    <Form.Item label="Author Name" validateStatus={errors.authors ? 'error' : ''} help={errors.authors}>
+                        <Input size="large" value={data.authors} onChange={(e) => setData('authors', e.target.value)} placeholder="Dr. Juan dela Cruz" />
                     </Form.Item>
                 </Col>
-                <Col xs={24} md={12}>
-                    <Form.Item
-                        label="Co-Authors"
-                        validateStatus={errors.co_authors ? 'error' : ''}
-                        help={errors.co_authors || 'Add up to 8 co-authors. Leave empty if none.'}
-                    >
-                        <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                            {coAuthorInputs.map((name, index) => (
-                                <Space key={`co-author-${index}`} style={{ width: '100%' }}>
-                                    <Input
-                                        size="large"
-                                        value={name}
-                                        placeholder={`Co-author ${index + 1}`}
-                                        onChange={(event) => updateCoAuthorValue(index, event.target.value)}
-                                    />
-                                    <Button
-                                        aria-label={`Remove co-author ${index + 1}`}
-                                        icon={<MinusCircleOutlined />}
-                                        disabled={coAuthorInputs.length === 1}
-                                        size="large"
-                                        onClick={() => removeCoAuthorField(index)}
-                                    />
-                                </Space>
-                            ))}
-
-                            <Button
-                                icon={<PlusOutlined />}
-                                onClick={addCoAuthorField}
-                                disabled={coAuthorInputs.length >= 8}
-                                size="large"
-                            >
-                                Add Co-Author
-                            </Button>
-                        </Space>
+                <Col xs={24} md={8}>
+                    <Form.Item label="Author Email" validateStatus={errors.author_email ? 'error' : ''} help={errors.author_email}>
+                        <Input size="large" type="email" value={data.author_email} onChange={(e) => setData('author_email', e.target.value)} placeholder="author@email.com" />
+                    </Form.Item>
+                </Col>
+                <Col xs={24} md={8}>
+                    <Form.Item label="Author Phone" validateStatus={errors.author_phone ? 'error' : ''} help={errors.author_phone}>
+                        <Input size="large" value={data.author_phone} onChange={(e) => setData('author_phone', e.target.value)} placeholder="09XXXXXXXXX" />
                     </Form.Item>
                 </Col>
             </Row>
+
+            {/* ── Co-Authors ──────────────────────────────────────────────── */}
+            <Divider orientation="left" orientationMargin={0}>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>Co-Authors</Typography.Text>
+            </Divider>
+
+            <Form.Item
+                validateStatus={errors.co_authors ? 'error' : ''}
+                help={errors.co_authors || 'Add up to 8 co-authors. Leave all fields empty if none.'}
+            >
+                <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                    {coAuthorRows.map((row, index) => (
+                        <Row key={`co-${index}`} gutter={8} align="middle">
+                            <Col xs={24} md={8}>
+                                <Input
+                                    size="large"
+                                    value={row.name}
+                                    placeholder={`Co-author ${index + 1} name`}
+                                    onChange={(e) => updateCoAuthorRow(index, 'name', e.target.value)}
+                                />
+                            </Col>
+                            <Col xs={24} md={7}>
+                                <Input
+                                    size="large"
+                                    type="email"
+                                    value={row.email}
+                                    placeholder="Email (optional)"
+                                    onChange={(e) => updateCoAuthorRow(index, 'email', e.target.value)}
+                                />
+                            </Col>
+                            <Col xs={22} md={7}>
+                                <Input
+                                    size="large"
+                                    value={row.phone}
+                                    placeholder="Phone (optional)"
+                                    onChange={(e) => updateCoAuthorRow(index, 'phone', e.target.value)}
+                                />
+                            </Col>
+                            <Col xs={2} md={2} style={{ textAlign: 'right' }}>
+                                <Button
+                                    aria-label={`Remove co-author ${index + 1}`}
+                                    icon={<MinusCircleOutlined />}
+                                    disabled={coAuthorRows.length === 1}
+                                    size="large"
+                                    onClick={() => removeCoAuthorRow(index)}
+                                />
+                            </Col>
+                        </Row>
+                    ))}
+
+                    <Button icon={<PlusOutlined />} onClick={addCoAuthorRow} disabled={coAuthorRows.length >= 8} size="large">
+                        Add Co-Author
+                    </Button>
+                </Space>
+            </Form.Item>
+
+            <Divider />
+
 
             <Row gutter={16}>
                 <Col xs={24} md={12}>

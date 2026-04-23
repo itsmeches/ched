@@ -4,6 +4,21 @@ import { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Card, Col, Input, Modal, Row, Space, Table, Tag, Typography, message } from 'antd';
 import { BankOutlined, ExclamationCircleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 
+const acronymStopWords = new Set(['of', 'and', 'the', 'for', 'at', 'in', 'on']);
+
+function getInstitutionAcronym(name, fallbackCode) {
+    const words = (name ?? '')
+        .split(/\s+/)
+        .map((word) => word.replace(/[^a-zA-Z0-9]/g, ''))
+        .filter(Boolean);
+
+    const significantWords = words.filter((word) => !acronymStopWords.has(word.toLowerCase()));
+    const sourceWords = significantWords.length > 0 ? significantWords : words;
+    const acronym = sourceWords.map((word) => word[0]).join('').toUpperCase();
+
+    return acronym || fallbackCode || '—';
+}
+
 export default function InstitutionsIndex({ institutions, filters }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search ?? '');
@@ -34,10 +49,14 @@ export default function InstitutionsIndex({ institutions, filters }) {
             ),
         },
         {
-            title: 'Code',
+            title: 'Acronym',
             dataIndex: 'code',
             key: 'code',
-            render: (value) => value ? <Tag color="blue">{value}</Tag> : '—',
+            render: (value, institution) => (
+                <Tag color="blue" title={value || institution.name}>
+                    {getInstitutionAcronym(institution.name, value)}
+                </Tag>
+            ),
         },
         { title: 'Address', dataIndex: 'address', key: 'address', render: (value) => value || '—' },
         { title: 'Users', dataIndex: 'users_count', key: 'users_count' },
@@ -102,7 +121,7 @@ export default function InstitutionsIndex({ institutions, filters }) {
                             </Col>
                             <Col xs={24} xl={12}>
                                 <Row gutter={[12, 12]}>
-                                    <Col xs={24} md={18}><Input size="large" aria-label="Search institutions by name or code" value={search} placeholder="Search by name or code" prefix={<SearchOutlined />} onChange={(event) => setSearch(event.target.value)} onPressEnter={applyFilter} /></Col>
+                                    <Col xs={24} md={18}><Input size="large" aria-label="Search institutions by name or acronym" value={search} placeholder="Search by name or acronym" prefix={<SearchOutlined />} onChange={(event) => setSearch(event.target.value)} onPressEnter={applyFilter} /></Col>
                                     <Col xs={24} md={6}><Button size="large" block type="primary" onClick={applyFilter} icon={<BankOutlined />}>Apply</Button></Col>
                                 </Row>
                             </Col>

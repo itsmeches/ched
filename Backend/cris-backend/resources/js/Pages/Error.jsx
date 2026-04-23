@@ -35,7 +35,7 @@ export default function ErrorPage({ status }) {
                                 <img src="/cris-mark.svg" alt="CRIS" style={{ width: 38, height: 38, borderRadius: 10 }} />
                                 <div>
                                     <Space size={10} align="center">
-                                        <Tag color="cyan" style={{ borderRadius: 999, fontWeight: 700, marginInlineEnd: 0 }}>CRIS</Tag>
+                                        <Tag style={{ borderRadius: 999, fontWeight: 700, marginInlineEnd: 0, backgroundColor: '#0033a0', color: '#fff', border: 'none' }}>CRIS</Tag>
                                         <Typography.Title level={4} style={{ margin: 0, color: '#0f172a' }}>
                                             Calabarzon Research Information System
                                         </Typography.Title>

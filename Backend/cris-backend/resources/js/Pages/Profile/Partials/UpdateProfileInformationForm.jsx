@@ -77,14 +77,17 @@ export default function UpdateProfileInformation({
                                 href={route('verification.send')}
                                 method="post"
                                 as="button"
-                                className="ml-1 rounded-md text-sm font-medium text-teal-600 underline hover:text-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                                className="ml-1 rounded-md text-sm font-medium underline focus:outline-none focus:ring-2 focus:ring-offset-2" 
+                                style={{ color: '#0033a0' }}
+                                onMouseEnter={(e) => e.target.style.color = '#001f66'}
+                                onMouseLeave={(e) => e.target.style.color = '#0033a0'}
                             >
                                 Click here to re-send the verification email.
                             </Link>
                         </p>
 
                         {status === 'verification-link-sent' && (
-                            <div className="mt-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
+                            <div className="mt-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-900" style={{ borderColor: '#b3d9ff', backgroundColor: '#e6f2ff', color: '#0033a0' }}>
                                 A new verification link has been sent to your
                                 email address.
                             </div>

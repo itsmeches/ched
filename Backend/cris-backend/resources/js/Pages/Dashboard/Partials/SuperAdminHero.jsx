@@ -33,7 +33,7 @@ export default function SuperAdminHero({ stats }) {
                             <Card bordered={false} style={{ background: 'rgba(255,255,255,0.14)' }}>
                                 <Space direction="vertical" size={6} style={{ width: '100%' }}>
                                     <Statistic title={<span style={{ color: 'rgba(255,255,255,0.72)' }}>Approval Rate</span>} value={stats.approvalRate} suffix="%" precision={1} valueStyle={{ color: '#fff' }} />
-                                    <Progress percent={Number(stats.approvalRate)} showInfo={false} strokeColor="#22c55e" trailColor="rgba(255,255,255,0.25)" />
+                                    <Progress percent={Number(stats.approvalRate)} showInfo={false} strokeColor="#0033a0" trailColor="rgba(255,255,255,0.25)" />
                                 </Space>
                             </Card>
                         </Col>

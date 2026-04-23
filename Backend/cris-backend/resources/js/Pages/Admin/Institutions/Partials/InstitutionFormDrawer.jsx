@@ -22,7 +22,7 @@ export default function InstitutionFormDrawer({ title, subtitle, open, onClose, 
         >
             <Space direction="vertical" size={16} style={{ width: '100%' }}>
                 {subtitle && <div style={{ color: '#475569', fontSize: 14 }}>{subtitle}</div>}
-                <Alert type="info" showIcon message="Institution codes should stay unique because they are used throughout the admin workflow." />
+                <Alert type="info" showIcon message="Institution acronyms should stay unique because they are used throughout the admin workflow." />
                 <Form layout="vertical" onSubmitCapture={onSubmit}>
                     <InstitutionFormFields data={data} setData={setData} errors={errors} />
                 </Form>

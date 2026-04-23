@@ -31,7 +31,7 @@ export default function Login({ status, canResetPassword }) {
             </div>
 
             {status && (
-                <div className="mb-5 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm font-medium text-emerald-700">
+                <div className="mb-5 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm font-medium text-blue-900" style={{ borderColor: '#b3d9ff', backgroundColor: '#e6f2ff', color: '#0033a0' }}>
                     {status}
                 </div>
             )}
@@ -59,7 +59,9 @@ export default function Login({ status, canResetPassword }) {
                         {canResetPassword && (
                             <Link
                                 href={route('password.request')}
-                                className="text-xs text-teal-600 hover:text-teal-800 font-medium"
+                                className="text-xs font-medium transition-colors" style={{ color: '#0033a0' }}
+                                onMouseEnter={(e) => e.target.style.color = '#001f66'}
+                                onMouseLeave={(e) => e.target.style.color = '#0033a0'}
                             >
                                 Forgot password?
                             </Link>
@@ -96,7 +98,9 @@ export default function Login({ status, canResetPassword }) {
 
             <p className="mt-6 text-center text-sm text-slate-500">
                 Don't have an account?{' '}
-                <Link href={route('register')} className="text-teal-600 hover:text-teal-800 font-medium">
+                <Link href={route('register')} className="font-medium transition-colors" style={{ color: '#0033a0' }}
+                    onMouseEnter={(e) => e.target.style.color = '#001f66'}
+                    onMouseLeave={(e) => e.target.style.color = '#0033a0'}>
                     Register here
                 </Link>
             </p>

@@ -1,7 +1,7 @@
 /** Shared status badge for research proposals */
 export const statusColors = {
     pending:      'bg-amber-100 text-amber-700',
-    approved:     'bg-green-100 text-green-700',
+    approved:     'bg-blue-100 text-blue-800',
     rejected:     'bg-red-100 text-red-700',
 };
 

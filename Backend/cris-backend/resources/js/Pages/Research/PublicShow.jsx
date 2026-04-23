@@ -2,12 +2,18 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { Button, Card, Divider, Space, Tag, Typography } from 'antd';
 import { ArrowLeftOutlined, FilePdfOutlined } from '@ant-design/icons';
+import { useState } from 'react';
 
 export default function PublicResearchShow({ proposal, canLogin, canRegister }) {
     const { auth } = usePage().props;
+    const [pdfOpen, setPdfOpen] = useState(false);
     const metadataItems = [
-        { label: 'Authors', value: proposal.authors },
+        { label: 'Author', value: proposal.authors },
+        { label: 'Author Email', value: proposal.author_email || '—' },
+        { label: 'Author Phone', value: proposal.author_phone || '—' },
         { label: 'Co-Authors', value: proposal.co_authors || '—' },
+        { label: 'Co-Author Emails', value: proposal.co_author_emails || '—' },
+        { label: 'Co-Author Phones', value: proposal.co_author_phones || '—' },
         { label: 'School', value: proposal.school || '—' },
         { label: 'Keywords', value: proposal.keywords || '—' },
         { label: 'Institution', value: proposal.institution?.name ?? '—' },
@@ -31,7 +37,7 @@ export default function PublicResearchShow({ proposal, canLogin, canRegister }) 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                             <div>
                                 <Space size={10} align="center" style={{ marginBottom: 2 }}>
-                                    <Tag color="cyan" style={{ borderRadius: 999, fontWeight: 700, marginInlineEnd: 0 }}>
+                                    <Tag style={{ borderRadius: 999, fontWeight: 700, marginInlineEnd: 0, backgroundColor: '#0033a0', color: '#fff', border: 'none' }}>
                                         CRIS
                                     </Tag>
                                     <Typography.Title level={4} style={{ margin: 0, color: '#0f172a' }}>
@@ -81,15 +87,19 @@ export default function PublicResearchShow({ proposal, canLogin, canRegister }) 
                                     <Space wrap size={[8, 8]}>
                                         {proposal.year && <Tag color="blue">Year {proposal.year}</Tag>}
                                         {proposal.category && <Tag color="geekblue">{proposal.category}</Tag>}
-                                        <Tag color="green">Approved</Tag>
+                                        <Tag style={{ backgroundColor: '#0033a0', color: '#fff', border: 'none' }}>Approved</Tag>
                                     </Space>
                                 </div>
 
                                 {proposal.file_path && (
                                     <Space wrap>
-                                        <a href={route('research.public.file', proposal.id)} target="_blank" rel="noreferrer">
-                                            <Button type="primary" icon={<FilePdfOutlined />}>Open PDF</Button>
-                                        </a>
+                                        <Button
+                                            type={pdfOpen ? 'primary' : 'default'}
+                                            icon={<FilePdfOutlined />}
+                                            onClick={() => setPdfOpen((prev) => !prev)}
+                                        >
+                                            {pdfOpen ? 'Hide PDF' : 'View PDF'}
+                                        </Button>
                                         <a href={route('research.public.file', { proposal: proposal.id, download: 1 })}>
                                             <Button icon={<FilePdfOutlined />}>Download PDF</Button>
                                         </a>
@@ -125,6 +135,28 @@ export default function PublicResearchShow({ proposal, canLogin, canRegister }) 
                             {proposal.abstract}
                         </Typography.Paragraph>
                     </Card>
+
+                    {pdfOpen && proposal.file_path && (
+                        <Card
+                            className="admin-dashboard-shell"
+                            bordered={false}
+                            title={
+                                <Space>
+                                    <FilePdfOutlined style={{ color: '#0033a0' }} />
+                                    <span>PDF Viewer</span>
+                                </Space>
+                            }
+                            extra={
+                                <Button size="small" onClick={() => setPdfOpen(false)}>Close</Button>
+                            }
+                        >
+                            <iframe
+                                src={route('research.public.file', proposal.id)}
+                                title="Research PDF"
+                                style={{ width: '100%', height: '80vh', border: 'none', borderRadius: 8 }}
+                            />
+                        </Card>
+                    )}
                 </div>
             </div>
         </>

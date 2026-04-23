@@ -88,9 +88,10 @@ export default function Navbar() {
                                     href={item.href}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                                         isActive(item)
-                                            ? 'bg-teal-50 text-teal-700 border-b-2 border-teal-600'
+                                            ? 'bg-blue-50 text-blue-900 border-b-2'
                                             : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                                     }`}
+                                    style={isActive(item) ? { borderColor: '#0033a0' } : {}}
                                 >
                                     {item.label}
                                 </Link>
@@ -111,7 +112,8 @@ export default function Navbar() {
                                     type="button"
                                     aria-label="Open user menu"
                                     aria-haspopup="menu"
-                                    className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 text-white hover:shadow-md transition-shadow"
+                                    className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white hover:shadow-md transition-shadow"
+                                    style={{ background: 'linear-gradient(to bottom right, #0047d4, #0033a0)' }}
                                 >
                                     {user.name.charAt(0).toUpperCase()}
                                 </button>
@@ -121,7 +123,7 @@ export default function Navbar() {
                                 <div className="px-4 py-2 text-sm text-slate-700 border-b border-slate-200">
                                     <p className="font-semibold">{user.name}</p>
                                     <p className="text-xs text-slate-500 mb-1">{user.email}</p>
-                                    <p className="text-xs text-teal-600 font-medium">{getRoleLabel()}</p>
+                                    <p className="text-xs font-medium" style={{ color: '#0033a0' }}>{getRoleLabel()}</p>
                                 </div>
                                 <Dropdown.Link href={route('profile.edit')}>
                                     Profile Settings
@@ -162,7 +164,7 @@ export default function Navbar() {
                                     href={item.href}
                                     className={`block px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                                         isActive(item)
-                                            ? 'bg-teal-50 text-teal-700'
+                                            ? 'bg-blue-50 text-blue-900'
                                             : 'text-slate-600 hover:bg-white hover:text-slate-900'
                                     }`}
                                     onClick={() => setMenuOpen(false)}

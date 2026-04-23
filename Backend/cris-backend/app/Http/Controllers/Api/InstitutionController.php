@@ -31,6 +31,8 @@ class InstitutionController extends Controller
             'address' => 'nullable|string',
             'contact_email' => 'nullable|email',
             'contact_phone' => 'nullable|string|max:20',
+        ], [], [
+            'code' => 'acronym',
         ]);
 
         $institution = Institution::create($validated);
@@ -60,6 +62,8 @@ class InstitutionController extends Controller
             'address' => 'nullable|string',
             'contact_email' => 'nullable|email',
             'contact_phone' => 'nullable|string|max:20',
+        ], [], [
+            'code' => 'acronym',
         ]);
 
         $institution->update($validated);

@@ -41,6 +41,8 @@ class InstitutionManagementController extends Controller
             'address'       => ['nullable', 'string', 'max:500'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
+        ], [], [
+            'code' => 'acronym',
         ]);
 
         Institution::create($data);
@@ -64,6 +66,8 @@ class InstitutionManagementController extends Controller
             'address'       => ['nullable', 'string', 'max:500'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
+        ], [], [
+            'code' => 'acronym',
         ]);
 
         $institution->update($data);

@@ -99,7 +99,7 @@ export default function PublicResearchIndex({ proposals, filters, canLogin, canR
                 style={{
                     minHeight: '100vh',
                     background:
-                        'radial-gradient(circle at 0% 0%, rgba(14, 116, 144, 0.18), transparent 28%), radial-gradient(circle at 100% 0%, rgba(217, 119, 6, 0.16), transparent 30%), linear-gradient(180deg, #f8fbfd 0%, #edf4f7 100%)',
+                        'radial-gradient(circle at 0% 0%, rgba(0, 51, 160, 0.10), transparent 28%), radial-gradient(circle at 100% 0%, rgba(217, 119, 6, 0.14), transparent 30%), linear-gradient(180deg, #f8fafc 0%, #eef4f9 100%)',
                 }}
             >
                 <div className="mx-auto max-w-7xl px-4 pb-12 pt-6 sm:px-6 lg:px-8">

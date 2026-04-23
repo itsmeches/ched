@@ -3,7 +3,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { formatDateTime } from '@/utils/date';
 import { Alert, Button, Card, Divider, Input, Popconfirm, Space, Tag, Typography, message } from 'antd';
-import { DownloadOutlined } from '@ant-design/icons';
+import { DownloadOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 
 export default function ResearchShow({ proposal, canEdit, canReview, canDelete }) {
@@ -11,6 +11,7 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete }
     const reviewForm = useForm({ action: '', comments: '' });
     const deleteForm = useForm({});
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+    const [pdfOpen, setPdfOpen] = useState(false);
 
     useEffect(() => {
         if (flash?.success) {
@@ -37,8 +38,12 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete }
     }
 
     const metadataItems = [
-        { label: 'Authors', value: proposal.authors },
+        { label: 'Author', value: proposal.authors },
+        { label: 'Author Email', value: proposal.author_email || '—' },
+        { label: 'Author Phone', value: proposal.author_phone || '—' },
         { label: 'Co-Authors', value: proposal.co_authors || '—' },
+        { label: 'Co-Author Emails', value: proposal.co_author_emails || '—' },
+        { label: 'Co-Author Phones', value: proposal.co_author_phones || '—' },
         { label: 'School', value: proposal.school || '—' },
         { label: 'Keywords', value: proposal.keywords || '—' },
         { label: 'Institution', value: proposal.institution?.name ?? '—' },
@@ -78,9 +83,13 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete }
 
                                 <Space wrap>
                                     {proposal.file_path && (
-                                        <a href={route('research.file', proposal.id)} target="_blank" rel="noreferrer">
-                                            <Button>View PDF</Button>
-                                        </a>
+                                        <Button
+                                            icon={<FilePdfOutlined />}
+                                            type={pdfOpen ? 'primary' : 'default'}
+                                            onClick={() => setPdfOpen((prev) => !prev)}
+                                        >
+                                            {pdfOpen ? 'Hide PDF' : 'View PDF'}
+                                        </Button>
                                     )}
 
                                     {proposal.file_path && (
@@ -137,6 +146,28 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete }
                             {proposal.abstract}
                         </Typography.Paragraph>
                     </Card>
+
+                    {pdfOpen && proposal.file_path && (
+                        <Card
+                            className="admin-dashboard-shell"
+                            bordered={false}
+                            title={
+                                <Space>
+                                    <FilePdfOutlined style={{ color: '#0033a0' }} />
+                                    <span>PDF Viewer</span>
+                                </Space>
+                            }
+                            extra={
+                                <Button size="small" onClick={() => setPdfOpen(false)}>Close</Button>
+                            }
+                        >
+                            <iframe
+                                src={route('research.file', proposal.id)}
+                                title="Research PDF"
+                                style={{ width: '100%', height: '80vh', border: 'none', borderRadius: 8 }}
+                            />
+                        </Card>
+                    )}
 
                     {proposal.comments && (
                         <Alert

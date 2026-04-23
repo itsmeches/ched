@@ -3,12 +3,12 @@ import { router } from '@inertiajs/react';
 import { BankOutlined, CrownOutlined, FileTextOutlined, SafetyCertificateOutlined, TeamOutlined } from '@ant-design/icons';
 
 const statCards = [
-    { key: 'users', label: 'Total Users', icon: <TeamOutlined />, routeName: 'admin.users.index', color: '#7c3aed' },
-    { key: 'heiUsers', label: 'HEI Accounts', icon: <BankOutlined />, routeName: 'admin.users.index', params: { role: 'hei' }, color: '#15803d' },
-    { key: 'chedUsers', label: 'CHED Accounts', icon: <SafetyCertificateOutlined />, routeName: 'admin.users.index', params: { role: 'ched' }, color: '#2563eb' },
-    { key: 'admins', label: 'Super Admins', icon: <CrownOutlined />, routeName: 'admin.users.index', params: { role: 'super_admin' }, color: '#9333ea' },
+    { key: 'users', label: 'Total Users', icon: <TeamOutlined />, routeName: 'admin.users.index', color: '#0033a0' },
+    { key: 'heiUsers', label: 'HEI Accounts', icon: <BankOutlined />, routeName: 'admin.users.index', params: { role: 'hei' }, color: '#0047d4' },
+    { key: 'chedUsers', label: 'CHED Accounts', icon: <SafetyCertificateOutlined />, routeName: 'admin.users.index', params: { role: 'ched' }, color: '#0033a0' },
+    { key: 'admins', label: 'Super Admins', icon: <CrownOutlined />, routeName: 'admin.users.index', params: { role: 'super_admin' }, color: '#001f66' },
     { key: 'institutions', label: 'Institutions', icon: <BankOutlined />, routeName: 'admin.institutions.index', color: '#d97706' },
-    { key: 'proposals', label: 'Research Records', icon: <FileTextOutlined />, routeName: 'research.index', color: '#0f766e' },
+    { key: 'proposals', label: 'Research Records', icon: <FileTextOutlined />, routeName: 'research.index', color: '#0033a0' },
     { key: 'rejected', label: 'Rejected Papers', icon: <FileTextOutlined />, routeName: 'research.index', params: { status: 'rejected' }, color: '#dc2626' },
 ];
 

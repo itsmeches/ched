@@ -6,9 +6,9 @@ import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, InboxOutl
 
 const statItems = [
     { key: 'pending', label: 'Pending Review', color: '#d97706', icon: <ClockCircleOutlined /> },
-    { key: 'approved', label: 'Approved', color: '#15803d', icon: <CheckCircleOutlined /> },
+    { key: 'approved', label: 'Approved', color: '#0033a0', icon: <CheckCircleOutlined /> },
     { key: 'rejected', label: 'Rejected', color: '#dc2626', icon: <StopOutlined /> },
-    { key: 'total', label: 'Total Papers', color: '#0f766e', icon: <InboxOutlined /> },
+    { key: 'total', label: 'Total Papers', color: '#0033a0', icon: <InboxOutlined /> },
 ];
 
 export default function CHEDDashboard({ stats, forReview }) {
@@ -43,7 +43,7 @@ export default function CHEDDashboard({ stats, forReview }) {
                         <Row gutter={[24, 24]} align="middle">
                             <Col xs={24} lg={16}>
                                 <Space direction="vertical" size={10}>
-                                    <Tag color="geekblue" style={{ alignSelf: 'flex-start', borderRadius: 999, paddingInline: 12, paddingBlock: 4 }}>
+                                    <Tag style={{ alignSelf: 'flex-start', borderRadius: 999, paddingInline: 12, paddingBlock: 4, backgroundColor: '#0033a0', color: '#fff', border: 'none' }}>
                                         CHED Review Desk
                                     </Tag>
                                     <Typography.Title level={2} style={{ margin: 0, color: '#ffffff' }}>
@@ -93,7 +93,7 @@ export default function CHEDDashboard({ stats, forReview }) {
                                     <Statistic title="Reviewed Today" value={stats.reviewedToday} />
                                     <div>
                                         <Typography.Text type="secondary">Approval Rate</Typography.Text>
-                                        <Progress percent={Number(stats.approvalRate)} strokeColor="#2563eb" />
+                                        <Progress percent={Number(stats.approvalRate)} strokeColor="#0033a0" />
                                     </div>
                                 </Space>
                             </Card>

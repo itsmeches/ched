@@ -50,7 +50,7 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                 const isLocked = row.status !== 'pending' || !!row.viewed_at;
 
                 if (!isLocked) {
-                    return <Tag color="green">Editable</Tag>;
+                    return <Tag color="blue">Editable</Tag>;
                 }
 
                 if (row.status === 'pending' && row.viewed_at) {

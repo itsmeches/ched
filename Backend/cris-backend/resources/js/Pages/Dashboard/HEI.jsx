@@ -5,15 +5,15 @@ import { Alert, Button, Card, Col, Progress, Row, Space, Statistic, Table, Tag, 
 import { CheckCircleOutlined, ClockCircleOutlined, FileAddOutlined, FileTextOutlined, StopOutlined } from '@ant-design/icons';
 
 const statItems = [
-    { key: 'total', label: 'Total Papers', color: '#0f766e', icon: <FileTextOutlined /> },
+    { key: 'total', label: 'Total Papers', color: '#0033a0', icon: <FileTextOutlined /> },
     { key: 'pending', label: 'Pending', color: '#d97706', icon: <ClockCircleOutlined /> },
-    { key: 'approved', label: 'Approved', color: '#15803d', icon: <CheckCircleOutlined /> },
+    { key: 'approved', label: 'Approved', color: '#0033a0', icon: <CheckCircleOutlined /> },
     { key: 'rejected', label: 'Rejected', color: '#dc2626', icon: <StopOutlined /> },
 ];
 
 const statusColor = {
     pending: 'gold',
-    approved: 'green',
+    approved: '#0033a0',
     rejected: 'red',
 };
 
@@ -66,7 +66,7 @@ export default function HEIDashboard({ stats, recentUploads, pendingQueue }) {
                         <Row gutter={[24, 24]} align="middle">
                             <Col xs={24} lg={16}>
                                 <Space direction="vertical" size={10}>
-                                    <Tag color="cyan" style={{ alignSelf: 'flex-start', borderRadius: 999, paddingInline: 12, paddingBlock: 4 }}>
+                                    <Tag style={{ alignSelf: 'flex-start', borderRadius: 999, paddingInline: 12, paddingBlock: 4, backgroundColor: '#0033a0', color: '#fff', border: 'none' }}>
                                         HEI Workspace
                                     </Tag>
                                     <Typography.Title level={2} style={{ margin: 0, color: '#ffffff' }}>
@@ -111,7 +111,7 @@ export default function HEIDashboard({ stats, recentUploads, pendingQueue }) {
                                     <Statistic title="Uploaded This Month" value={stats.uploadedThisMonth} />
                                     <div>
                                         <Typography.Text type="secondary">Approval Rate</Typography.Text>
-                                        <Progress percent={Number(stats.approvalRate)} status="active" strokeColor="#15803d" />
+                                        <Progress percent={Number(stats.approvalRate)} status="active" strokeColor="#0033a0" />
                                     </div>
                                 </Space>
                             </Card>

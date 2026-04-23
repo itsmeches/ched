@@ -2,11 +2,15 @@ import { Alert, Button, Card, Col, Divider, Form, Input, Row, Select, Space, Tag
 import { Link, router } from '@inertiajs/react';
 import { PlusOutlined, UserAddOutlined } from '@ant-design/icons';
 
+function getInstitutionOptionLabel(institution) {
+    return institution.code ? `${institution.name} (${institution.code})` : institution.name;
+}
+
 export default function SuperAdminAccountPanel({ data, setData, postSubmit, processing, errors, institutions, roles }) {
     return (
         <Row gutter={[24, 24]}>
             <Col xs={24} xl={14}>
-                <Card title={<Space><UserAddOutlined /><span>Create New Account</span></Space>} extra={<Tag color="teal">Writes directly to database</Tag>} className="admin-dashboard-shell">
+                <Card title={<Space><UserAddOutlined /><span>Create New Account</span></Space>} extra={<Tag style={{ color: '#0033a0', backgroundColor: '#e6f2ff', borderColor: '#0033a0' }}>Writes directly to database</Tag>} className="admin-dashboard-shell">
                     <Typography.Paragraph type="secondary">
                         Create HEI, CHED, or Super Admin users here. New accounts are available immediately after save.
                     </Typography.Paragraph>
@@ -48,7 +52,7 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
                                         value={data.institution_id || undefined}
                                         placeholder={data.role === 'hei' ? 'Select an institution' : 'Not required for this role'}
                                         disabled={data.role !== 'hei'}
-                                        options={institutions.map((institution) => ({ value: institution.id, label: institution.code ? `${institution.name} (${institution.code})` : institution.name }))}
+                                        options={institutions.map((institution) => ({ value: institution.id, label: getInstitutionOptionLabel(institution) }))}
                                         onChange={(value) => setData('institution_id', value ?? '')}
                                         allowClear
                                     />

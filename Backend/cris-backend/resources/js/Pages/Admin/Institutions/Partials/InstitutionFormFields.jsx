@@ -9,8 +9,8 @@ export default function InstitutionFormFields({ data, setData, errors }) {
 
             <Row gutter={16}>
                 <Col xs={24} md={12}>
-                    <Form.Item label="Code" validateStatus={errors.code ? 'error' : ''} help={errors.code}>
-                        <Input size="large" value={data.code} onChange={(event) => setData('code', event.target.value)} placeholder="BatStateU" />
+                        <Form.Item label="Acronym" validateStatus={errors.code ? 'error' : ''} help={errors.code}>
+                            <Input size="large" value={data.acronym} onChange={(event) => setData('acronym', event.target.value)} placeholder="BSU" />
                     </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>

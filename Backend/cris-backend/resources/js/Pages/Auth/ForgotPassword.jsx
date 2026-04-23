@@ -27,7 +27,7 @@ export default function ForgotPassword({ status }) {
             </div>
 
             {status && (
-                <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-900" style={{ borderColor: '#b3d9ff', backgroundColor: '#e6f2ff', color: '#0033a0' }}>
                     {status}
                 </div>
             )}
@@ -56,7 +56,9 @@ export default function ForgotPassword({ status }) {
 
             <p className="mt-6 text-center text-sm text-slate-500">
                 Remembered your password?{' '}
-                <Link href={route('login')} className="font-medium text-teal-600 hover:text-teal-800">
+                <Link href={route('login')} className="font-medium transition-colors" style={{ color: '#0033a0' }}
+                    onMouseEnter={(e) => e.target.style.color = '#001f66'}
+                    onMouseLeave={(e) => e.target.style.color = '#0033a0'}>
                     Back to sign in
                 </Link>
             </p>

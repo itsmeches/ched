@@ -10,7 +10,7 @@ export default function GuestLayout({ children }) {
                 Skip to main content
             </a>
             {/* Left branding panel */}
-            <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-gradient-to-br from-teal-600 via-teal-700 to-slate-800 px-12 py-10 text-white">
+            <div className="hidden lg:flex lg:w-1/2 flex-col justify-between px-12 py-10 text-white" style={{ background: 'linear-gradient(135deg, #0033a0 0%, #001f66 50%, #1a1a2e 100%)' }}>
                 <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
                     <img src="/cris-mark.svg" alt="CRIS" className="h-10 w-10" />
                     <span className="text-xl font-bold tracking-wide">CRIS</span>
@@ -19,16 +19,16 @@ export default function GuestLayout({ children }) {
                 <div>
                     <h1 className="text-4xl font-bold leading-tight">
                         Calabarzon Research<br />
-                        <span className="text-teal-200">Information System</span>
+                        <span style={{ color: '#b3d9ff' }}>Information System</span>
                     </h1>
-                    <p className="mt-4 text-base text-teal-100/80 max-w-sm leading-relaxed">
+                    <p className="mt-4 text-base max-w-sm leading-relaxed" style={{ color: 'rgba(179, 217, 255, 0.8)' }}>
                         A unified platform for research submission, institutional review, and public discovery across the CALABARZON region.
                     </p>
 
                    
                 </div>
 
-                <p className="text-xs text-teal-300/60">
+                <p className="text-xs" style={{ color: 'rgba(179, 217, 255, 0.6)' }}>
                     &copy; {new Date().getFullYear()} CHED CALABARZON. All rights reserved.
                 </p>
             </div>
@@ -39,7 +39,7 @@ export default function GuestLayout({ children }) {
                 <div className="mb-8 lg:hidden flex items-center gap-3">
                     <img src="/cris-mark.svg" alt="CRIS" className="h-10 w-10" />
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-widest text-teal-700">CRIS</p>
+                        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#0033a0' }}>CRIS</p>
                         <p className="text-sm font-semibold text-slate-900">Calabarzon Research Information System</p>
                     </div>
                 </div>

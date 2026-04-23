@@ -7,11 +7,15 @@ import ResearchProposalForm from './Partials/ResearchProposalForm';
 export default function ResearchEdit({ proposal }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
-        _method:    'PUT',
-        title:      proposal.title      ?? '',
-        authors:    proposal.authors    ?? '',
-        co_authors: proposal.co_authors ?? '',
-        school:     proposal.school     ?? '',
+        _method:           'PUT',
+        title:             proposal.title             ?? '',
+        authors:           proposal.authors           ?? '',
+        author_email:      proposal.author_email      ?? '',
+        author_phone:      proposal.author_phone      ?? '',
+        co_authors:        proposal.co_authors        ?? '',
+        co_author_emails:  proposal.co_author_emails  ?? '',
+        co_author_phones:  proposal.co_author_phones  ?? '',
+        school:            proposal.school            ?? '',
         year:       proposal.year       ?? new Date().getFullYear(),
         category:   proposal.category   ?? '',
         keywords:   proposal.keywords   ?? '',

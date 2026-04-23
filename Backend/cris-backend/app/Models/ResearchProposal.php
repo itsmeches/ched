@@ -16,7 +16,11 @@ class ResearchProposal extends Model
     protected $fillable = [
         'title',
         'authors',
+        'author_email',
+        'author_phone',
         'co_authors',
+        'co_author_emails',
+        'co_author_phones',
         'year',
         'school',
         'abstract',

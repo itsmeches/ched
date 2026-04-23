@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Alert, Avatar, Button, Card, Col, Input, Modal, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
 
-const roleColorMap = { pending: 'orange', super_admin: 'purple', ched: 'blue', hei: 'green' };
+const roleColorMap = { pending: 'orange', super_admin: 'purple', ched: '#0033a0', hei: '#0047d4' };
 
 export default function UsersIndex({ users, filters }) {
     const { flash } = usePage().props;
@@ -32,7 +32,7 @@ export default function UsersIndex({ users, filters }) {
             key: 'user',
             render: (_, user) => (
                 <Space>
-                    <Avatar style={{ backgroundColor: '#115e59' }}>{user.name?.charAt(0)?.toUpperCase() ?? 'U'}</Avatar>
+                    <Avatar style={{ backgroundColor: '#0033a0' }}>{user.name?.charAt(0)?.toUpperCase() ?? 'U'}</Avatar>
                     <div>
                         <div style={{ fontWeight: 600 }}>{user.name}</div>
                         <div style={{ fontSize: 12, color: '#64748b' }}>{user.email}</div>

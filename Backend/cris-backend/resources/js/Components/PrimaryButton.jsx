@@ -7,8 +7,11 @@ export default function PrimaryButton({
     return (
         <button
             {...props}
+            style={{ backgroundColor: '#0033a0' }}
+            onMouseEnter={(e) => !disabled && (e.target.style.backgroundColor = '#001f66')}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = '#0033a0')}
             className={
-                `inline-flex items-center rounded-lg border border-transparent bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition duration-150 ease-in-out hover:bg-teal-800 focus:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 active:bg-teal-900 ${
+                `inline-flex items-center rounded-lg border border-transparent px-4 py-2 text-sm font-semibold text-white transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     disabled && 'opacity-25'
                 } ` + className
             }
