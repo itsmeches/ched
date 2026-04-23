@@ -13,50 +13,56 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Create Institutions
-        $institution1 = Institution::create([
-            'name' => 'University of Batangas',
+        $institution1 = Institution::updateOrCreate([
             'code' => 'UB',
+        ], [
+            'name' => 'University of Batangas',
             'address' => 'Batangas City, Batangas',
             'contact_email' => 'admin@ub.edu.ph',
             'contact_phone' => '(043) 123-4567',
         ]);
 
-        $institution2 = Institution::create([
-            'name' => 'Batangas State University',
+        $institution2 = Institution::updateOrCreate([
             'code' => 'BatStateU',
+        ], [
+            'name' => 'Batangas State University',
             'address' => 'Batangas City, Batangas',
             'contact_email' => 'admin@batstateu.edu.ph',
             'contact_phone' => '(043) 987-6543',
         ]);
 
         // Create Users
-        User::create([
-            'name' => 'Super Admin',
+        $superAdmin = User::updateOrCreate([
             'email' => 'superadmin@cris.gov.ph',
+        ], [
+            'name' => 'Super Admin',
             'password' => Hash::make('password'),
             'role' => 'super_admin',
             'institution_id' => null,
         ]);
 
-        User::create([
-            'name' => 'CHED Officer',
+        $chedUser = User::updateOrCreate([
             'email' => 'ched@cris.gov.ph',
+        ], [
+            'name' => 'CHED Officer',
             'password' => Hash::make('password'),
             'role' => 'ched',
             'institution_id' => null,
         ]);
 
-        $heiUser = User::create([
-            'name' => 'HEI Researcher',
+        $heiUser = User::updateOrCreate([
             'email' => 'hei@edu.ph',
+        ], [
+            'name' => 'HEI Researcher',
             'password' => Hash::make('password'),
             'role' => 'hei',
             'institution_id' => $institution1->id,
         ]);
 
         // Create Research Proposals
-        ResearchProposal::create([
+        ResearchProposal::updateOrCreate([
             'title' => 'Impact of K-12 Implementation in CALABARZON',
+        ], [
             'abstract' => 'A comprehensive study on the effects of K-12 curriculum implementation on student outcomes in the CALABARZON region.',
             'researchers' => 'Dr. Juan dela Cruz, Prof. Maria Santos',
             'institution_id' => $institution1->id,
@@ -66,8 +72,9 @@ class DatabaseSeeder extends Seeder
             'submitted_by' => $heiUser->id,
         ]);
 
-        ResearchProposal::create([
+        ResearchProposal::updateOrCreate([
             'title' => 'Climate Change Impact on Agriculture in Batangas',
+        ], [
             'abstract' => 'Study on how climate change affects agricultural productivity and farming practices in the province of Batangas.',
             'researchers' => 'Dr. Pedro Garcia, Ms. Ana Reyes',
             'institution_id' => $institution2->id,
@@ -75,13 +82,16 @@ class DatabaseSeeder extends Seeder
             'keywords' => 'Climate Change, Agriculture, Batangas',
             'status' => 'approved',
             'submitted_by' => $heiUser->id,
-            'reviewed_by' => 2,
+            'reviewed_by' => $chedUser->id,
+            'approved_by' => $chedUser->id,
+            'approved_at' => now(),
             'reviewed_at' => now(),
             'comments' => 'Excellent research design. Approved for implementation.',
         ]);
 
-        ResearchProposal::create([
+        ResearchProposal::updateOrCreate([
             'title' => 'Digital Transformation in Higher Education',
+        ], [
             'abstract' => 'An investigation into the digital transformation strategies adopted by HEIs in CALABARZON during and post-pandemic.',
             'researchers' => 'Dr. Maria Lopez',
             'institution_id' => $institution1->id,

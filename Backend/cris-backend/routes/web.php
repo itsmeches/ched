@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EditPermissionController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResearchProposalController;
@@ -57,6 +58,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/research/{proposal}', [ResearchProposalController::class, 'show'])->name('research.show');
     Route::delete('/research/{proposal}', [ResearchProposalController::class, 'destroy'])->name('research.destroy');
     Route::get('/research/{proposal}/file', [ResearchProposalController::class, 'downloadFile'])->name('research.file');
+
+    // Edit permission requests (HEI → CHED)
+    Route::post('/research/{proposal}/edit-permission', [EditPermissionController::class, 'store'])
+        ->name('research.edit-permission.store');
+    Route::post('/research/{proposal}/edit-permission/{editRequest}/decide', [EditPermissionController::class, 'decide'])
+        ->name('research.edit-permission.decide');
 
     // History (scoped per role inside controller)
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');

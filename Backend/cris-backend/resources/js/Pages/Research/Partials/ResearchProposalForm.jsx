@@ -3,6 +3,10 @@ import { Link } from '@inertiajs/react';
 import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 
+function sanitizePhoneInput(value) {
+    return String(value ?? '').replace(/\D+/g, '').slice(0, 11);
+}
+
 function parseCsv(value) {
     return String(value ?? '').split(',').map((s) => s.trim());
 }
@@ -104,7 +108,15 @@ export default function ResearchProposalForm({
                 </Col>
                 <Col xs={24} md={8}>
                     <Form.Item label="Author Phone" validateStatus={errors.author_phone ? 'error' : ''} help={errors.author_phone}>
-                        <Input size="large" value={data.author_phone} onChange={(e) => setData('author_phone', e.target.value)} placeholder="09XXXXXXXXX" />
+                        <Input
+                            size="large"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            maxLength={11}
+                            value={data.author_phone}
+                            onChange={(e) => setData('author_phone', sanitizePhoneInput(e.target.value))}
+                            placeholder="09XXXXXXXXX"
+                        />
                     </Form.Item>
                 </Col>
             </Row>
@@ -141,9 +153,12 @@ export default function ResearchProposalForm({
                             <Col xs={22} md={7}>
                                 <Input
                                     size="large"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    maxLength={11}
                                     value={row.phone}
                                     placeholder="Phone (optional)"
-                                    onChange={(e) => updateCoAuthorRow(index, 'phone', e.target.value)}
+                                    onChange={(e) => updateCoAuthorRow(index, 'phone', sanitizePhoneInput(e.target.value))}
                                 />
                             </Col>
                             <Col xs={2} md={2} style={{ textAlign: 'right' }}>

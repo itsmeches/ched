@@ -3,15 +3,28 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { formatDateTime } from '@/utils/date';
 import { Alert, Button, Card, Divider, Input, Popconfirm, Space, Tag, Typography, message } from 'antd';
-import { DownloadOutlined, FilePdfOutlined } from '@ant-design/icons';
-import { useEffect, useState } from 'react';
+import { DownloadOutlined, FilePdfOutlined, KeyOutlined, LockOutlined } from '@ant-design/icons';
+import { useEffect, useRef, useState } from 'react';
 
-export default function ResearchShow({ proposal, canEdit, canReview, canDelete }) {
+export default function ResearchShow({ proposal, canEdit, canReview, canDelete, editPermission, pendingEditRequests }) {
     const { flash } = usePage().props;
     const reviewForm = useForm({ action: '', comments: '' });
     const deleteForm = useForm({});
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [pdfOpen, setPdfOpen] = useState(false);
+    const pdfCardRef = useRef(null);
+    const editPermForm = useForm({ reason: '' });
+
+    function handleViewPdf() {
+        const opening = !pdfOpen;
+        setPdfOpen(opening);
+        if (opening) {
+            // Wait one tick for the card to mount, then scroll to it
+            setTimeout(() => {
+                pdfCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
+        }
+    }
 
     useEffect(() => {
         if (flash?.success) {
@@ -86,7 +99,7 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete }
                                         <Button
                                             icon={<FilePdfOutlined />}
                                             type={pdfOpen ? 'primary' : 'default'}
-                                            onClick={() => setPdfOpen((prev) => !prev)}
+                                            onClick={handleViewPdf}
                                         >
                                             {pdfOpen ? 'Hide PDF' : 'View PDF'}
                                         </Button>
@@ -149,6 +162,7 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete }
 
                     {pdfOpen && proposal.file_path && (
                         <Card
+                            ref={pdfCardRef}
                             className="admin-dashboard-shell"
                             bordered={false}
                             title={
@@ -185,13 +199,165 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete }
                         />
                     )}
 
-                    {!canEdit && proposal.status === 'pending' && proposal.viewed_at && (
-                        <Alert
-                            type="info"
-                            showIcon
-                            message="Editing Locked"
-                            description="This submission can no longer be edited because CHED has already viewed it."
-                        />
+                    {/* HEI: edit permission request section — shown whenever the proposal is locked to them */}
+                    {!canEdit && (
+                        (proposal.status === 'pending' && proposal.viewed_at) ||
+                        proposal.status === 'approved' ||
+                        proposal.status === 'rejected'
+                    ) && (
+                        <Card
+                            className="admin-dashboard-shell"
+                            bordered={false}
+                            title={
+                                <Space>
+                                    <LockOutlined style={{ color: '#d97706' }} />
+                                    <span>Editing Locked</span>
+                                </Space>
+                            }
+                        >
+                            <Space direction="vertical" style={{ width: '100%' }} size={12}>
+                                <Typography.Text type="secondary">
+                                    {proposal.status === 'approved' &&
+                                        'This research has been approved. If you need to make corrections, you can request edit permission from CHED.'}
+                                    {proposal.status === 'rejected' &&
+                                        'This research was rejected. If you wish to revise and resubmit, you can request edit permission from CHED.'}
+                                    {proposal.status === 'pending' && proposal.viewed_at &&
+                                        'This submission is locked because CHED has already viewed it. You may request permission to edit from the reviewing CHED officer.'}
+                                </Typography.Text>
+
+                                {/* No request yet, or previous was denied → show form */}
+                                {(!editPermission || editPermission.status === 'denied') && (
+                                    <Space direction="vertical" style={{ width: '100%' }} size={8}>
+                                        {editPermission?.status === 'denied' && (
+                                            <Alert
+                                                type="error"
+                                                showIcon
+                                                message="Request Denied"
+                                                description="Your previous edit permission request was denied. You may submit a new request below."
+                                                style={{ marginBottom: 4 }}
+                                            />
+                                        )}
+                                        <Input.TextArea
+                                            rows={3}
+                                            placeholder="Reason for edit request (optional)"
+                                            value={editPermForm.data.reason}
+                                            onChange={(e) => editPermForm.setData('reason', e.target.value)}
+                                            maxLength={500}
+                                            showCount
+                                        />
+                                        <Button
+                                            type="primary"
+                                            icon={<KeyOutlined />}
+                                            loading={editPermForm.processing}
+                                            onClick={() =>
+                                                editPermForm.post(
+                                                    route('research.edit-permission.store', proposal.id),
+                                                    { onSuccess: () => editPermForm.reset() },
+                                                )
+                                            }
+                                        >
+                                            Request Edit Permission
+                                        </Button>
+                                    </Space>
+                                )}
+
+                                {/* Pending */}
+                                {editPermission?.status === 'pending' && (
+                                    <Alert
+                                        type="info"
+                                        showIcon
+                                        message="Request Pending"
+                                        description="Your edit permission request is awaiting CHED review."
+                                    />
+                                )}
+
+                                {/* Approved — Edit button is already visible above */}
+                                {editPermission?.status === 'approved' && (
+                                    <Alert
+                                        type="success"
+                                        showIcon
+                                        message="Permission Granted"
+                                        description="CHED approved your request. Use the Edit button above to make your changes."
+                                    />
+                                )}
+                            </Space>
+                        </Card>
+                    )}
+
+                    {/* CHED: pending edit permission requests */}
+                    {pendingEditRequests?.length > 0 && (
+                        <Card
+                            className="admin-dashboard-shell"
+                            bordered={false}
+                            title={
+                                <Space>
+                                    <KeyOutlined style={{ color: '#d97706' }} />
+                                    <span>Edit Permission Requests</span>
+                                    <Tag color="orange">{pendingEditRequests.length}</Tag>
+                                </Space>
+                            }
+                        >
+                            <Space direction="vertical" style={{ width: '100%' }} size={10}>
+                                {pendingEditRequests.map((req) => (
+                                    <div
+                                        key={req.id}
+                                        className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-amber-50/50 px-4 py-3"
+                                    >
+                                        <div className="min-w-0">
+                                            <Typography.Text strong>{req.requester?.name}</Typography.Text>
+                                            {req.reason ? (
+                                                <Typography.Paragraph
+                                                    style={{ margin: '4px 0 0', color: '#64748b', fontSize: 13 }}
+                                                >
+                                                    {req.reason}
+                                                </Typography.Paragraph>
+                                            ) : (
+                                                <Typography.Text
+                                                    type="secondary"
+                                                    style={{ display: 'block', fontSize: 13, marginTop: 2 }}
+                                                >
+                                                    No reason provided
+                                                </Typography.Text>
+                                            )}
+                                        </div>
+                                        <Space>
+                                            <Popconfirm
+                                                title="Approve this edit request?"
+                                                description="The HEI will be able to edit this submission once."
+                                                okText="Approve"
+                                                onConfirm={() =>
+                                                    router.post(
+                                                        route('research.edit-permission.decide', {
+                                                            proposal: proposal.id,
+                                                            editRequest: req.id,
+                                                        }),
+                                                        { decision: 'approved' },
+                                                    )
+                                                }
+                                            >
+                                                <Button type="primary" size="small">Approve</Button>
+                                            </Popconfirm>
+                                            <Popconfirm
+                                                title="Deny this edit request?"
+                                                okText="Deny"
+                                                okButtonProps={{ danger: true }}
+                                                onConfirm={() =>
+                                                    router.post(
+                                                        route('research.edit-permission.decide', {
+                                                            proposal: proposal.id,
+                                                            editRequest: req.id,
+                                                        }),
+                                                        { decision: 'denied' },
+                                                    )
+                                                }
+                                            >
+                                                <Button danger size="small">Deny</Button>
+                                            </Popconfirm>
+                                        </Space>
+                                    </div>
+                                ))}
+                            </Space>
+                        </Card>
                     )}
 
                     {canReview && proposal.status === 'pending' && (

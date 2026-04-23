@@ -1,7 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminFilterCard from '@/Components/Admin/AdminFilterCard';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
+import AdminTableCard from '@/Components/Admin/AdminTableCard';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Card, Col, Input, Modal, Row, Space, Table, Tag, Typography, message } from 'antd';
+import { Alert, Button, Col, Input, Modal, Row, Space, Table, Tag, message } from 'antd';
 import { BankOutlined, ExclamationCircleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 
 const acronymStopWords = new Set(['of', 'and', 'the', 'for', 'at', 'in', 'on']);
@@ -104,33 +107,54 @@ export default function InstitutionsIndex({ institutions, filters }) {
     }
 
     return (
-        <AuthenticatedLayout header={<div className="flex items-center justify-between gap-4"><h2 className="text-xl font-semibold text-slate-900">Institution Management</h2><Link href={route('admin.institutions.create')}><Button size="large" type="primary" icon={<PlusOutlined />}>Add Institution</Button></Link></div>}>
+        <AuthenticatedLayout
+            header={(
+                <AdminPageHeader
+                    title="Institution Management"
+                    actions={(
+                        <Link href={route('admin.institutions.create')}>
+                            <Button size="large" type="primary" icon={<PlusOutlined />}>
+                                Add Institution
+                            </Button>
+                        </Link>
+                    )}
+                />
+            )}
+        >
             <Head title="Institutions" />
 
             <div className="space-y-6">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
-                    <Card className="admin-dashboard-shell" bordered={false}>
-                        <Row justify="space-between" align="middle" gutter={[16, 16]}>
-                            <Col xs={24} xl={12}>
-                                <Space direction="vertical" size={4}>
-                                    <Typography.Title level={4} style={{ margin: 0 }}>Manage institution records</Typography.Title>
-                                    <Typography.Text type="secondary">Maintain school profiles before assigning HEI accounts and tracking research ownership.</Typography.Text>
-                                </Space>
-                            </Col>
-                            <Col xs={24} xl={12}>
-                                <Row gutter={[12, 12]}>
-                                    <Col xs={24} md={18}><Input size="large" aria-label="Search institutions by name or acronym" value={search} placeholder="Search by name or acronym" prefix={<SearchOutlined />} onChange={(event) => setSearch(event.target.value)} onPressEnter={applyFilter} /></Col>
-                                    <Col xs={24} md={6}><Button size="large" block type="primary" onClick={applyFilter} icon={<BankOutlined />}>Apply</Button></Col>
-                                </Row>
-                            </Col>
-                        </Row>
-                    </Card>
+                    <AdminFilterCard
+                        title="Manage institution records"
+                        description="Maintain school profiles before assigning HEI accounts and tracking research ownership."
+                        controls={(
+                            <Row gutter={[12, 12]}>
+                                <Col xs={24} md={18}>
+                                    <Input
+                                        size="large"
+                                        aria-label="Search institutions by name or acronym"
+                                        value={search}
+                                        placeholder="Search by name or acronym"
+                                        prefix={<SearchOutlined />}
+                                        onChange={(event) => setSearch(event.target.value)}
+                                        onPressEnter={applyFilter}
+                                    />
+                                </Col>
+                                <Col xs={24} md={6}>
+                                    <Button size="large" block type="primary" onClick={applyFilter} icon={<BankOutlined />}>
+                                        Apply
+                                    </Button>
+                                </Col>
+                            </Row>
+                        )}
+                    />
 
-                    <Card className="admin-dashboard-shell" bordered={false}>
+                    <AdminTableCard summary={`${institutions.total} institution${institutions.total === 1 ? '' : 's'} found`}>
                         <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: institutions.current_page, pageSize: institutions.per_page, total: institutions.total, onChange: (page) => router.get(route('admin.institutions.index'), { search, page }, { preserveState: true, replace: true }) }} scroll={{ x: 860 }} locale={{ emptyText: 'No institutions matched your search.' }} />
-                    </Card>
+                    </AdminTableCard>
             </div>
         </AuthenticatedLayout>
     );

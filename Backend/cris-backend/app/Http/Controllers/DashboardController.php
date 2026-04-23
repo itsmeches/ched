@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ResearchProposal;
 use App\Models\User;
+use App\Models\EditPermissionRequest;
 use App\Models\Institution;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -91,9 +92,18 @@ class DashboardController extends Controller
             ->limit(10)
             ->get(['id', 'title', 'authors', 'year', 'school', 'status', 'submitted_by', 'institution_id', 'created_at']);
 
+        $editRequests = EditPermissionRequest::with([
+                'requester:id,name',
+                'proposal:id,title',
+            ])
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
         return Inertia::render('Dashboard/CHED', [
-            'stats'     => $stats,
-            'forReview' => $forReview,
+            'stats'        => $stats,
+            'forReview'    => $forReview,
+            'editRequests' => $editRequests,
         ]);
     }
 

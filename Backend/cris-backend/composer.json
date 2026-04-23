@@ -35,6 +35,9 @@
         }
     },
     "scripts": {
+        "test:hardening": [
+            "@php artisan test --testdox --group=authorization-hardening"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

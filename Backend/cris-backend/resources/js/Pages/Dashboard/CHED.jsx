@@ -1,8 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
-import { Alert, Button, Card, Col, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, InboxOutlined, StopOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Col, Popconfirm, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
+import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, InboxOutlined, KeyOutlined, StopOutlined } from '@ant-design/icons';
 
 const statItems = [
     { key: 'pending', label: 'Pending Review', color: '#d97706', icon: <ClockCircleOutlined /> },
@@ -11,7 +11,7 @@ const statItems = [
     { key: 'total', label: 'Total Papers', color: '#0033a0', icon: <InboxOutlined /> },
 ];
 
-export default function CHEDDashboard({ stats, forReview }) {
+export default function CHEDDashboard({ stats, forReview, editRequests }) {
     const pendingColumns = [
         {
             title: 'Title',
@@ -124,6 +124,78 @@ export default function CHEDDashboard({ stats, forReview }) {
                             />
                         )}
                     </Card>
+
+                    {editRequests?.length > 0 && (
+                        <Card
+                            className="admin-dashboard-shell"
+                            bordered={false}
+                            title={
+                                <Space>
+                                    <KeyOutlined style={{ color: '#d97706' }} />
+                                    <span>Edit Permission Requests</span>
+                                    <Tag color="orange">{editRequests.length}</Tag>
+                                </Space>
+                            }
+                        >
+                            <Space direction="vertical" style={{ width: '100%' }} size={10}>
+                                {editRequests.map((req) => (
+                                    <div
+                                        key={req.id}
+                                        className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-amber-50/50 px-4 py-3"
+                                    >
+                                        <div className="min-w-0">
+                                            <Link href={route('research.show', req.proposal?.id)}>
+                                                <Typography.Text strong style={{ color: '#0033a0' }}>
+                                                    {req.proposal?.title ?? 'Unknown proposal'}
+                                                </Typography.Text>
+                                            </Link>
+                                            <Typography.Text
+                                                type="secondary"
+                                                style={{ display: 'block', fontSize: 13, marginTop: 2 }}
+                                            >
+                                                Requested by {req.requester?.name}
+                                                {req.reason ? ` — ${req.reason}` : ''}
+                                            </Typography.Text>
+                                        </div>
+                                        <Space>
+                                            <Popconfirm
+                                                title="Approve this edit request?"
+                                                description="The HEI will be able to edit this submission once."
+                                                okText="Approve"
+                                                onConfirm={() =>
+                                                    router.post(
+                                                        route('research.edit-permission.decide', {
+                                                            proposal: req.proposal?.id,
+                                                            editRequest: req.id,
+                                                        }),
+                                                        { decision: 'approved' },
+                                                    )
+                                                }
+                                            >
+                                                <Button type="primary" size="small">Approve</Button>
+                                            </Popconfirm>
+                                            <Popconfirm
+                                                title="Deny this edit request?"
+                                                okText="Deny"
+                                                okButtonProps={{ danger: true }}
+                                                onConfirm={() =>
+                                                    router.post(
+                                                        route('research.edit-permission.decide', {
+                                                            proposal: req.proposal?.id,
+                                                            editRequest: req.id,
+                                                        }),
+                                                        { decision: 'denied' },
+                                                    )
+                                                }
+                                            >
+                                                <Button danger size="small">Deny</Button>
+                                            </Popconfirm>
+                                        </Space>
+                                    </div>
+                                ))}
+                            </Space>
+                        </Card>
+                    )}
 
             </div>
         </AuthenticatedLayout>

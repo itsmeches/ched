@@ -31,8 +31,12 @@ class ResearchProposalPolicy
             return true;
         }
 
-        return $proposal->submitted_by === $user->id
-            && $proposal->isEditable();
+        if ($proposal->submitted_by !== $user->id) {
+            return false;
+        }
+
+        // isEditable() now also checks for an approved edit permission
+        return $proposal->isEditable();
     }
 
     public function delete(User $user, ResearchProposal $proposal): bool

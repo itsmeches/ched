@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreResearchProposalRequest;
 use App\Http\Requests\UpdateResearchProposalRequest;
+use App\Models\EditPermissionRequest;
 use App\Models\Keyword;
 use App\Models\ResearchProposal;
 use App\Models\ResearchProposalHistory;
@@ -186,11 +187,31 @@ class ResearchProposalController extends Controller
 
         $proposal->load(['submitter:id,name', 'viewer:id,name', 'reviewer:id,name', 'approver:id,name', 'institution:id,name']);
 
+        // For HEI: their latest edit permission request on this proposal
+        $editPermission = null;
+        if ($user?->isHEI() && $proposal->submitted_by === $user->id) {
+            $editPermission = $proposal->editPermissionRequests()
+                ->where('requested_by', $user->id)
+                ->latest()
+                ->first();
+        }
+
+        // For CHED / Super Admin: pending requests awaiting decision
+        $pendingEditRequests = null;
+        if ($user?->isCHED() || $user?->isSuperAdmin()) {
+            $pendingEditRequests = $proposal->editPermissionRequests()
+                ->where('status', 'pending')
+                ->with('requester:id,name')
+                ->get();
+        }
+
         return Inertia::render('Research/Show', [
-            'proposal' => $proposal,
-            'canEdit'  => $user?->can('update', $proposal) ?? false,
-            'canReview' => $user?->can('review', $proposal) ?? false,
-            'canDelete' => $user?->can('delete', $proposal) ?? false,
+            'proposal'            => $proposal,
+            'canEdit'             => $user?->can('update', $proposal) ?? false,
+            'canReview'           => $user?->can('review', $proposal) ?? false,
+            'canDelete'           => $user?->can('delete', $proposal) ?? false,
+            'editPermission'      => $editPermission,
+            'pendingEditRequests' => $pendingEditRequests,
         ]);
     }
 
@@ -263,6 +284,12 @@ class ResearchProposalController extends Controller
 
         $newValues = $this->trackedValues($proposal->fresh());
         $this->logHistory($proposal, $request->user()->id, 'updated', $oldValues, $newValues);
+
+        // Consume the approved edit permission so the lock re-engages after this edit
+        $proposal->editPermissionRequests()
+            ->where('requested_by', $request->user()->id)
+            ->where('status', 'approved')
+            ->delete();
 
         return redirect()->route('research.show', ['proposal' => $proposal->id])
             ->with('success', 'Research paper updated.');

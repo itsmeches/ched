@@ -1,7 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminFilterCard from '@/Components/Admin/AdminFilterCard';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
+import AdminTableCard from '@/Components/Admin/AdminTableCard';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Card, Col, Input, Modal, Row, Space, Table, Tag, Tooltip, Typography, message } from 'antd';
+import { Alert, Button, Col, Input, Modal, Row, Space, Table, Tag, Tooltip, Typography, message } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, TagsOutlined } from '@ant-design/icons';
 
 export default function KeywordsIndex({ keywords, filters }) {
@@ -136,10 +139,14 @@ export default function KeywordsIndex({ keywords, filters }) {
     return (
         <AuthenticatedLayout
             header={(
-                <div className="flex items-center justify-between gap-4">
-                    <h2 className="text-xl font-semibold text-slate-900">Keyword Management</h2>
-                    <Button size="large" type="primary" icon={<PlusOutlined />} onClick={openCreate}>Add Keyword</Button>
-                </div>
+                <AdminPageHeader
+                    title="Keyword Management"
+                    actions={(
+                        <Button size="large" type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+                            Add Keyword
+                        </Button>
+                    )}
+                />
             )}
         >
             <Head title="Keywords" />
@@ -148,36 +155,32 @@ export default function KeywordsIndex({ keywords, filters }) {
                 {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                 {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
-                <Card className="admin-dashboard-shell" bordered={false}>
-                    <Row justify="space-between" align="middle" gutter={[16, 16]}>
-                        <Col xs={24} xl={12}>
-                            <Space direction="vertical" size={4}>
-                                <Typography.Title level={4} style={{ margin: 0 }}>Manage keyword catalog</Typography.Title>
-                                <Typography.Text type="secondary">Add official keywords used by researchers when tagging papers.</Typography.Text>
-                            </Space>
-                        </Col>
-                        <Col xs={24} xl={12}>
-                            <Row gutter={[12, 12]}>
-                                <Col xs={24} md={18}>
-                                    <Input
-                                        size="large"
-                                        aria-label="Search keywords"
-                                        value={search}
-                                        placeholder="Search keyword"
-                                        prefix={<SearchOutlined />}
-                                        onChange={(event) => setSearch(event.target.value)}
-                                        onPressEnter={applyFilter}
-                                    />
-                                </Col>
-                                <Col xs={24} md={6}>
-                                    <Button size="large" block type="primary" onClick={applyFilter} icon={<TagsOutlined />}>Apply</Button>
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                </Card>
+                <AdminFilterCard
+                    title="Manage keyword catalog"
+                    description="Add official keywords used by researchers when tagging papers."
+                    controls={(
+                        <Row gutter={[12, 12]}>
+                            <Col xs={24} md={18}>
+                                <Input
+                                    size="large"
+                                    aria-label="Search keywords"
+                                    value={search}
+                                    placeholder="Search keyword"
+                                    prefix={<SearchOutlined />}
+                                    onChange={(event) => setSearch(event.target.value)}
+                                    onPressEnter={applyFilter}
+                                />
+                            </Col>
+                            <Col xs={24} md={6}>
+                                <Button size="large" block type="primary" onClick={applyFilter} icon={<TagsOutlined />}>
+                                    Apply
+                                </Button>
+                            </Col>
+                        </Row>
+                    )}
+                />
 
-                <Card className="admin-dashboard-shell" bordered={false}>
+                <AdminTableCard summary={`${keywords.total} keyword${keywords.total === 1 ? '' : 's'} in catalog`}>
                     <Table
                         rowKey="id"
                         columns={columns}
@@ -191,7 +194,7 @@ export default function KeywordsIndex({ keywords, filters }) {
                         scroll={{ x: 720 }}
                         locale={{ emptyText: 'No keywords matched your search.' }}
                     />
-                </Card>
+                </AdminTableCard>
             </div>
 
             <Modal
