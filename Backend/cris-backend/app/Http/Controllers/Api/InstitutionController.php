@@ -5,15 +5,26 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Institution;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class InstitutionController extends Controller
 {
     // List all institutions (SuperAdmin/CHED only)
     public function index(Request $request)
     {
-        $institutions = Institution::withCount(['users', 'proposals'])
-            ->orderBy('name')
-            ->paginate(10);
+        $this->authorize('viewAny', Institution::class);
+
+        $perPage = min(max((int) $request->integer('per_page', 10), 1), 100);
+        $cacheKey = $this->institutionIndexCacheKey($request, $perPage);
+
+        $institutions = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($perPage) {
+            return Institution::query()
+                ->select(['id', 'name', 'code', 'address', 'contact_email', 'contact_phone', 'created_at', 'updated_at'])
+                ->withCount(['users', 'proposals'])
+                ->orderBy('name')
+                ->paginate($perPage)
+                ->toArray();
+        });
 
         return response()->json($institutions);
     }
@@ -21,9 +32,7 @@ class InstitutionController extends Controller
     // Create institution (SuperAdmin only)
     public function store(Request $request)
     {
-        if (!$request->user()->isSuperAdmin()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        $this->authorize('create', Institution::class);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -36,6 +45,7 @@ class InstitutionController extends Controller
         ]);
 
         $institution = Institution::create($validated);
+        $this->bumpInstitutionIndexCacheVersion();
 
         return response()->json([
             'message' => 'Institution created',
@@ -46,15 +56,15 @@ class InstitutionController extends Controller
     // View single institution
     public function show(Institution $institution)
     {
+        $this->authorize('view', $institution);
+
         return response()->json($institution->load(['users', 'proposals']));
     }
 
     // Update institution (SuperAdmin only)
     public function update(Request $request, Institution $institution)
     {
-        if (!$request->user()->isSuperAdmin()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        $this->authorize('update', $institution);
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -67,6 +77,7 @@ class InstitutionController extends Controller
         ]);
 
         $institution->update($validated);
+        $this->bumpInstitutionIndexCacheVersion();
 
         return response()->json([
             'message' => 'Institution updated',
@@ -77,12 +88,28 @@ class InstitutionController extends Controller
     // Delete institution (SuperAdmin only)
     public function destroy(Request $request, Institution $institution)
     {
-        if (!$request->user()->isSuperAdmin()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        $this->authorize('delete', $institution);
 
         $institution->delete();
+        $this->bumpInstitutionIndexCacheVersion();
 
         return response()->json(['message' => 'Institution deleted']);
+    }
+
+    private function institutionIndexCacheKey(Request $request, int $perPage): string
+    {
+        $version = (int) Cache::get('institutions:index:version', 1);
+        $page = max((int) $request->integer('page', 1), 1);
+
+        return "institutions:index:v{$version}:page:{$page}:per_page:{$perPage}";
+    }
+
+    private function bumpInstitutionIndexCacheVersion(): void
+    {
+        if (! Cache::has('institutions:index:version')) {
+            Cache::forever('institutions:index:version', 1);
+        }
+
+        Cache::increment('institutions:index:version');
     }
 }

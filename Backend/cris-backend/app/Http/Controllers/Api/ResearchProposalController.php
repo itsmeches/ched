@@ -6,25 +6,54 @@ use App\Http\Controllers\Controller;
 use App\Models\Keyword;
 use App\Models\ResearchProposal;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class ResearchProposalController extends Controller
 {
     // HEI: List own proposals
     public function index(Request $request)
     {
+        $this->authorize('viewAny', ResearchProposal::class);
+
         $user = $request->user();
+        $perPage = min(max((int) $request->integer('per_page', 10), 1), 100);
+        $selectColumns = [
+            'id',
+            'title',
+            'authors',
+            'co_authors',
+            'year',
+            'school',
+            'abstract',
+            'category',
+            'keywords',
+            'status',
+            'comments',
+            'institution_id',
+            'submitted_by',
+            'reviewed_by',
+            'created_at',
+            'updated_at',
+        ];
         
         if ($user->isSuperAdmin() || $user->isCHED()) {
             // Admin/CHED can see all proposals
-            $proposals = ResearchProposal::with(['institution', 'submitter'])
+            $proposals = ResearchProposal::query()
+                ->select($selectColumns)
+                ->with([
+                    'institution:id,name,code',
+                    'submitter:id,name,email',
+                ])
                 ->orderBy('created_at', 'desc')
-                ->paginate(10);
+                ->paginate($perPage);
         } else {
             // HEI sees only their own
-            $proposals = ResearchProposal::with(['institution'])
+            $proposals = ResearchProposal::query()
+                ->select($selectColumns)
+                ->with(['institution:id,name,code'])
                 ->where('submitted_by', $user->id)
                 ->orderBy('created_at', 'desc')
-                ->paginate(10);
+                ->paginate($perPage);
         }
         
         return response()->json($proposals);
@@ -33,13 +62,25 @@ class ResearchProposalController extends Controller
     // HEI: Create proposal
     public function store(Request $request)
     {
+        $this->authorize('create', ResearchProposal::class);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'abstract' => 'required|string',
-            'researchers' => 'nullable|string',
+            'authors' => 'nullable|string|max:500',
+            'researchers' => 'nullable|string|max:500',
+            'co_authors' => 'nullable|string|max:500',
+            'year' => 'nullable|integer|min:1900|max:2100',
+            'school' => 'nullable|string|max:255',
             'category' => 'required|string',
             'keywords' => 'nullable|string',
         ]);
+
+        if (! array_key_exists('authors', $validated) && array_key_exists('researchers', $validated)) {
+            $validated['authors'] = $validated['researchers'];
+        }
+
+        unset($validated['researchers']);
 
         $normalizedKeywords = $this->parseKeywords($validated['keywords'] ?? null);
         $validated['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
@@ -62,27 +103,39 @@ class ResearchProposalController extends Controller
     // View single proposal
     public function show(ResearchProposal $proposal)
     {
+        $this->authorize('view', $proposal);
+
         return response()->json($proposal->load(['institution', 'submitter', 'reviewer']));
     }
 
     // HEI: Update own proposal while pending
     public function update(Request $request, ResearchProposal $proposal)
     {
-        if ($request->user()->isHEI() && $proposal->submitted_by !== $request->user()->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        $this->authorize('update', $proposal);
 
         if ($proposal->status !== 'pending') {
-            return response()->json(['error' => 'Cannot update proposal in current status'], 400);
+            throw ValidationException::withMessages([
+                'proposal' => ['Cannot update proposal in current status.'],
+            ]);
         }
 
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'abstract' => 'sometimes|string',
-            'researchers' => 'nullable|string',
+            'authors' => 'sometimes|nullable|string|max:500',
+            'researchers' => 'sometimes|nullable|string|max:500',
+            'co_authors' => 'sometimes|nullable|string|max:500',
+            'year' => 'sometimes|nullable|integer|min:1900|max:2100',
+            'school' => 'sometimes|nullable|string|max:255',
             'category' => 'sometimes|string',
             'keywords' => 'nullable|string',
         ]);
+
+        if (! array_key_exists('authors', $validated) && array_key_exists('researchers', $validated)) {
+            $validated['authors'] = $validated['researchers'];
+        }
+
+        unset($validated['researchers']);
 
         $normalizedKeywords = $this->parseKeywords($validated['keywords'] ?? null);
 
@@ -105,6 +158,14 @@ class ResearchProposalController extends Controller
     // CHED/SuperAdmin: Review proposal
     public function review(Request $request, ResearchProposal $proposal)
     {
+        $this->authorize('review', $proposal);
+
+        if (! $proposal->isPending()) {
+            throw ValidationException::withMessages([
+                'proposal' => ['Only pending proposals can be reviewed.'],
+            ]);
+        }
+
         $validated = $request->validate([
             'status' => 'required|in:approved,rejected',
             'comments' => 'nullable|string',
@@ -126,12 +187,12 @@ class ResearchProposalController extends Controller
     // HEI: Delete own pending proposal
     public function destroy(Request $request, ResearchProposal $proposal)
     {
-        if ($proposal->submitted_by !== $request->user()->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        $this->authorize('delete', $proposal);
 
         if ($proposal->status !== 'pending') {
-            return response()->json(['error' => 'Can only delete pending proposals'], 400);
+            throw ValidationException::withMessages([
+                'proposal' => ['Only pending proposals can be deleted.'],
+            ]);
         }
 
         $proposal->delete();

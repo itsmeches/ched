@@ -3,7 +3,9 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "build:zap": "vite build && node scripts/sanitize-zap-assets.js",
+        "zap:proxy": "node scripts/zap-proxy.js"
     },
     "dependencies": {
         "@ant-design/icons": "^6.1.1",
@@ -11,7 +13,8 @@
         "@inertiajs/react": "^2.0.0",
         "antd": "^6.3.6",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "react-dom": "^18.2.0",
+        "ziggy-js": "^2.6.2"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.3",

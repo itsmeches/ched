@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\ResearchProposalController;
 use App\Http\Controllers\Api\InstitutionController;
 
 // Public routes
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:api-login');
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -28,4 +28,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/institutions/{institution}', [InstitutionController::class, 'show']);
     Route::put('/institutions/{institution}', [InstitutionController::class, 'update']);
     Route::delete('/institutions/{institution}', [InstitutionController::class, 'destroy']);
+});
+
+Route::fallback(function () {
+    return response()->json([
+        'message' => 'The requested resource was not found.',
+        'status' => 404,
+    ], 404);
 });

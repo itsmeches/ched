@@ -48,6 +48,6 @@ class ResearchProposalPolicy
 
     public function review(User $user, ResearchProposal $proposal): bool
     {
-        return $user->isCHED();
+        return $user->isCHED() || $user->isSuperAdmin();
     }
 }

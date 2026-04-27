@@ -10,6 +10,12 @@ use App\Http\Controllers\Admin\InstitutionManagementController;
 use App\Http\Controllers\Admin\KeywordManagementController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/robots.txt', function () {
+    return response("User-agent: *\nDisallow:", 200, [
+        'Content-Type' => 'text/plain; charset=UTF-8',
+    ]);
+});
+
 Route::middleware('throttle:60,1')->group(function () {
     Route::get('/', [ResearchProposalController::class, 'publicIndex'])
         ->name('research.public.index');
@@ -45,7 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ── CHED ─────────────────────────────────────────────────────────────────
-    Route::middleware('role:ched')->group(function () {
+    Route::middleware('role:ched,super_admin')->group(function () {
         Route::get('/ched/dashboard', [DashboardController::class, 'ched'])->name('ched.dashboard');
         Route::get('/ched/decisions', [DashboardController::class, 'chedDecisions'])->name('ched.decisions');
 

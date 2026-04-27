@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "dedoc/scramble": "^0.13",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
@@ -35,6 +36,15 @@
         }
     },
     "scripts": {
+        "serve:zap-backend": [
+            "@php artisan serve --host=127.0.0.1 --port=8001"
+        ],
+        "serve:zap": [
+            "@php -d expose_php=0 -S 127.0.0.1:8000 server.php"
+        ],
+        "serve:secure": [
+            "@php -d expose_php=0 -S 127.0.0.1:8000 -t public server.php"
+        ],
         "test:hardening": [
             "@php artisan test --testdox --group=authorization-hardening"
         ],
