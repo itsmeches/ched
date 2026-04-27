@@ -78,7 +78,7 @@ The work completed focused on five outcomes:
 ### 3.3 Build and Dependency Tools
 
 1. Composer: PHP dependency manager. Installs Laravel packages and backend libraries from composer.json.
-2. npm: JavaScript dependency manager. Installs frontend/build dependencies from package.json.
+2. npm: JavaScript dependency manager. Installs JavaScript and asset-build dependencies from package.json.
 3. Vite: Modern build tool and dev server for frontend assets.
 4. Artisan: Laravel command-line interface for migrations, route inspection, seeding, caching, and maintenance tasks.
 

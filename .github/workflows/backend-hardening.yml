@@ -1,0 +1,45 @@
+name: Backend Hardening
+
+on:
+  pull_request:
+    paths:
+      - "Backend/cris-backend/**"
+      - ".github/workflows/backend-hardening.yml"
+  push:
+    branches: [main, master, develop]
+    paths:
+      - "Backend/cris-backend/**"
+      - ".github/workflows/backend-hardening.yml"
+
+jobs:
+  authorization-hardening:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend/cris-backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+
+      - name: Copy env
+        run: cp .env.example .env
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: App key
+        run: php artisan key:generate
+
+      - name: Run authorization hardening tests
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+        run: composer run test:hardening

@@ -37,13 +37,9 @@ Your Laravel + React stack has been successfully configured to use **Inertia.js*
 - `vite.config.js` - Updated to use React plugin
 - `routes/web.php` - Converted to Inertia routes
 
-### Frontend (React - Already Configured)
+### Frontend (Integrated with Laravel)
 
-The frontend React app will now communicate with the backend through Inertia instead of direct API calls.
-
-**Package Updated:**
-
-- `Frontend/package.json` - Added `@inertiajs/react`
+The React frontend now lives directly inside the Laravel application under `Backend/cris-backend/resources/js` and communicates through Inertia instead of a separate SPA-to-API setup.
 
 ## Directory Structure
 
@@ -88,13 +84,6 @@ npm install
 composer update
 ```
 
-**Frontend:**
-
-```bash
-cd Frontend
-npm install
-```
-
 ### 2. Run Development Servers
 
 **Backend (in Backend/cris-backend):**
@@ -109,8 +98,7 @@ In another terminal:
 php artisan serve
 ```
 
-**Frontend:**
-Currently, you can keep the frontend in sync with the backend, or merge them since Inertia handles the UI.
+The UI is served by the Laravel/Inertia app, so no separate frontend workspace is required.
 
 ### 3. Create Database & Migrate
 

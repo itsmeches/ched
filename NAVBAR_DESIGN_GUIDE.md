@@ -11,12 +11,12 @@ Your CRIS system now uses a unified, modern navbar design across all pages. This
 - **Old**: Basic navbar with only Dashboard link visible
 - **New**: Full-featured `Navbar.jsx` component with role-based navigation
 
-### 2. **Frontend (React App)**
+### 2. **Application Layout**
 
-- **Old**: Sidebar layout with dark blue theme
-- **New**: Clean top navbar matching the new CRIS branding
+- **Old**: Mixed sidebar/navbar layouts
+- **New**: Clean top navbar matching the current CRIS branding
 
-### 3. **Both Layouts**
+### 3. **Shared Design Direction**
 
 - Updated to use modern Tailwind styling (slate/teal color scheme)
 - Consistent with CRIS branding (SVG logo, teal accent color)
@@ -97,14 +97,6 @@ Displays different items based on user role:
    - Clean, minimal header section
    - Better spacing with max-width container
 
-### Frontend
-
-3. **[src/components/Layout.jsx](../../../Frontend/src/components/Layout.jsx)** _(Updated)_
-   - Converted from sidebar to top navbar
-   - Same role-based navigation as backend
-   - Uses React Router (`Link`, `useLocation`)
-   - State management for mobile menu and profile dropdown
-
 ---
 
 ## Design System
@@ -140,7 +132,7 @@ Displays different items based on user role:
 
 ## User Experience Improvements
 
-✅ **Consistency** - Same navbar design across frontend and backend
+✅ **Consistency** - Same navbar design across the active application
 ✅ **Clarity** - Role-based navigation shows only relevant items
 ✅ **Responsive** - Works perfectly on mobile, tablet, desktop
 ✅ **Branding** - CRIS SVG logo, modern color scheme
@@ -159,17 +151,6 @@ The `Navbar.jsx` component automatically:
 - Determines role-based menu items
 - Generates correct routes using Laravel's `route()` helper
 - Handles active link highlighting
-
-### Frontend (React Router)
-
-The updated `Layout.jsx`:
-
-- Uses React Router for navigation (no Inertia)
-- Compares current location with nav item paths
-- Dropdown state managed with local React state
-- Mobile menu closes on route change
-
----
 
 ## How to Extend
 
@@ -214,4 +195,3 @@ Change `md:` class to `lg:` (or `sm:`) to show/hide mobile menu at different scr
 - CRIS logo: `/public/cris-mark.svg`
 - Backend navbar: [Components/Navbar.jsx](../Components/Navbar.jsx)
 - Backend layout: [Layouts/AuthenticatedLayout.jsx](../Layouts/AuthenticatedLayout.jsx)
-- Frontend navbar: [Frontend/src/components/Layout.jsx](../../../Frontend/src/components/Layout.jsx)
