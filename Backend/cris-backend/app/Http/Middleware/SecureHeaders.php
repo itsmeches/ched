@@ -17,6 +17,14 @@ class SecureHeaders
         $response = $next($request);
 
         $nonce = Vite::cspNonce();
+        $isLocal = app()->environment('local');
+        $viteOrigins = " http://127.0.0.1:5173 http://localhost:5173";
+        $viteConnect = " ws://127.0.0.1:5173 ws://localhost:5173";
+        $localStyleUnsafeInline = $isLocal ? " 'unsafe-inline'" : '';
+
+        $scriptSrc = "'self' 'nonce-{$nonce}'" . ($isLocal ? $viteOrigins : '');
+        $styleSrc = "'self' 'nonce-{$nonce}' https://fonts.bunny.net{$localStyleUnsafeInline}" . ($isLocal ? $viteOrigins : '');
+        $connectSrc = "'self'" . ($isLocal ? $viteOrigins . $viteConnect : '');
 
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
@@ -27,7 +35,7 @@ class SecureHeaders
         // Strict CSP baseline without unsafe-inline; nonce enables framework-managed inline tags.
         $response->headers->set(
             'Content-Security-Policy',
-            "default-src 'self'; script-src 'self' 'nonce-{$nonce}'; style-src 'self' 'nonce-{$nonce}' https://fonts.bunny.net; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.bunny.net data:; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+            "default-src 'self'; script-src {$scriptSrc}; style-src {$styleSrc}; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.bunny.net data:; img-src 'self' data: blob:; connect-src {$connectSrc}; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
         );
 
         if ($request->isSecure()) {

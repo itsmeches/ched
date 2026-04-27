@@ -3,7 +3,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build",
+        "build": "vite build && node scripts/sanitize-zap-assets.js",
         "build:zap": "vite build && node scripts/sanitize-zap-assets.js",
         "zap:proxy": "node scripts/zap-proxy.js"
     },
