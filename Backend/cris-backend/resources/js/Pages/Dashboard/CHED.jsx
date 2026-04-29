@@ -1,8 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
-import { Alert, Button, Card, Col, Popconfirm, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, InboxOutlined, KeyOutlined, StopOutlined } from '@ant-design/icons';
+import { StatusBadge } from '@/Components/StatusBadge';
+import { useState } from 'react';
 
 const statItems = [
     { key: 'pending', label: 'Pending Review', color: '#d97706', icon: <ClockCircleOutlined /> },
@@ -11,7 +13,69 @@ const statItems = [
     { key: 'total', label: 'Total Papers', color: '#0033a0', icon: <InboxOutlined /> },
 ];
 
-export default function CHEDDashboard({ stats, forReview, editRequests }) {
+export default function CHEDDashboard({ stats, stageCounts = {}, forReview, editRequests, notifications = [] }) {
+    const DEFAULT_REJECT_REMARK = 'CHED final review: Please revise and resubmit with required corrections.';
+
+    const [rejectModal, setRejectModal] = useState({
+        open: false,
+        proposalId: null,
+        comments: '',
+        starter: '',
+        error: '',
+        loading: false,
+    });
+
+    function openRejectModal(proposalId) {
+        setRejectModal({
+            open: true,
+            proposalId,
+            comments: DEFAULT_REJECT_REMARK,
+            starter: DEFAULT_REJECT_REMARK,
+            error: '',
+            loading: false,
+        });
+    }
+
+    function closeRejectModal() {
+        setRejectModal({
+            open: false,
+            proposalId: null,
+            comments: '',
+            starter: '',
+            error: '',
+            loading: false,
+        });
+    }
+
+    function submitReject() {
+        const remarks = String(rejectModal.comments || '').trim();
+
+        if (!remarks) {
+            setRejectModal((prev) => ({ ...prev, error: 'Remarks are required when rejecting a submission.' }));
+            return;
+        }
+
+        if (remarks === String(rejectModal.starter || '').trim()) {
+            setRejectModal((prev) => ({ ...prev, error: 'Please edit the default remarks before submitting rejection.' }));
+            return;
+        }
+
+        setRejectModal((prev) => ({ ...prev, loading: true, error: '' }));
+
+        router.post(route('research.review', rejectModal.proposalId), {
+            action: 'reject',
+            comments: remarks,
+        }, {
+            onSuccess: () => closeRejectModal(),
+            onError: () => {
+                setRejectModal((prev) => ({ ...prev, error: 'Unable to submit rejection. Please try again.' }));
+            },
+            onFinish: () => {
+                setRejectModal((prev) => ({ ...prev, loading: false }));
+            },
+        });
+    }
+
     const pendingColumns = [
         {
             title: 'Title',
@@ -24,13 +88,37 @@ export default function CHEDDashboard({ stats, forReview, editRequests }) {
             key: 'institution',
             render: (_, row) => row.institution?.name ?? 'Unknown institution',
         },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (value) => <StatusBadge status={value} />,
+        },
+        {
+            title: 'Remarks',
+            dataIndex: 'remarks',
+            key: 'remarks',
+            render: (value) => value || '—',
+        },
         { title: 'Year', dataIndex: 'year', key: 'year', width: 100 },
         {
             title: 'Submitted',
-            dataIndex: 'created_at',
-            key: 'created_at',
+            dataIndex: 'submitted_at',
+            key: 'submitted_at',
             width: 150,
-            render: (value) => formatDate(value),
+            render: (_, row) => formatDate(row.submitted_at || row.created_at),
+        },
+        {
+            title: 'Action',
+            key: 'action',
+            render: (_, row) => (
+                <Space>
+                    <Popconfirm title="Final approve this submission?" okText="Approve" onConfirm={() => router.post(route('research.review', row.id), { action: 'approve' })}>
+                        <Button type="primary" size="small">Approve</Button>
+                    </Popconfirm>
+                    <Button danger size="small" onClick={() => openRejectModal(row.id)}>Reject</Button>
+                </Space>
+            ),
         },
     ];
 
@@ -56,7 +144,7 @@ export default function CHEDDashboard({ stats, forReview, editRequests }) {
                             </Col>
                             <Col xs={24} lg={8}>
                                 <Space direction="vertical" style={{ width: '100%' }} size={12}>
-                                    <Link href={route('research.index', { status: 'pending' })}>
+                                    <Link href={route('research.index', { status: 'under_review_ched' })}>
                                         <Button type="primary" size="large" block icon={<FileSearchOutlined />}>
                                             Open Review Queue
                                         </Button>
@@ -86,6 +174,30 @@ export default function CHEDDashboard({ stats, forReview, editRequests }) {
                         ))}
                     </Row>
 
+                    <Card className="admin-dashboard-shell" bordered={false} title="Quick Filters">
+                        <Space wrap>
+                            <Link href={route('research.index', { status: 'under_review_ched' })}>
+                                <Button>CHED Final Queue</Button>
+                            </Link>
+                            <Link href={route('research.index', { status: 'approved' })}>
+                                <Button>Approved</Button>
+                            </Link>
+                            <Link href={route('research.index', { status: 'rejected' })}>
+                                <Button>Rejected</Button>
+                            </Link>
+                        </Space>
+                    </Card>
+
+                    <Card className="admin-dashboard-shell" bordered={false} title="Stage Counters">
+                        <Space wrap>
+                            <Tag color="gold">Faculty: {stageCounts.under_review_faculty ?? 0}</Tag>
+                            <Tag color="blue">HEI: {stageCounts.under_review_hei ?? 0}</Tag>
+                            <Tag color="cyan">CHED: {stageCounts.under_review_ched ?? 0}</Tag>
+                            <Tag color="green">Approved: {stageCounts.approved ?? 0}</Tag>
+                            <Tag color="red">Rejected: {stageCounts.rejected ?? 0}</Tag>
+                        </Space>
+                    </Card>
+
                     <Row gutter={[16, 16]}>
                         <Col xs={24} xl={12}>
                             <Card className="admin-dashboard-shell" title="Review Performance" bordered={false}>
@@ -102,7 +214,7 @@ export default function CHEDDashboard({ stats, forReview, editRequests }) {
                             <Card className="admin-dashboard-shell" title="Queue Snapshot" bordered={false}>
                                 <Space direction="vertical" style={{ width: '100%' }} size={14}>
                                     <Statistic title="Papers awaiting review" value={stats.pending} prefix={<ClockCircleOutlined style={{ color: '#d97706' }} />} />
-                                    <Link href={route('research.index', { status: 'pending' })}>
+                                    <Link href={route('research.index', { status: 'under_review_ched' })}>
                                         <Button type="primary" block icon={<FileSearchOutlined />}>Open Review Queue</Button>
                                     </Link>
                                 </Space>
@@ -110,7 +222,7 @@ export default function CHEDDashboard({ stats, forReview, editRequests }) {
                         </Col>
                     </Row>
 
-                    <Card title="Needs Your Review" extra={<Link href={route('research.index', { status: 'pending' })}>View all</Link>} className="admin-dashboard-shell">
+                    <Card title="Needs Your Final Approval" extra={<Link href={route('research.index', { status: 'under_review_ched' })}>View all</Link>} className="admin-dashboard-shell">
                         {forReview.length === 0 ? (
                             <Alert type="success" showIcon message="No papers pending review. The current queue is clear." />
                         ) : (
@@ -122,6 +234,27 @@ export default function CHEDDashboard({ stats, forReview, editRequests }) {
                                 scroll={{ x: 820 }}
                                 locale={{ emptyText: 'No papers are currently waiting for review.' }}
                             />
+                        )}
+                    </Card>
+
+                    <Card title="Unread Notifications" className="admin-dashboard-shell">
+                        <div style={{ marginBottom: 12 }}>
+                            <Button size="small" onClick={() => router.post(route('notifications.read-all'))}>Mark all as read</Button>
+                        </div>
+                        {notifications.length === 0 ? (
+                            <Alert type="info" showIcon message="No new notifications." />
+                        ) : (
+                            <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                                {notifications.map((item) => (
+                                    <Alert
+                                        key={item.id}
+                                        type="info"
+                                        showIcon
+                                        message={item.message}
+                                        description={formatDate(item.created_at)}
+                                    />
+                                ))}
+                            </Space>
                         )}
                     </Card>
 
@@ -196,6 +329,25 @@ export default function CHEDDashboard({ stats, forReview, editRequests }) {
                             </Space>
                         </Card>
                     )}
+
+                    <Modal
+                        title="Reject Submission"
+                        open={rejectModal.open}
+                        onCancel={closeRejectModal}
+                        onOk={submitReject}
+                        okText="Reject"
+                        okButtonProps={{ danger: true, loading: rejectModal.loading }}
+                    >
+                        <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                            <Input.TextArea
+                                rows={4}
+                                value={rejectModal.comments}
+                                onChange={(event) => setRejectModal((prev) => ({ ...prev, comments: event.target.value, error: '' }))}
+                                placeholder="Enter rejection remarks"
+                            />
+                            {rejectModal.error && <Alert type="error" showIcon message={rejectModal.error} />}
+                        </Space>
+                    </Modal>
 
             </div>
         </AuthenticatedLayout>

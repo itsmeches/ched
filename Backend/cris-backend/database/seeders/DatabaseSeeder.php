@@ -57,6 +57,8 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'hei',
             'institution_id' => $institution1->id,
+            'created_by' => $chedUser->id,
+            'ched_id' => $chedUser->id,
         ]);
 
         // Create Research Proposals
@@ -68,7 +70,7 @@ class DatabaseSeeder extends Seeder
             'institution_id' => $institution1->id,
             'category' => 'Education',
             'keywords' => 'K-12, Education, Curriculum, CALABARZON',
-            'status' => 'pending',
+            'status' => 'under_review_ched',
             'submitted_by' => $heiUser->id,
         ]);
 
@@ -97,7 +99,7 @@ class DatabaseSeeder extends Seeder
             'institution_id' => $institution1->id,
             'category' => 'Education',
             'keywords' => 'Digital Transformation, Higher Education, Technology',
-            'status' => 'pending',
+            'status' => 'under_review_ched',
             'submitted_by' => $heiUser->id,
         ]);
     }

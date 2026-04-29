@@ -8,7 +8,9 @@ use App\Models\EditPermissionRequest;
 use App\Models\Keyword;
 use App\Models\ResearchProposal;
 use App\Models\ResearchProposalHistory;
+use App\Models\User;
 use App\Notifications\ResearchProposalReviewed;
+use App\Services\SimpleNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -71,6 +73,7 @@ class ResearchProposalController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
+        $tab = (string) $request->input('tab', '');
 
         $query = ResearchProposal::with(['submitter:id,name', 'institution:id,name'])
             ->select(['id', 'title', 'authors', 'year', 'school', 'keywords', 'status', 'institution_id', 'submitted_by', 'viewed_at', 'updated_at'])
@@ -78,26 +81,57 @@ class ResearchProposalController extends Controller
 
         $this->applySearchFilters($query, $request, includeStatus: true);
 
-        // HEI only sees own papers
-        if ($user->isHEI()) {
+        // Student: own papers only
+        if ($user->isStudent()) {
             $query->where('submitted_by', $user->id);
+        } elseif ($user->isFaculty()) {
+            // Faculty: papers from assigned students, plus revised papers this faculty previously rejected.
+            $query->where(function ($inner) use ($user) {
+                $inner->whereHas('submitter', fn ($submitter) => $submitter->where('faculty_id', $user->id))
+                    ->orWhereHas('histories', fn ($history) => $history
+                        ->where('action', 'rejected')
+                        ->where('user_id', $user->id));
+            });
+        } elseif ($user->role === \App\Models\User::ROLE_HEI) {
+            // HEI: papers linked to this HEI via direct linkage, faculty linkage, or institution fallback.
+            $query->whereHas('submitter', function ($inner) use ($user) {
+                $inner->where('hei_id', $user->id)
+                    ->orWhere('id', $user->id)
+                    ->orWhere('institution_id', $user->institution_id)
+                    ->orWhereHas('faculty', function ($faculty) use ($user) {
+                        $faculty->where('hei_id', $user->id)
+                            ->orWhere('institution_id', $user->institution_id);
+                    });
+            });
         }
 
         $editability = (string) $request->input('editability', '');
         if ($editability === 'editable') {
-            $query->where('status', ResearchProposal::STATUS_PENDING)
-                ->whereNull('viewed_at');
+            $query->where('status', ResearchProposal::STATUS_REJECTED);
         } elseif ($editability === 'locked') {
             $query->where(function ($inner) {
-                $inner->where('status', '!=', ResearchProposal::STATUS_PENDING)
+                $inner->where('status', '!=', ResearchProposal::STATUS_REJECTED)
                     ->orWhereNotNull('viewed_at');
             });
         }
 
+        if ($tab === 'queue' && ! $user->isStudent()) {
+            if ($user->isFaculty()) {
+                $query->where('status', ResearchProposal::STATUS_UNDER_REVIEW_FACULTY);
+            } elseif ($user->role === User::ROLE_HEI) {
+                $query->where('status', ResearchProposal::STATUS_UNDER_REVIEW_HEI);
+            } elseif ($user->isCHED()) {
+                $query->where('status', ResearchProposal::STATUS_UNDER_REVIEW_CHED);
+            } elseif ($user->isSuperAdmin()) {
+                $query->whereIn('status', ResearchProposal::PENDING_STATUSES);
+            }
+        }
+
         return Inertia::render('Research/Index', [
             'proposals'  => $query->paginate(15)->withQueryString(),
-            'filters'    => $request->only(['search', 'status', 'year', 'school', 'editability']),
-            'canCreate'  => $user->isHEI(),
+            'filters'    => $request->only(['search', 'status', 'year', 'school', 'editability', 'tab']),
+            'tab'        => $tab,
+            'canCreate'  => $user->isStudent(),
         ]);
     }
 
@@ -141,6 +175,12 @@ class ResearchProposalController extends Controller
 
     public function store(StoreResearchProposalRequest $request): RedirectResponse
     {
+        $guardErrors = $this->submissionGuardrailErrors($request->user());
+
+        if ($guardErrors !== []) {
+            return back()->withErrors($guardErrors)->withInput();
+        }
+
         $data = $request->validated();
         $normalizedKeywords = $this->parseKeywords($data['keywords'] ?? null);
         $data['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
@@ -155,16 +195,23 @@ class ResearchProposalController extends Controller
         $proposal = ResearchProposal::create([
             ...$data,
             'submitted_by'   => $request->user()->id,
+            'submitted_at'   => now(),
             'institution_id' => $request->user()->institution_id,
-            'status'         => ResearchProposal::STATUS_PENDING,
+            'status'         => ResearchProposal::STATUS_UNDER_REVIEW_FACULTY,
         ]);
+
+        $requestUser = $request->user();
+        SimpleNotificationService::notify(
+            $requestUser?->faculty_id,
+            "New submission '{$proposal->title}' is waiting for your review."
+        );
 
         $this->syncKeywords($proposal, $normalizedKeywords);
 
         $this->logHistory($proposal, $request->user()->id, 'created', null, $this->trackedValues($proposal));
 
         return redirect()->route('research.show', ['proposal' => $proposal->id])
-            ->with('success', 'Research paper submitted and marked as pending review.');
+            ->with('success', 'Research paper submitted for faculty review.');
     }
 
     public function show(ResearchProposal $proposal): Response
@@ -172,7 +219,7 @@ class ResearchProposalController extends Controller
         $this->authorize('view', $proposal);
         $user = request()->user();
 
-        if ($user?->isCHED() && is_null($proposal->viewed_at)) {
+        if ($user?->isCHED() && $proposal->isPendingChed() && is_null($proposal->viewed_at)) {
             // Lock HEI editing after CHED has first opened the submission.
             DB::table('research_proposals')
                 ->where('id', $proposal->id)
@@ -185,11 +232,47 @@ class ResearchProposalController extends Controller
             $proposal->refresh();
         }
 
-        $proposal->load(['submitter:id,name', 'viewer:id,name', 'reviewer:id,name', 'approver:id,name', 'institution:id,name']);
+        $proposal->load(['submitter:id,name', 'viewer:id,name', 'reviewer:id,name', 'approver:id,name', 'rejector:id,name', 'institution:id,name']);
 
-        // For HEI: their latest edit permission request on this proposal
+        $lastActionBy = $proposal->submitter?->name;
+        $lastActionAt = $proposal->submitted_at ?? $proposal->created_at;
+
+        if ($proposal->status === ResearchProposal::STATUS_APPROVED && $proposal->approver) {
+            $lastActionBy = $proposal->approver->name;
+            $lastActionAt = $proposal->approved_at ?? $proposal->reviewed_at ?? $proposal->updated_at;
+        } elseif ($proposal->status === ResearchProposal::STATUS_REJECTED && $proposal->rejector) {
+            $lastActionBy = $proposal->rejector->name;
+            $lastActionAt = $proposal->rejected_at ?? $proposal->reviewed_at ?? $proposal->updated_at;
+        } elseif ($proposal->reviewer) {
+            $lastActionBy = $proposal->reviewer->name;
+            $lastActionAt = $proposal->reviewed_at ?? $proposal->updated_at;
+        }
+
+        $proposal->setAttribute('last_action_by', $lastActionBy);
+        $proposal->setAttribute('last_action_at', $lastActionAt);
+
+        $proposal->setAttribute('current_stage', match ($proposal->status) {
+            ResearchProposal::STATUS_UNDER_REVIEW_FACULTY => 'Under Faculty Review',
+            ResearchProposal::STATUS_UNDER_REVIEW_HEI => 'Under HEI Review',
+            ResearchProposal::STATUS_UNDER_REVIEW_CHED => 'Under CHED Review',
+            ResearchProposal::STATUS_APPROVED => 'Approved',
+            ResearchProposal::STATUS_REJECTED => 'Rejected',
+            default => ucfirst(str_replace('_', ' ', (string) $proposal->status)),
+        });
+
+        $proposal->setAttribute(
+            'last_reviewer',
+            $proposal->reviewer?->name ?? $proposal->approver?->name ?? $proposal->rejector?->name,
+        );
+
+        $proposal->setAttribute(
+            'last_decision_time',
+            $proposal->approved_at ?? $proposal->rejected_at ?? $proposal->reviewed_at,
+        );
+
+        // For Student: latest edit permission request on this proposal
         $editPermission = null;
-        if ($user?->isHEI() && $proposal->submitted_by === $user->id) {
+        if ($user?->isStudent() && $proposal->submitted_by === $user->id) {
             $editPermission = $proposal->editPermissionRequests()
                 ->where('requested_by', $user->id)
                 ->latest()
@@ -295,6 +378,44 @@ class ResearchProposalController extends Controller
             ->with('success', 'Research paper updated.');
     }
 
+    public function resubmit(ResearchProposal $proposal): RedirectResponse
+    {
+        $user = request()->user();
+
+        abort_unless($user && $user->isStudent() && $proposal->submitted_by === $user->id, 403);
+
+        if ($proposal->status !== ResearchProposal::STATUS_REJECTED) {
+            return redirect()->route('research.show', ['proposal' => $proposal->id])
+                ->with('error', 'Only rejected submissions can be resubmitted.');
+        }
+
+        $proposal->update([
+            'status' => ResearchProposal::STATUS_UNDER_REVIEW_FACULTY,
+            'submitted_at' => now(),
+            'reviewed_by' => null,
+            'reviewed_at' => null,
+            'approved_by' => null,
+            'approved_at' => null,
+            'approved_by_faculty_at' => null,
+            'approved_by_hei_at' => null,
+            'approved_by_ched_at' => null,
+            'rejected_at' => null,
+            'rejected_by' => null,
+            'remarks' => null,
+            'comments' => null,
+            'viewed_by' => null,
+            'viewed_at' => null,
+        ]);
+
+        $this->logHistory($proposal, $user->id, 'resubmitted', null, [
+            'status' => $proposal->status,
+            'submitted_at' => $proposal->submitted_at,
+        ]);
+
+        return redirect()->route('research.show', ['proposal' => $proposal->id])
+            ->with('success', 'Submission resubmitted and routed back to Faculty review.');
+    }
+
     public function destroy(ResearchProposal $proposal): RedirectResponse
     {
         $this->authorize('delete', $proposal);
@@ -357,7 +478,7 @@ class ResearchProposalController extends Controller
         $proposal->keywordItems()->sync(array_values(array_unique($keywordIds)));
     }
 
-    /** CHED / Super Admin reviews a paper */
+    /** Faculty / HEI / CHED / Super Admin reviews a paper */
     public function review(Request $request, ResearchProposal $proposal): RedirectResponse
     {
         $this->authorize('review', $proposal);
@@ -368,19 +489,83 @@ class ResearchProposalController extends Controller
 
         $request->validate([
             'action'   => ['required', 'in:approve,reject'],
-            'comments' => ['nullable', 'string', 'max:2000'],
+            'comments' => ['nullable', 'string', 'max:2000', 'required_if:action,reject'],
         ]);
 
+        $nextStatus = ResearchProposal::STATUS_REJECTED;
+        $isFinalApproval = false;
+        $reviewer = $request->user();
+        $approvedByFacultyAt = $proposal->approved_by_faculty_at;
+        $approvedByHeiAt = $proposal->approved_by_hei_at;
+        $approvedByChedAt = $proposal->approved_by_ched_at;
+        $rejectedAt = null;
+        $rejectedBy = null;
+        $remarks = null;
+
+        if ($request->action === 'approve') {
+            if ($reviewer->isFaculty()) {
+                $approvedByFacultyAt = now();
+            } elseif ($reviewer->role === \App\Models\User::ROLE_HEI) {
+                $approvedByHeiAt = now();
+            } elseif ($reviewer->isCHED()) {
+                $approvedByChedAt = now();
+            }
+
+            if ($proposal->isPendingFaculty()) {
+                $nextStatus = ResearchProposal::STATUS_UNDER_REVIEW_HEI;
+            } elseif ($proposal->isPendingHei()) {
+                $nextStatus = ResearchProposal::STATUS_UNDER_REVIEW_CHED;
+            } elseif ($proposal->isPendingChed()) {
+                $nextStatus = ResearchProposal::STATUS_APPROVED;
+                $isFinalApproval = true;
+            }
+        } else {
+            $rejectedAt = now();
+            $rejectedBy = $reviewer->id;
+            $remarks = $request->comments;
+            $nextStatus = ResearchProposal::STATUS_REJECTED;
+        }
+
         $proposal->update([
-            'status'      => $request->action === 'approve'
-                ? ResearchProposal::STATUS_APPROVED
-                : ResearchProposal::STATUS_REJECTED,
+            'status'      => $nextStatus,
             'reviewed_by' => $request->user()->id,
             'reviewed_at' => now(),
-            'approved_by' => $request->action === 'approve' ? $request->user()->id : null,
-            'approved_at' => $request->action === 'approve' ? now() : null,
+            'approved_by' => $isFinalApproval ? $request->user()->id : null,
+            'approved_at' => $isFinalApproval ? now() : null,
+            'approved_by_faculty_at' => $approvedByFacultyAt,
+            'approved_by_hei_at' => $approvedByHeiAt,
+            'approved_by_ched_at' => $approvedByChedAt,
+            'rejected_at' => $rejectedAt,
+            'rejected_by' => $rejectedBy,
+            'remarks' => $remarks,
             'comments'    => $request->comments,
         ]);
+
+        $submitter = $proposal->submitter;
+
+        if ($request->action === 'approve') {
+            if ($nextStatus === ResearchProposal::STATUS_UNDER_REVIEW_HEI) {
+                SimpleNotificationService::notify(
+                    $submitter?->hei_id,
+                    "Submission '{$proposal->title}' is now awaiting HEI review."
+                );
+            } elseif ($nextStatus === ResearchProposal::STATUS_UNDER_REVIEW_CHED) {
+                SimpleNotificationService::notify(
+                    $submitter?->ched_id,
+                    "Submission '{$proposal->title}' is now awaiting CHED review."
+                );
+            } elseif ($nextStatus === ResearchProposal::STATUS_APPROVED) {
+                SimpleNotificationService::notify(
+                    $submitter?->id,
+                    "Your submission '{$proposal->title}' was approved."
+                );
+            }
+        } else {
+            SimpleNotificationService::notify(
+                $submitter?->id,
+                "Your submission '{$proposal->title}' was rejected."
+            );
+        }
 
         $this->logHistory($proposal, $request->user()->id, $request->action === 'approve' ? 'approved' : 'rejected', null, [
             'status'   => $proposal->status,
@@ -393,7 +578,15 @@ class ResearchProposalController extends Controller
             $proposal->submitter->notify(new ResearchProposalReviewed($proposal));
         }
 
-        return back()->with('success', 'Review saved.');
+        if ($request->action === 'reject') {
+            return back()->with('success', 'Submission rejected and returned to student for revision.');
+        }
+
+        if ($isFinalApproval) {
+            return back()->with('success', 'Final approval completed.');
+        }
+
+        return back()->with('success', 'Submission approved and moved to the next review stage.');
     }
 
     /** @return array<string, mixed> */
@@ -447,5 +640,45 @@ class ResearchProposalController extends Controller
             'new_values'           => $newValues,
             'performed_at'         => now(),
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function submissionGuardrailErrors(?User $user): array
+    {
+        if (! $user) {
+            return [
+                'user' => 'Unable to determine submitting account.',
+            ];
+        }
+
+        if (! $user->institution_id) {
+            return [
+                'institution_id' => 'Your account must be linked to an institution before submitting a proposal.',
+            ];
+        }
+
+        $missing = [];
+
+        if (! $user->faculty_id) {
+            $missing[] = 'faculty link';
+        }
+
+        if (! $user->hei_id) {
+            $missing[] = 'HEI link';
+        }
+
+        if (! $user->ched_id) {
+            $missing[] = 'CHED link';
+        }
+
+        if ($missing !== []) {
+            return [
+                'role_linkage' => 'Your student account is missing required role linkage: ' . implode(', ', $missing) . '.',
+            ];
+        }
+
+        return [];
     }
 }

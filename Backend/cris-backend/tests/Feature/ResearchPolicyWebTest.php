@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Institution;
 use App\Models\ResearchProposal;
+use App\Models\ResearchProposalHistory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -70,6 +71,74 @@ class ResearchPolicyWebTest extends TestCase
 
         $response->assertRedirect(route('research.index'));
         $this->assertDatabaseMissing('research_proposals', ['id' => $proposal->id]);
+    }
+
+    public function test_faculty_can_review_resubmitted_pending_faculty_paper_via_rejection_history_fallback(): void
+    {
+        $institution = Institution::query()->create([
+            'name' => 'Calamba Research College',
+            'code' => 'CRC-' . fake()->unique()->numerify('###'),
+        ]);
+
+        $ched = User::factory()->create([
+            'role' => User::ROLE_CHED,
+        ]);
+
+        $hei = User::factory()->create([
+            'role' => User::ROLE_HEI,
+            'institution_id' => $institution->id,
+            'ched_id' => $ched->id,
+        ]);
+
+        /** @var User $faculty */
+        $faculty = User::factory()->create([
+            'role' => User::ROLE_FACULTY,
+            'institution_id' => $institution->id,
+            'hei_id' => $hei->id,
+            'ched_id' => $ched->id,
+        ]);
+
+        $student = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'institution_id' => $institution->id,
+            'faculty_id' => null,
+            'hei_id' => $hei->id,
+            'ched_id' => $ched->id,
+        ]);
+
+        $proposal = ResearchProposal::query()->create([
+            'title' => 'Resubmitted Legacy Linkage Proposal',
+            'authors' => 'Student Author',
+            'co_authors' => 'Co Author',
+            'year' => 2026,
+            'school' => 'Engineering',
+            'abstract' => 'Test abstract',
+            'institution_id' => $institution->id,
+            'category' => 'Technology',
+            'keywords' => 'AI, Data',
+            'status' => ResearchProposal::STATUS_UNDER_REVIEW_FACULTY,
+            'submitted_by' => $student->id,
+            'submitted_at' => now(),
+        ]);
+
+        ResearchProposalHistory::query()->create([
+            'research_proposal_id' => $proposal->id,
+            'user_id' => $faculty->id,
+            'action' => 'rejected',
+            'old_values' => null,
+            'new_values' => ['status' => ResearchProposal::STATUS_REJECTED],
+            'performed_at' => now()->subDay(),
+        ]);
+
+        $response = $this->actingAs($faculty)
+            ->from(route('research.show', $proposal))
+            ->post(route('research.review', $proposal), [
+                'action' => 'approve',
+                'comments' => 'Approved after revision.',
+            ]);
+
+        $response->assertRedirect(route('research.show', $proposal));
+        $this->assertSame(ResearchProposal::STATUS_UNDER_REVIEW_HEI, $proposal->fresh()->status);
     }
 
     /**

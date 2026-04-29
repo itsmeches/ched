@@ -13,22 +13,22 @@ use Illuminate\Http\Request;
 class EditPermissionController extends Controller
 {
     /**
-     * HEI submits an edit permission request for a locked proposal.
+     * Student submits an edit permission request for a locked proposal.
      */
     public function store(Request $request, ResearchProposal $proposal): RedirectResponse
     {
         $user = $request->user();
 
-        // HEI can request a permission whenever the proposal is locked to them:
-        //  - pending + already viewed by CHED, OR
+        // Student can request a permission whenever the proposal is locked to them:
+        //  - under_review_ched + already viewed by CHED, OR
         //  - already approved / rejected
         $isLocked = $proposal->submitted_by === $user->id
             && (
-                ($proposal->status === ResearchProposal::STATUS_PENDING && ! is_null($proposal->viewed_at))
+                ($proposal->status === ResearchProposal::STATUS_UNDER_REVIEW_CHED && ! is_null($proposal->viewed_at))
                 || in_array($proposal->status, [ResearchProposal::STATUS_APPROVED, ResearchProposal::STATUS_REJECTED], true)
             );
 
-        abort_unless($user->isHEI() && $isLocked, 403);
+        abort_unless($user->isStudent() && $isLocked, 403);
 
         // Block if a pending request already exists
         $alreadyPending = $proposal->editPermissionRequests()
@@ -84,9 +84,9 @@ class EditPermissionController extends Controller
             'decided_at' => now(),
         ]);
 
-        // Notify the HEI who requested
-        $heiUser = User::find($editRequest->requested_by);
-        $heiUser?->notify(new EditPermissionDecided($proposal, $editRequest));
+        // Notify the student who requested
+        $studentUser = User::find($editRequest->requested_by);
+        $studentUser?->notify(new EditPermissionDecided($proposal, $editRequest));
 
         $label = $validated['decision'] === 'approved' ? 'approved' : 'denied';
 

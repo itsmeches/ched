@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HierarchicalAccountController;
 use App\Http\Controllers\EditPermissionController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\ProfileController;
@@ -39,12 +40,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Generic dashboard — redirects to role-specific one
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // ── STUDENT ──────────────────────────────────────────────────────────────
+    Route::middleware('role:student,super_admin')->group(function () {
+        Route::get('/student/dashboard', [DashboardController::class, 'student'])->name('student.dashboard');
+    });
+
+    // ── FACULTY ──────────────────────────────────────────────────────────────
+    Route::middleware('role:faculty,super_admin')->group(function () {
+        Route::get('/faculty/dashboard', [DashboardController::class, 'faculty'])->name('faculty.dashboard');
+    });
+
     // ── HEI ──────────────────────────────────────────────────────────────────
     Route::middleware('role:hei,super_admin')->group(function () {
         Route::get('/hei/dashboard', [DashboardController::class, 'hei'])->name('hei.dashboard');
     });
 
-    Route::middleware('role:hei,ched,super_admin')->group(function () {
+    Route::middleware('role:hei,faculty,student,ched,super_admin')->group(function () {
         Route::resource('research', ResearchProposalController::class)
             ->parameters(['research' => 'proposal'])
             ->except(['index', 'show', 'destroy']);
@@ -54,9 +65,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:ched,super_admin')->group(function () {
         Route::get('/ched/dashboard', [DashboardController::class, 'ched'])->name('ched.dashboard');
         Route::get('/ched/decisions', [DashboardController::class, 'chedDecisions'])->name('ched.decisions');
+    });
 
+    Route::middleware('role:faculty,hei,ched,super_admin')->group(function () {
         Route::post('research/{proposal}/review', [ResearchProposalController::class, 'review'])
             ->name('research.review');
+    });
+
+    Route::middleware('role:student')->group(function () {
+        Route::post('research/{proposal}/resubmit', [ResearchProposalController::class, 'resubmit'])
+            ->name('research.resubmit');
     });
 
     // Shared: any authenticated user can list/view research
@@ -74,6 +92,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // History (scoped per role inside controller)
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
     Route::get('/history/export', [HistoryController::class, 'exportCsv'])->name('history.export');
+
+    Route::post('/notifications/read-all', [DashboardController::class, 'markAllNotificationsRead'])
+        ->name('notifications.read-all');
+
+    // Hierarchical account creation (CHED -> HEI -> Faculty -> Student)
+    Route::middleware('role:ched,hei,faculty')->group(function () {
+        Route::get('/accounts/create', [HierarchicalAccountController::class, 'create'])
+            ->name('accounts.create');
+        Route::get('/accounts/hierarchy', [HierarchicalAccountController::class, 'hierarchy'])
+            ->name('accounts.hierarchy');
+        Route::post('/accounts', [HierarchicalAccountController::class, 'store'])
+            ->name('accounts.store');
+    });
 
     // ── SUPER ADMIN ───────────────────────────────────────────────────────────
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {

@@ -42,6 +42,8 @@ class UserManagementController extends Controller
                 'super_admin' => (int) ($roleCounts['super_admin'] ?? 0),
                 'ched' => (int) ($roleCounts['ched'] ?? 0),
                 'hei' => (int) ($roleCounts['hei'] ?? 0),
+                'faculty' => (int) ($roleCounts['faculty'] ?? 0),
+                'student' => (int) ($roleCounts['student'] ?? 0),
             ],
         ]);
     }
@@ -53,6 +55,8 @@ class UserManagementController extends Controller
             'roles'        => [
                 ['value' => 'pending',     'label' => 'Pending Approval'],
                 ['value' => 'hei',         'label' => 'HEI'],
+                ['value' => 'faculty',     'label' => 'Faculty'],
+                ['value' => 'student',     'label' => 'Student'],
                 ['value' => 'ched',        'label' => 'CHED'],
                 ['value' => 'super_admin', 'label' => 'Super Admin'],
             ],
@@ -65,14 +69,20 @@ class UserManagementController extends Controller
             'name'           => ['required', 'string', 'max:255'],
             'email'          => ['required', 'email', 'unique:users,email'],
             'password'       => ['required', 'confirmed', Password::defaults()],
-            'role'           => ['required', 'in:pending,hei,ched,super_admin'],
-            'institution_id' => [Rule::requiredIf(fn () => $request->input('role') === 'hei'), 'nullable', 'exists:institutions,id'],
+            'role'           => ['required', Rule::in(User::ROLES)],
+            'institution_id' => [Rule::requiredIf(fn () => User::requiresInstitutionForRole((string) $request->input('role'))), 'nullable', 'exists:institutions,id'],
             'redirect_to'    => ['nullable', 'in:dashboard,index'],
         ]);
 
-        $institutionId = $data['role'] === 'hei'
+        $institutionId = User::requiresInstitutionForRole($data['role'])
             ? $data['institution_id']
             : null;
+
+        if (in_array($data['role'], [User::ROLE_FACULTY, User::ROLE_STUDENT], true)) {
+            return redirect()->back()->withErrors([
+                'role' => 'Invalid role linkage: create Faculty/Student via hierarchical account creation to preserve parent links.',
+            ])->withInput();
+        }
 
         User::create([
             'name'           => $data['name'],
@@ -98,6 +108,8 @@ class UserManagementController extends Controller
             'roles'        => [
                 ['value' => 'pending',     'label' => 'Pending Approval'],
                 ['value' => 'hei',         'label' => 'HEI'],
+                ['value' => 'faculty',     'label' => 'Faculty'],
+                ['value' => 'student',     'label' => 'Student'],
                 ['value' => 'ched',        'label' => 'CHED'],
                 ['value' => 'super_admin', 'label' => 'Super Admin'],
             ],
@@ -109,14 +121,26 @@ class UserManagementController extends Controller
         $data = $request->validate([
             'name'           => ['required', 'string', 'max:255'],
             'email'          => ['required', 'email', "unique:users,email,{$user->id}"],
-            'role'           => ['required', 'in:pending,hei,ched,super_admin'],
-            'institution_id' => [Rule::requiredIf(fn () => $request->input('role') === 'hei'), 'nullable', 'exists:institutions,id'],
+            'role'           => ['required', Rule::in(User::ROLES)],
+            'institution_id' => [Rule::requiredIf(fn () => User::requiresInstitutionForRole((string) $request->input('role'))), 'nullable', 'exists:institutions,id'],
             'password'       => ['nullable', 'confirmed', Password::defaults()],
         ]);
 
-        $institutionId = $data['role'] === 'hei'
+        $institutionId = User::requiresInstitutionForRole($data['role'])
             ? $data['institution_id']
             : null;
+
+        if ($data['role'] === User::ROLE_FACULTY && (! $user->hei_id || ! $user->ched_id)) {
+            return redirect()->back()->withErrors([
+                'role' => 'Invalid role linkage: Faculty accounts must have HEI and CHED links.',
+            ])->withInput();
+        }
+
+        if ($data['role'] === User::ROLE_STUDENT && (! $user->faculty_id || ! $user->hei_id || ! $user->ched_id)) {
+            return redirect()->back()->withErrors([
+                'role' => 'Invalid role linkage: Student accounts must have Faculty, HEI, and CHED links.',
+            ])->withInput();
+        }
 
         $user->update([
             'name'           => $data['name'],

@@ -26,21 +26,46 @@ use Illuminate\Support\Facades\Auth;
  * @property string $status
  * @property string|null $file_path
  * @property int $submitted_by
+ * @property \Illuminate\Support\Carbon|null $submitted_at
  * @property int|null $viewed_by
  * @property \Illuminate\Support\Carbon|null $viewed_at
  * @property int|null $reviewed_by
  * @property \Illuminate\Support\Carbon|null $reviewed_at
  * @property int|null $approved_by
  * @property \Illuminate\Support\Carbon|null $approved_at
+ * @property \Illuminate\Support\Carbon|null $approved_by_faculty_at
+ * @property \Illuminate\Support\Carbon|null $approved_by_hei_at
+ * @property \Illuminate\Support\Carbon|null $approved_by_ched_at
+ * @property \Illuminate\Support\Carbon|null $rejected_at
+ * @property int|null $rejected_by
+ * @property string|null $remarks
  * @property string|null $comments
  */
 class ResearchProposal extends Model
 {
     use HasFactory;
 
-    public const STATUS_PENDING  = 'pending';
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_SUBMITTED = 'submitted';
+    public const STATUS_UNDER_REVIEW_FACULTY = 'under_review_faculty';
+    public const STATUS_UNDER_REVIEW_HEI = 'under_review_hei';
+    public const STATUS_UNDER_REVIEW_CHED = 'under_review_ched';
     public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';
+    public const STATUS_NEEDS_REVISION = 'needs_revision';
+
+    // Legacy aliases kept to avoid breaking existing tests/older code paths.
+    public const STATUS_PENDING = self::STATUS_UNDER_REVIEW_CHED;
+    public const STATUS_PENDING_FACULTY = self::STATUS_UNDER_REVIEW_FACULTY;
+    public const STATUS_PENDING_HEI = self::STATUS_UNDER_REVIEW_HEI;
+    public const STATUS_PENDING_CHED = self::STATUS_UNDER_REVIEW_CHED;
+
+    public const PENDING_STATUSES = [
+        self::STATUS_SUBMITTED,
+        self::STATUS_UNDER_REVIEW_FACULTY,
+        self::STATUS_UNDER_REVIEW_HEI,
+        self::STATUS_UNDER_REVIEW_CHED,
+    ];
 
     protected $fillable = [
         'title',
@@ -59,20 +84,32 @@ class ResearchProposal extends Model
         'status',
         'file_path',
         'submitted_by',
+        'submitted_at',
         'viewed_by',
         'viewed_at',
         'reviewed_by',
         'reviewed_at',
         'approved_by',
         'approved_at',
+        'approved_by_faculty_at',
+        'approved_by_hei_at',
+        'approved_by_ched_at',
+        'rejected_at',
+        'rejected_by',
+        'remarks',
         'comments',
     ];
 
     protected $casts = [
         'year'        => 'integer',
+        'submitted_at' => 'datetime',
         'viewed_at'   => 'datetime',
         'reviewed_at' => 'datetime',
         'approved_at' => 'datetime',
+        'approved_by_faculty_at' => 'datetime',
+        'approved_by_hei_at' => 'datetime',
+        'approved_by_ched_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function institution()
@@ -100,6 +137,11 @@ class ResearchProposal extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function rejector()
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
+    }
+
     public function keywordItems(): BelongsToMany
     {
         return $this->belongsToMany(Keyword::class);
@@ -112,39 +154,28 @@ class ResearchProposal extends Model
 
     public function isPending(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return in_array($this->status, self::PENDING_STATUSES, true);
+    }
+
+    public function isPendingFaculty(): bool
+    {
+        return $this->status === self::STATUS_UNDER_REVIEW_FACULTY
+            || $this->status === self::STATUS_SUBMITTED;
+    }
+
+    public function isPendingHei(): bool
+    {
+        return $this->status === self::STATUS_UNDER_REVIEW_HEI;
+    }
+
+    public function isPendingChed(): bool
+    {
+        return $this->status === self::STATUS_UNDER_REVIEW_CHED;
     }
 
     public function isEditable(): bool
     {
-        $userId = Auth::id();
-
-        // Approved or rejected: only editable with an approved permission
-        if ($this->status !== self::STATUS_PENDING) {
-            if (! $userId) {
-                return false;
-            }
-
-            return $this->editPermissionRequests()
-                ->where('requested_by', $userId)
-                ->where('status', 'approved')
-                ->exists();
-        }
-
-        // Pending + not yet viewed by CHED — freely editable
-        if (is_null($this->viewed_at)) {
-            return true;
-        }
-
-        // Pending + locked (CHED viewed) — need an approved permission
-        if ($userId) {
-            return $this->editPermissionRequests()
-                ->where('requested_by', $userId)
-                ->where('status', 'approved')
-                ->exists();
-        }
-
-        return false;
+        return $this->status === self::STATUS_REJECTED;
     }
 
     public function editPermissionRequests(): HasMany

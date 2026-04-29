@@ -13,11 +13,8 @@ class UpdateResearchProposalRequest extends FormRequest
     {
         $proposal = $this->route('proposal');
 
-        if ($this->user()?->isCHED()) {
-            return true;
-        }
-
         return $proposal
+            && $this->user()?->isStudent()
             && $proposal->submitted_by === $this->user()->id
             && $proposal->isEditable();
     }
@@ -25,7 +22,7 @@ class UpdateResearchProposalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'           => ['required', 'string', 'max:255'],
+            'title'           => ['required', 'string', 'max:255', 'regex:/\\S/'],
             'authors'         => ['required', 'string', 'max:500'],
             'author_email'    => ['nullable', 'email', 'max:255'],
             'author_phone'    => ['nullable', 'string', 'size:11', 'regex:' . self::PHONE_PATTERN],
@@ -44,6 +41,7 @@ class UpdateResearchProposalRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'title.regex' => 'Title cannot be empty or whitespace only.',
             'author_phone.regex' => 'Author phone must be exactly 11 digits.',
             'author_phone.size' => 'Author phone must be exactly 11 digits.',
             'co_author_phones.regex' => 'Each co-author phone must be exactly 11 digits.',

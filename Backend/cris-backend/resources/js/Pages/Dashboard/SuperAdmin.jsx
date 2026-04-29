@@ -1,9 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {
     Alert,
+    Button,
+    Card,
     Skeleton,
+    Space,
 } from 'antd';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { lazy, Suspense } from 'react';
 
 const SuperAdminHero = lazy(() => import('./Partials/SuperAdminHero'));
@@ -11,7 +14,7 @@ const SuperAdminStats = lazy(() => import('./Partials/SuperAdminStats'));
 const SuperAdminAccountPanel = lazy(() => import('./Partials/SuperAdminAccountPanel'));
 const SuperAdminUsersTable = lazy(() => import('./Partials/SuperAdminUsersTable'));
 
-export default function SuperAdminDashboard({ stats, recentUsers, recentProposals, institutionOverview, institutions, roles }) {
+export default function SuperAdminDashboard({ stats, recentUsers, recentProposals, institutionOverview, institutions, roles, notifications = [] }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -48,6 +51,26 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminStats stats={stats} />
                     </Suspense>
+
+                    <Card title="Unread Notifications" className="admin-dashboard-shell">
+                        <div style={{ marginBottom: 12 }}>
+                            <Button size="small" onClick={() => router.post(route('notifications.read-all'))}>Mark all as read</Button>
+                        </div>
+                        {notifications.length === 0 ? (
+                            <Alert type="info" showIcon message="No new notifications." />
+                        ) : (
+                            <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                                {notifications.map((item) => (
+                                    <Alert
+                                        key={item.id}
+                                        type="info"
+                                        showIcon
+                                        message={item.message}
+                                    />
+                                ))}
+                            </Space>
+                        )}
+                    </Card>
 
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminAccountPanel data={data} setData={setData} postSubmit={submit} processing={processing} errors={errors} institutions={institutions} roles={roles} />

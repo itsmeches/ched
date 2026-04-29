@@ -3,9 +3,11 @@ import { useState } from 'react';
 import Dropdown from './Dropdown';
 
 export default function Navbar() {
-    const { auth } = usePage().props;
+    const page = usePage();
+    const { auth } = page.props;
     const user = auth.user;
     const [menuOpen, setMenuOpen] = useState(false);
+    const currentTab = new URLSearchParams((page.url || '').split('?')[1] || '').get('tab');
 
     const getRoleLabel = () => {
         switch (user.role) {
@@ -15,6 +17,10 @@ export default function Navbar() {
                 return 'CHED Reviewer';
             case 'hei':
                 return 'HEI Researcher';
+            case 'faculty':
+                return 'Faculty';
+            case 'student':
+                return 'Student';
             default:
                 return 'User';
         }
@@ -25,7 +31,7 @@ export default function Navbar() {
             {
                 label: 'Dashboard',
                 href: route('dashboard'),
-                activePatterns: ['dashboard', 'admin.dashboard', 'ched.dashboard', 'hei.dashboard'],
+                activePatterns: ['dashboard', 'admin.dashboard', 'ched.dashboard', 'hei.dashboard', 'faculty.dashboard', 'student.dashboard'],
             },
         ];
 
@@ -42,6 +48,8 @@ export default function Navbar() {
         if (user.role === 'ched') {
             return [
                 ...commonItems,
+                { label: 'Create HEI', href: route('accounts.create'), activePatterns: ['accounts.create'] },
+                { label: 'Account Hierarchy', href: route('accounts.hierarchy'), activePatterns: ['accounts.hierarchy'] },
                 {
                     label: 'Research Queue',
                     href: route('research.index'),
@@ -52,15 +60,38 @@ export default function Navbar() {
             ];
         }
 
-        if (user.role === 'hei') {
+        if (['hei', 'faculty', 'student'].includes(user.role)) {
+            const accountItem = user.role === 'hei'
+                ? { label: 'Create Faculty', href: route('accounts.create'), activePatterns: ['accounts.create'] }
+                : user.role === 'faculty'
+                    ? { label: 'Create Student', href: route('accounts.create'), activePatterns: ['accounts.create'] }
+                    : null;
+
+            const hierarchyItem = ['hei', 'faculty'].includes(user.role)
+                ? { label: 'Account Hierarchy', href: route('accounts.hierarchy'), activePatterns: ['accounts.hierarchy'] }
+                : null;
+
+            const reviewItem = user.role === 'student'
+                ? null
+                : {
+                    label: 'Review Queue',
+                    href: route('research.index', { tab: 'queue' }),
+                    activePatterns: ['research.index', 'research.review'],
+                    tab: 'queue',
+                };
+
             return [
                 ...commonItems,
+                ...(accountItem ? [accountItem] : []),
+                ...(hierarchyItem ? [hierarchyItem] : []),
+                ...(reviewItem ? [reviewItem] : []),
                 {
                     label: 'My Research',
-                    href: route('research.index'),
+                    href: route('research.index', { tab: 'mine' }),
                     activePatterns: ['research.index', 'research.show', 'research.edit', 'research.update', 'research.destroy'],
+                    tab: 'mine',
                 },
-                { label: 'Submit Paper', href: route('research.create'), activePatterns: ['research.create', 'research.store'] },
+                ...(user.role === 'student' ? [{ label: 'Submit Paper', href: route('research.create'), activePatterns: ['research.create', 'research.store'] }] : []),
                 { label: 'History', href: route('history.index'), activePatterns: ['history.index'] },
             ];
         }
@@ -69,7 +100,13 @@ export default function Navbar() {
     };
 
     const navItems = getNavItems();
-    const isActive = (item) => item.activePatterns?.some((pattern) => route().current(pattern));
+    const isActive = (item) => {
+        if (item.tab && route().current('research.index')) {
+            return currentTab === item.tab;
+        }
+
+        return item.activePatterns?.some((pattern) => route().current(pattern));
+    };
 
     return (
         <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white shadow-sm">

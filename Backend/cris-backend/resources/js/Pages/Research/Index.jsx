@@ -6,7 +6,7 @@ import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { formatDateTime } from '@/utils/date';
 
-export default function ResearchIndex({ proposals, filters, canCreate }) {
+export default function ResearchIndex({ proposals, filters, canCreate, tab = '' }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
@@ -47,13 +47,13 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
             title: 'Editability',
             key: 'editability',
             render: (_, row) => {
-                const isLocked = row.status !== 'pending' || !!row.viewed_at;
+                const isLocked = row.status !== 'rejected';
 
                 if (!isLocked) {
                     return <Tag color="blue">Editable</Tag>;
                 }
 
-                if (row.status === 'pending' && row.viewed_at) {
+                if (row.status === 'under_review_ched' && row.viewed_at) {
                     return (
                         <Space direction="vertical" size={2}>
                             <Tag color="volcano" style={{ marginInlineEnd: 0 }}>Locked (Viewed by CHED)</Tag>
@@ -81,7 +81,7 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
     ], []);
 
     function applyFilters() {
-        router.get(route('research.index'), { search, status, editability, year, school }, { preserveState: true });
+        router.get(route('research.index'), { search, status, editability, year, school, tab }, { preserveState: true });
     }
 
     return (
@@ -119,7 +119,11 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                             placeholder="All statuses"
                                             allowClear
                                             options={[
-                                                { value: 'pending', label: 'Pending' },
+                                                { value: 'draft', label: 'Draft' },
+                                                { value: 'submitted', label: 'Submitted' },
+                                                { value: 'under_review_faculty', label: 'Under Review (Faculty)' },
+                                                { value: 'under_review_hei', label: 'Under Review (HEI)' },
+                                                { value: 'under_review_ched', label: 'Under Review (CHED)' },
                                                 { value: 'approved', label: 'Approved' },
                                                 { value: 'rejected', label: 'Rejected' },
                                             ]}
@@ -167,7 +171,7 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                     <Col xs={12} md={3}>
                                         <Button size="large" block onClick={() => {
                                             setSearch(''); setStatus(''); setEditability(''); setYear(''); setSchool('');
-                                            router.get(route('research.index'), {}, { replace: true });
+                                            router.get(route('research.index'), { tab }, { replace: true });
                                         }}>Clear</Button>
                                     </Col>
                                     {canCreate && (
@@ -191,7 +195,7 @@ export default function ResearchIndex({ proposals, filters, canCreate }) {
                                 current: proposals.current_page,
                                 pageSize: proposals.per_page,
                                 total: proposals.total,
-                                onChange: (page) => router.get(route('research.index'), { search, status, editability, year, school, page }, { preserveState: true }),
+                                onChange: (page) => router.get(route('research.index'), { search, status, editability, year, school, tab, page }, { preserveState: true }),
                             }}
                             scroll={{ x: 920 }}
                             locale={{ emptyText: 'No research papers found for the selected filters.' }}

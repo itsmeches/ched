@@ -10,7 +10,7 @@ return new class extends Migration
         $driver = DB::getDriverName();
 
         if (in_array($driver, ['mysql', 'mariadb'], true)) {
-            DB::statement("ALTER TABLE users MODIFY role ENUM('pending','super_admin','ched','hei') NOT NULL DEFAULT 'pending'");
+            DB::statement("ALTER TABLE users MODIFY role ENUM('pending','super_admin','ched','hei','faculty','student') NOT NULL DEFAULT 'pending'");
         }
     }
 
@@ -20,7 +20,7 @@ return new class extends Migration
 
         if (in_array($driver, ['mysql', 'mariadb'], true)) {
             DB::table('users')
-                ->where('role', 'pending')
+                ->whereIn('role', ['pending', 'faculty', 'student'])
                 ->update(['role' => 'hei']);
 
             DB::statement("ALTER TABLE users MODIFY role ENUM('super_admin','ched','hei') NOT NULL DEFAULT 'hei'");

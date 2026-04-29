@@ -18,7 +18,7 @@ export default function UsersCreate({ institutions, roles }) {
                     <Card className="admin-dashboard-shell" bordered={false}>
                         <Typography.Text type="secondary">The creation form opens in a drawer so you can stay close to the user list workflow.</Typography.Text>
                     </Card>
-                    <UserFormDrawer title="Create User Account" subtitle="Set the user role, assign an institution for HEI accounts, and save the record directly into the system." open={true} onClose={() => router.visit(route('admin.users.index'))} onSubmit={submit} processing={processing} data={data} setData={setData} errors={errors} roles={roles} institutions={institutions} submitText="Create Account" />
+                    <UserFormDrawer title="Create User Account" subtitle="Set the user role, assign an institution for HEI/Faculty/Student accounts, and save the record directly into the system." open={true} onClose={() => router.visit(route('admin.users.index'))} onSubmit={submit} processing={processing} data={data} setData={setData} errors={errors} roles={roles} institutions={institutions} submitText="Create Account" />
             </div>
         </AuthenticatedLayout>
     );

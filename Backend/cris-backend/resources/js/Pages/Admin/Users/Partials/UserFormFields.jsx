@@ -1,6 +1,8 @@
 import { Col, Form, Input, Row, Select } from 'antd';
 
 export default function UserFormFields({ data, setData, errors, roles, institutions, includePasswordHint = false }) {
+    const requiresInstitution = ['hei', 'faculty', 'student'].includes(data.role);
+
     return (
         <>
             <Row gutter={16}>
@@ -25,7 +27,7 @@ export default function UserFormFields({ data, setData, errors, roles, instituti
                             options={roles.map((role) => ({ value: role.value, label: role.label }))}
                             onChange={(value) => {
                                 setData('role', value);
-                                if (value !== 'hei') {
+                                if (!['hei', 'faculty', 'student'].includes(value)) {
                                     setData('institution_id', '');
                                 }
                             }}
@@ -37,8 +39,8 @@ export default function UserFormFields({ data, setData, errors, roles, instituti
                         <Select
                             size="large"
                             value={data.institution_id || undefined}
-                            placeholder={data.role === 'hei' ? 'Select an institution' : 'Not required for this role'}
-                            disabled={data.role !== 'hei'}
+                            placeholder={requiresInstitution ? 'Select an institution' : 'Not required for this role'}
+                            disabled={!requiresInstitution}
                             options={institutions.map((institution) => ({ value: institution.id, label: institution.name }))}
                             onChange={(value) => setData('institution_id', value ?? '')}
                             allowClear

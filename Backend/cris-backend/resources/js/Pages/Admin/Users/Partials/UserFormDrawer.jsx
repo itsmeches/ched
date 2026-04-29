@@ -22,7 +22,7 @@ export default function UserFormDrawer({ title, subtitle, open, onClose, onSubmi
         >
             <Space direction="vertical" size={16} style={{ width: '100%' }}>
                 {subtitle && <div style={{ color: '#475569', fontSize: 14 }}>{subtitle}</div>}
-                <Alert type="info" showIcon message="HEI accounts require an institution. CHED and Super Admin accounts remain global." />
+                <Alert type="info" showIcon message="HEI, Faculty, and Student accounts require an institution. CHED and Super Admin accounts remain global." />
                 <Form layout="vertical" onSubmitCapture={onSubmit}>
                     <UserFormFields
                         data={data}

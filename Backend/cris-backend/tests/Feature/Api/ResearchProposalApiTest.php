@@ -13,19 +13,39 @@ class ResearchProposalApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_hei_can_submit_a_proposal_with_author_fields(): void
+    public function test_student_can_submit_a_proposal_with_author_fields(): void
     {
         $institution = Institution::query()->create([
             'name' => 'Laguna State College',
             'code' => 'LSC-' . fake()->unique()->numerify('###'),
         ]);
 
+        $ched = User::factory()->create([
+            'role' => User::ROLE_CHED,
+        ]);
+
         $hei = User::factory()->create([
             'role' => User::ROLE_HEI,
             'institution_id' => $institution->id,
+            'ched_id' => $ched->id,
         ]);
 
-        Sanctum::actingAs($hei);
+        $faculty = User::factory()->create([
+            'role' => User::ROLE_FACULTY,
+            'institution_id' => $institution->id,
+            'hei_id' => $hei->id,
+            'ched_id' => $ched->id,
+        ]);
+
+        $student = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'institution_id' => $institution->id,
+            'faculty_id' => $faculty->id,
+            'hei_id' => $hei->id,
+            'ched_id' => $ched->id,
+        ]);
+
+        Sanctum::actingAs($student);
 
         $response = $this->postJson('/api/proposals', [
             'title' => 'Community Climate Adaptation Framework',
@@ -47,12 +67,12 @@ class ResearchProposalApiTest extends TestCase
             'authors' => 'Dr. Elisa Cruz',
             'co_authors' => 'Prof. Ramon Dela Cruz',
             'institution_id' => $institution->id,
-            'submitted_by' => $hei->id,
-            'status' => ResearchProposal::STATUS_PENDING,
+            'submitted_by' => $student->id,
+            'status' => ResearchProposal::STATUS_UNDER_REVIEW_FACULTY,
         ]);
     }
 
-    public function test_hei_only_sees_their_own_proposals_in_api_index(): void
+    public function test_hei_only_sees_proposals_under_their_hierarchy_in_api_index(): void
     {
         $institution = Institution::query()->create([
             'name' => 'Cavite Research University',
@@ -69,9 +89,21 @@ class ResearchProposalApiTest extends TestCase
             'institution_id' => $institution->id,
         ]);
 
+        $student = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'institution_id' => $institution->id,
+            'hei_id' => $hei->id,
+        ]);
+
         $otherHei = User::factory()->create([
             'role' => User::ROLE_HEI,
             'institution_id' => $otherInstitution->id,
+        ]);
+
+        $otherStudent = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'institution_id' => $otherInstitution->id,
+            'hei_id' => $otherHei->id,
         ]);
 
         ResearchProposal::query()->create([
@@ -81,7 +113,7 @@ class ResearchProposalApiTest extends TestCase
             'institution_id' => $institution->id,
             'category' => 'Education',
             'status' => ResearchProposal::STATUS_PENDING,
-            'submitted_by' => $hei->id,
+            'submitted_by' => $student->id,
         ]);
 
         ResearchProposal::query()->create([
@@ -91,7 +123,7 @@ class ResearchProposalApiTest extends TestCase
             'institution_id' => $otherInstitution->id,
             'category' => 'Technology',
             'status' => ResearchProposal::STATUS_PENDING,
-            'submitted_by' => $otherHei->id,
+            'submitted_by' => $otherStudent->id,
         ]);
 
         Sanctum::actingAs($hei);
@@ -183,7 +215,7 @@ class ResearchProposalApiTest extends TestCase
             ]);
     }
 
-    public function test_reviewing_a_non_pending_proposal_returns_standardized_validation_error(): void
+    public function test_reviewing_a_non_pending_proposal_is_forbidden_by_policy(): void
     {
         $institution = Institution::query()->create([
             'name' => 'Batangas Review College',
@@ -215,11 +247,10 @@ class ResearchProposalApiTest extends TestCase
             'status' => ResearchProposal::STATUS_REJECTED,
         ]);
 
-        $response->assertStatus(422)
+        $response->assertForbidden()
             ->assertJson([
-                'message' => 'The provided data is invalid.',
-                'status' => 422,
-            ])
-            ->assertJsonPath('errors.proposal.0', 'Only pending proposals can be reviewed.');
+                'message' => 'This action is unauthorized.',
+                'status' => 403,
+            ]);
     }
 }

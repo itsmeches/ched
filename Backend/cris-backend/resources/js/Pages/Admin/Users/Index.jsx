@@ -9,13 +9,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { Alert, Avatar, Button, Col, Input, Modal, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
 
-const roleColorMap = { pending: 'orange', super_admin: 'purple', ched: '#0033a0', hei: '#0047d4' };
+const roleColorMap = { pending: 'orange', super_admin: 'purple', ched: '#0033a0', hei: '#0047d4', faculty: 'cyan', student: 'geekblue' };
 const roleLabelMap = {
     all: 'All Users',
     pending: 'Pending Approval',
     super_admin: 'Super Admin',
     ched: 'CHED',
     hei: 'HEI',
+    faculty: 'Faculty',
+    student: 'Student',
 };
 
 export default function UsersIndex({ users, filters, roleCounts }) {
@@ -30,6 +32,8 @@ export default function UsersIndex({ users, filters, roleCounts }) {
         { key: 'super_admin', label: roleLabelMap.super_admin, count: roleCounts?.super_admin ?? 0, color: '#7c3aed' },
         { key: 'ched', label: roleLabelMap.ched, count: roleCounts?.ched ?? 0, color: '#0033a0' },
         { key: 'hei', label: roleLabelMap.hei, count: roleCounts?.hei ?? 0, color: '#0047d4' },
+        { key: 'faculty', label: roleLabelMap.faculty, count: roleCounts?.faculty ?? 0, color: '#0891b2' },
+        { key: 'student', label: roleLabelMap.student, count: roleCounts?.student ?? 0, color: '#1d4ed8' },
     ], [roleCounts]);
 
     useEffect(() => {
@@ -174,6 +178,8 @@ export default function UsersIndex({ users, filters, roleCounts }) {
                                             { value: 'super_admin', label: 'Super Admin' },
                                             { value: 'ched', label: 'CHED' },
                                             { value: 'hei', label: 'HEI' },
+                                            { value: 'faculty', label: 'Faculty' },
+                                            { value: 'student', label: 'Student' },
                                         ]}
                                         onChange={(value) => setRole(value ?? '')}
                                         style={{ width: '100%' }}

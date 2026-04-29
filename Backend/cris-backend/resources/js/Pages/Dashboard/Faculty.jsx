@@ -2,19 +2,19 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Row, Space, Statistic, Table, Tag } from 'antd';
-import { BankOutlined, CheckCircleOutlined, ClockCircleOutlined, StopOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClockCircleOutlined, StopOutlined, TeamOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { useState } from 'react';
 
 const statItems = [
-    { key: 'total', label: 'Total Submissions', icon: <BankOutlined style={{ color: '#0033a0' }} /> },
-    { key: 'pending', label: 'Pending HEI Review', icon: <ClockCircleOutlined style={{ color: '#d97706' }} /> },
+    { key: 'total', label: 'Total Student Submissions', icon: <TeamOutlined style={{ color: '#0033a0' }} /> },
+    { key: 'pending', label: 'Pending Faculty Review', icon: <ClockCircleOutlined style={{ color: '#d97706' }} /> },
     { key: 'approved', label: 'Approved', icon: <CheckCircleOutlined style={{ color: '#0033a0' }} /> },
     { key: 'rejected', label: 'Rejected', icon: <StopOutlined style={{ color: '#dc2626' }} /> },
 ];
 
-export default function HEIDashboard({ stats, stageCounts = {}, forReview, recentDecisions, notifications = [] }) {
-    const DEFAULT_REJECT_REMARK = 'HEI review: Please revise and improve the submission based on institutional requirements.';
+export default function FacultyDashboard({ stats, stageCounts = {}, forReview, recentDecisions, notifications = [] }) {
+    const DEFAULT_REJECT_REMARK = 'Faculty review: Please revise and improve the submission based on stage requirements.';
 
     const [rejectModal, setRejectModal] = useState({
         open: false,
@@ -133,8 +133,8 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
     ];
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">HEI Dashboard</h2>}>
-            <Head title="HEI Dashboard" />
+        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Faculty Dashboard</h2>}>
+            <Head title="Faculty Dashboard" />
 
             <div className="space-y-8">
                 <Row gutter={[16, 16]}>
@@ -149,17 +149,14 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
 
                 <Card className="admin-dashboard-shell" bordered={false} title="Quick Filters">
                     <Space wrap>
-                        <Link href={route('accounts.hierarchy')}>
-                            <Button>Account Hierarchy</Button>
-                        </Link>
-                        <Link href={route('research.index', { status: 'under_review_hei' })}>
-                            <Button>HEI Queue</Button>
+                        <Link href={route('research.index', { status: 'under_review_faculty' })}>
+                            <Button>Faculty Queue</Button>
                         </Link>
                         <Link href={route('research.index', { status: 'rejected' })}>
                             <Button>Rejected Submissions</Button>
                         </Link>
-                        <Link href={route('research.index', { status: 'under_review_ched' })}>
-                            <Button>Forwarded to CHED</Button>
+                        <Link href={route('research.index', { status: 'under_review_hei' })}>
+                            <Button>Forwarded to HEI</Button>
                         </Link>
                     </Space>
                 </Card>
@@ -174,9 +171,9 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
                     </Space>
                 </Card>
 
-                <Card title="HEI Review Queue" className="admin-dashboard-shell">
+                <Card title="Faculty Review Queue" className="admin-dashboard-shell">
                     {forReview.length === 0 ? (
-                        <Alert type="success" showIcon message="No submissions waiting for HEI review." />
+                        <Alert type="success" showIcon message="No submissions waiting for Faculty review." />
                     ) : (
                         <Table rowKey="id" columns={queueColumns} dataSource={forReview} pagination={false} scroll={{ x: 980 }} />
                     )}
@@ -197,7 +194,7 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
                     )}
                 </Card>
 
-                <Card title="Recent HEI Decisions" className="admin-dashboard-shell">
+                <Card title="Recent Faculty Decisions" className="admin-dashboard-shell">
                     <Table rowKey="id" columns={decisionColumns} dataSource={recentDecisions} pagination={false} scroll={{ x: 840 }} />
                 </Card>
 

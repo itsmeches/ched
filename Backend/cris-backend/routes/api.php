@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/proposals', [ResearchProposalController::class, 'store']);
     Route::get('/proposals/{proposal}', [ResearchProposalController::class, 'show']);
     Route::put('/proposals/{proposal}', [ResearchProposalController::class, 'update']);
+    Route::post('/proposals/{proposal}/resubmit', [ResearchProposalController::class, 'resubmit']);
     Route::delete('/proposals/{proposal}', [ResearchProposalController::class, 'destroy']);
     Route::post('/proposals/{proposal}/review', [ResearchProposalController::class, 'review']);
 

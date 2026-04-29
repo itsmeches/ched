@@ -139,6 +139,144 @@ class HistoryHardeningTest extends TestCase
         $this->assertStringContainsString('Export Scope Proposal', $content);
     }
 
+    public function test_student_history_is_scoped_to_own_submissions_only(): void
+    {
+        $actors = $this->makeUsersAndInstitution();
+        $faculty = User::factory()->create([
+            'role' => User::ROLE_FACULTY,
+            'institution_id' => $actors['institution']->id,
+            'hei_id' => $actors['hei']->id,
+        ]);
+
+        /** @var User $student */
+        $student = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'institution_id' => $actors['institution']->id,
+            'faculty_id' => $faculty->id,
+            'hei_id' => $actors['hei']->id,
+        ]);
+
+        $otherStudent = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'institution_id' => $actors['institution']->id,
+            'faculty_id' => $faculty->id,
+            'hei_id' => $actors['hei']->id,
+        ]);
+
+        $ownProposal = $this->makeProposal($actors['institution']->id, $student->id, 'Student Own Proposal');
+        $otherProposal = $this->makeProposal($actors['institution']->id, $otherStudent->id, 'Other Student Proposal');
+
+        ResearchProposalHistory::query()->create([
+            'research_proposal_id' => $ownProposal->id,
+            'user_id' => $faculty->id,
+            'action' => 'approved',
+            'old_values' => null,
+            'new_values' => ['status' => 'approved'],
+            'performed_at' => now(),
+        ]);
+
+        ResearchProposalHistory::query()->create([
+            'research_proposal_id' => $otherProposal->id,
+            'user_id' => $faculty->id,
+            'action' => 'approved',
+            'old_values' => null,
+            'new_values' => ['status' => 'approved'],
+            'performed_at' => now()->subHour(),
+        ]);
+
+        $response = $this->actingAs($student)->get(route('history.index'));
+
+        $response->assertOk();
+        $response->assertSee('Student Own Proposal');
+        $response->assertDontSee('Other Student Proposal');
+    }
+
+    public function test_faculty_history_includes_assigned_students_and_own_actions_only(): void
+    {
+        $actors = $this->makeUsersAndInstitution();
+        $hei = $actors['hei'];
+        $admin = $actors['admin'];
+        $institution = $actors['institution'];
+
+        /** @var User $faculty */
+        $faculty = User::factory()->create([
+            'role' => User::ROLE_FACULTY,
+            'institution_id' => $institution->id,
+            'hei_id' => $hei->id,
+        ]);
+
+        $otherFaculty = User::factory()->create([
+            'role' => User::ROLE_FACULTY,
+            'institution_id' => $institution->id,
+            'hei_id' => $hei->id,
+        ]);
+
+        $assignedStudent = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'institution_id' => $institution->id,
+            'faculty_id' => $faculty->id,
+            'hei_id' => $hei->id,
+        ]);
+
+        $otherStudent = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'institution_id' => $institution->id,
+            'faculty_id' => $otherFaculty->id,
+            'hei_id' => $hei->id,
+        ]);
+
+        $assignedProposal = $this->makeProposal($institution->id, $assignedStudent->id, 'Faculty Assigned Student Proposal');
+        $otherProposal = $this->makeProposal($institution->id, $otherStudent->id, 'Faculty Own Action Base Proposal');
+        $trulyUnrelatedProposal = $this->makeProposal($institution->id, $otherStudent->id, 'Faculty Truly Unrelated Proposal');
+
+        // Visible: proposal belongs to assigned student.
+        ResearchProposalHistory::query()->create([
+            'research_proposal_id' => $assignedProposal->id,
+            'user_id' => $admin->id,
+            'action' => 'updated',
+            'old_values' => ['title' => 'Old Faculty Assigned Student Proposal'],
+            'new_values' => ['title' => 'Faculty Assigned Student Proposal'],
+            'performed_at' => now(),
+        ]);
+
+        // Visible: faculty's own action even on a non-assigned proposal.
+        ResearchProposalHistory::query()->create([
+            'research_proposal_id' => $otherProposal->id,
+            'user_id' => $faculty->id,
+            'action' => 'updated',
+            'old_values' => ['title' => 'Old Faculty Own Action Proposal'],
+            'new_values' => ['title' => 'Faculty Own Action Proposal'],
+            'performed_at' => now()->subMinutes(30),
+        ]);
+
+        // Not visible: not assigned and not performed by this faculty.
+        ResearchProposalHistory::query()->create([
+            'research_proposal_id' => $otherProposal->id,
+            'user_id' => $admin->id,
+            'action' => 'updated',
+            'old_values' => ['title' => 'Old Faculty Unrelated Proposal'],
+            'new_values' => ['title' => 'Faculty Unrelated Proposal'],
+            'performed_at' => now()->subHour(),
+        ]);
+
+        // Not visible: separate proposal not assigned and not performed by this faculty.
+        ResearchProposalHistory::query()->create([
+            'research_proposal_id' => $trulyUnrelatedProposal->id,
+            'user_id' => $admin->id,
+            'action' => 'updated',
+            'old_values' => ['title' => 'Old Faculty Truly Unrelated Proposal'],
+            'new_values' => ['title' => 'Faculty Truly Unrelated Proposal'],
+            'performed_at' => now()->subMinutes(45),
+        ]);
+
+        $response = $this->actingAs($faculty)->get(route('history.index'));
+
+        $response->assertOk();
+        $response->assertSee('Faculty Assigned Student Proposal');
+        $response->assertSee('Faculty Own Action Proposal');
+        $response->assertDontSee('Faculty Truly Unrelated Proposal');
+    }
+
     /**
      * @return array{
      *   hei: User,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ResearchProposalHistory;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -135,19 +136,36 @@ class HistoryController extends Controller
 
     private function applyRoleScope($query, $user): void
     {
-        if ($user->isHEI()) {
-            // HEI: only papers submitted by this account.
+        if ($user->role === User::ROLE_STUDENT) {
+            // Student: only activity on the student's own submissions.
             $query->whereHas('proposal', fn ($q) => $q->where('submitted_by', $user->id));
             return;
         }
 
-        if ($user->isCHED()) {
+        if ($user->role === User::ROLE_FACULTY) {
+            // Faculty: own actions plus activity on submissions from assigned students.
+            $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                    ->orWhereHas('proposal.submitter', fn ($inner) => $inner->where('faculty_id', $user->id));
+            });
+            return;
+        }
+
+        if ($user->role === User::ROLE_HEI) {
+            // HEI: only activity on submissions created by this HEI account.
+            $query->whereHas('proposal', fn ($q) => $q->where('submitted_by', $user->id));
+            return;
+        }
+
+        if ($user->role === User::ROLE_CHED) {
             // CHED: own actions plus actions on papers they reviewed.
             $query->where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
                     ->orWhereHas('proposal', fn ($inner) => $inner->where('reviewed_by', $user->id));
             });
+            return;
         }
+
         // super_admin: no restriction
     }
 
