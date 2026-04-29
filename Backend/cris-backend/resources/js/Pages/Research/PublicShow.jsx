@@ -10,10 +10,10 @@ export default function PublicResearchShow({ proposal, canLogin, canRegister }) 
     const metadataItems = [
         { label: 'Author', value: proposal.authors },
         { label: 'Author Email', value: proposal.author_email || '—' },
-        { label: 'Author Phone', value: proposal.author_phone || '—' },
+        // { label: 'Author Phone', value: proposal.author_phone || '—' },
         { label: 'Co-Authors', value: proposal.co_authors || '—' },
         { label: 'Co-Author Emails', value: proposal.co_author_emails || '—' },
-        { label: 'Co-Author Phones', value: proposal.co_author_phones || '—' },
+        // { label: 'Co-Author Phones', value: proposal.co_author_phones || '—' },
         { label: 'School', value: proposal.school || '—' },
         { label: 'Keywords', value: proposal.keywords || '—' },
         { label: 'Institution', value: proposal.institution?.name ?? '—' },
