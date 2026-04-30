@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Institution;
 use App\Models\User;
+use App\Models\UserManagementAudit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,6 +16,55 @@ use Inertia\Response;
 
 class UserManagementController extends Controller
 {
+    public function audits(Request $request): Response
+    {
+        $search = trim((string) $request->input('search', ''));
+        $action = trim((string) $request->input('action', ''));
+        $from = trim((string) $request->input('from', ''));
+        $to = trim((string) $request->input('to', ''));
+
+        $audits = UserManagementAudit::query()
+            ->with([
+                'actor:id,name,email',
+                'target' => fn ($query) => $query->withTrashed()->select('id', 'name', 'email', 'role', 'deleted_at'),
+            ])
+            ->when($action !== '', fn ($q) => $q->where('action', $action))
+            ->when($search !== '', fn ($q) =>
+                $q->where(function ($inner) use ($search) {
+                    $inner->whereHas('actor', function ($sub) use ($search) {
+                        $sub->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    })->orWhereHas('target', function ($sub) use ($search) {
+                        $sub->withTrashed()
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+                })
+            )
+            ->when($from !== '', fn ($q) => $q->whereDate('performed_at', '>=', $from))
+            ->when($to !== '', fn ($q) => $q->whereDate('performed_at', '<=', $to))
+            ->orderByDesc('performed_at')
+            ->paginate(25)
+            ->withQueryString();
+
+        return Inertia::render('Admin/Users/Audits', [
+            'audits' => $audits,
+            'filters' => [
+                'search' => $search,
+                'action' => $action,
+                'from' => $from,
+                'to' => $to,
+            ],
+            'actionOptions' => UserManagementAudit::query()
+                ->select('action')
+                ->distinct()
+                ->orderBy('action')
+                ->pluck('action')
+                ->map(fn ($value) => ['value' => $value, 'label' => str_replace('_', ' ', (string) $value)])
+                ->values(),
+        ]);
+    }
+
     public function index(Request $request): Response
     {
         $search = trim((string) $request->input('search', ''));
@@ -22,13 +72,16 @@ class UserManagementController extends Controller
         $institutionId = (int) $request->input('institution_id', 0);
         $from = trim((string) $request->input('from', ''));
         $to = trim((string) $request->input('to', ''));
+        $showDeactivated = $request->boolean('deactivated', false);
+
+        $baseQuery = $showDeactivated ? User::onlyTrashed() : User::query();
 
         $roleCounts = User::query()
             ->selectRaw('role, COUNT(*) as total')
             ->groupBy('role')
             ->pluck('total', 'role');
 
-        $users = User::with('institution:id,name')
+        $users = $baseQuery->with('institution:id,name')
             ->when($search !== '', fn ($q) =>
                 $q->where(function ($inner) use ($search) {
                     $inner->where('name', 'like', "%{$search}%")
@@ -52,6 +105,7 @@ class UserManagementController extends Controller
                 'institution_id' => $institutionId > 0 ? $institutionId : '',
                 'from' => $from,
                 'to' => $to,
+                'deactivated' => $showDeactivated,
             ],
             'roleCounts'   => [
                 'all' => User::count(),
@@ -135,6 +189,8 @@ class UserManagementController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
+        $oldValues = $user->only(['name', 'email', 'role', 'institution_id']);
+
         $data = $request->validate([
             'name'           => ['required', 'string', 'max:255'],
             'email'          => ['required', 'email', "unique:users,email,{$user->id}"],
@@ -167,6 +223,14 @@ class UserManagementController extends Controller
             ...($data['password'] ? ['password' => Hash::make($data['password'])] : []),
         ]);
 
+        $this->logUserManagementAudit(
+            request: $request,
+            target: $user,
+            action: 'admin_user_updated',
+            oldValues: $oldValues,
+            newValues: $user->only(['name', 'email', 'role', 'institution_id'])
+        );
+
         return redirect()->route('admin.users.index')
             ->with('success', 'User updated.');
     }
@@ -174,11 +238,61 @@ class UserManagementController extends Controller
     public function destroy(User $user): RedirectResponse
     {
         // Prevent self-delete
-        abort_if($user->id === request()->user()?->id, 403, 'Cannot delete your own account.');
+        abort_if($user->id === request()->user()?->id, 403, 'Cannot deactivate your own account.');
 
-        $user->delete();
+        $request = request();
+        $oldValues = ['deleted_at' => $user->deleted_at?->toDateTimeString()];
+
+        $user->delete(); // soft delete via SoftDeletes trait
+
+        $this->logUserManagementAudit(
+            request: $request,
+            target: $user,
+            action: 'admin_user_deactivated',
+            oldValues: $oldValues,
+            newValues: ['deleted_at' => $user->fresh()?->deleted_at?->toDateTimeString()]
+        );
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'User deleted.');
+            ->with('success', 'User deactivated.');
+    }
+
+    public function restore(int $id): RedirectResponse
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+        $request = request();
+        $oldValues = ['deleted_at' => $user->deleted_at?->toDateTimeString()];
+
+        $user->restore();
+
+        $this->logUserManagementAudit(
+            request: $request,
+            target: $user,
+            action: 'admin_user_restored',
+            oldValues: $oldValues,
+            newValues: ['deleted_at' => null]
+        );
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User reactivated.');
+    }
+
+    private function logUserManagementAudit(
+        Request $request,
+        User $target,
+        string $action,
+        ?array $oldValues,
+        ?array $newValues
+    ): void {
+        UserManagementAudit::create([
+            'actor_user_id' => $request->user()?->id,
+            'target_user_id' => $target->id,
+            'action' => $action,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'ip_address' => $request->ip(),
+            'user_agent' => (string) $request->userAgent(),
+            'performed_at' => now(),
+        ]);
     }
 }

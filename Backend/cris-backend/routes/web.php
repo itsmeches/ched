@@ -105,6 +105,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('accounts.hierarchy');
         Route::post('/accounts', [HierarchicalAccountController::class, 'store'])
             ->name('accounts.store');
+
+        // Manage subordinate accounts (creator-owned)
+        Route::get('/accounts/{user}/edit', [HierarchicalAccountController::class, 'edit'])
+            ->name('accounts.edit');
+        Route::put('/accounts/{user}', [HierarchicalAccountController::class, 'update'])
+            ->name('accounts.update');
+        Route::post('/accounts/{user}/reset-password', [HierarchicalAccountController::class, 'resetPassword'])
+            ->name('accounts.reset-password');
+        Route::delete('/accounts/{user}', [HierarchicalAccountController::class, 'deactivate'])
+            ->name('accounts.deactivate');
     });
 
     // ── SUPER ADMIN ───────────────────────────────────────────────────────────
@@ -113,6 +123,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('users', UserManagementController::class)
             ->except(['show']);
+
+        Route::get('users/audits', [UserManagementController::class, 'audits'])
+            ->name('users.audits');
+
+        Route::post('users/{user}/restore', [UserManagementController::class, 'restore'])
+            ->name('users.restore');
 
         Route::resource('institutions', InstitutionManagementController::class)
             ->except(['show']);

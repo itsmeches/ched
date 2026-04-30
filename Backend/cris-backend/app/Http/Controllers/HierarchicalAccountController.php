@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Institution;
 use App\Models\User;
+use App\Models\UserManagementAudit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -179,15 +181,16 @@ class HierarchicalAccountController extends Controller
     private function hierarchyTabs(User $creator): array
     {
         if ($creator->isCHED()) {
-            $rows = User::query()
+            $rows = User::withTrashed()
                 ->with('institution:id,name')
                 ->where('role', User::ROLE_HEI)
                 ->where('ched_id', $creator->id)
                 ->orderBy('name')
-                ->get(['id', 'name', 'email', 'institution_id', 'created_at']);
+                ->get(['id', 'name', 'email', 'institution_id', 'created_by', 'created_at', 'deleted_at']);
 
-            $rows->transform(function (User $row) {
+            $rows->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', 'CHED');
+                $row->setAttribute('can_manage', $row->created_by === $creator->id);
                 return $row;
             });
 
@@ -200,19 +203,20 @@ class HierarchicalAccountController extends Controller
         }
 
         if ($creator->role === User::ROLE_HEI) {
-            $facultyRows = User::query()
+            $facultyRows = User::withTrashed()
                 ->with('institution:id,name')
                 ->where('role', User::ROLE_FACULTY)
                 ->where('hei_id', $creator->id)
                 ->orderBy('name')
-                ->get(['id', 'name', 'email', 'institution_id', 'created_at']);
+                ->get(['id', 'name', 'email', 'institution_id', 'created_by', 'created_at', 'deleted_at']);
 
-            $facultyRows->transform(function (User $row) {
+            $facultyRows->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', 'HEI');
+                $row->setAttribute('can_manage', $row->created_by === $creator->id);
                 return $row;
             });
 
-            $studentsRows = User::query()
+            $studentsRows = User::withTrashed()
                 ->with(['institution:id,name', 'faculty:id,name'])
                 ->where('role', User::ROLE_STUDENT)
                 ->where(function ($query) use ($creator) {
@@ -220,10 +224,11 @@ class HierarchicalAccountController extends Controller
                         ->orWhereHas('faculty', fn ($faculty) => $faculty->where('hei_id', $creator->id));
                 })
                 ->orderBy('name')
-                ->get(['id', 'name', 'email', 'institution_id', 'faculty_id', 'created_at']);
+                ->get(['id', 'name', 'email', 'institution_id', 'faculty_id', 'created_by', 'created_at', 'deleted_at']);
 
-            $studentsRows->transform(function (User $row) {
+            $studentsRows->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', $row->faculty?->name ?? 'Unknown Faculty');
+                $row->setAttribute('can_manage', $row->created_by === $creator->id);
                 return $row;
             });
 
@@ -244,15 +249,16 @@ class HierarchicalAccountController extends Controller
         }
 
         if ($creator->isFaculty()) {
-            $rows = User::query()
+            $rows = User::withTrashed()
                 ->with('institution:id,name')
                 ->where('role', User::ROLE_STUDENT)
                 ->where('faculty_id', $creator->id)
                 ->orderBy('name')
-                ->get(['id', 'name', 'email', 'institution_id', 'created_at']);
+                ->get(['id', 'name', 'email', 'institution_id', 'created_by', 'created_at', 'deleted_at']);
 
             $rows->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', $creator->name);
+                $row->setAttribute('can_manage', $row->created_by === $creator->id);
                 return $row;
             });
 
@@ -265,5 +271,105 @@ class HierarchicalAccountController extends Controller
         }
 
         return [];
+    }
+
+    public function edit(Request $request, User $user): Response|RedirectResponse
+    {
+        Gate::authorize('update', $user);
+
+        return Inertia::render('Accounts/Edit', [
+            'account' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+        ]);
+    }
+
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        Gate::authorize('update', $user);
+
+        $oldValues = $user->only(['name', 'email']);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email,' . $user->id],
+        ]);
+
+        $user->update($data);
+
+        $this->logUserManagementAudit(
+            request: $request,
+            target: $user,
+            action: 'hierarchy_account_updated',
+            oldValues: $oldValues,
+            newValues: $user->only(['name', 'email'])
+        );
+
+        return redirect()->route('accounts.hierarchy')
+            ->with('success', 'Account updated successfully.');
+    }
+
+    public function resetPassword(Request $request, User $user): RedirectResponse
+    {
+        Gate::authorize('resetPassword', $user);
+
+        $data = $request->validate([
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ]);
+
+        $user->update(['password' => Hash::make($data['password'])]);
+
+        $this->logUserManagementAudit(
+            request: $request,
+            target: $user,
+            action: 'hierarchy_password_reset',
+            oldValues: null,
+            newValues: ['password_reset' => true]
+        );
+
+        return redirect()->route('accounts.hierarchy')
+            ->with('success', 'Password reset successfully.');
+    }
+
+    public function deactivate(Request $request, User $user): RedirectResponse
+    {
+        Gate::authorize('deactivate', $user);
+
+        $oldValues = ['deleted_at' => $user->deleted_at?->toDateTimeString()];
+
+        $user->delete(); // soft delete
+
+        $this->logUserManagementAudit(
+            request: $request,
+            target: $user,
+            action: 'hierarchy_account_deactivated',
+            oldValues: $oldValues,
+            newValues: ['deleted_at' => $user->fresh()?->deleted_at?->toDateTimeString()]
+        );
+
+        return redirect()->route('accounts.hierarchy')
+            ->with('success', 'Account deactivated successfully.');
+    }
+
+    private function logUserManagementAudit(
+        Request $request,
+        User $target,
+        string $action,
+        ?array $oldValues,
+        ?array $newValues
+    ): void {
+        UserManagementAudit::create([
+            'actor_user_id' => $request->user()?->id,
+            'target_user_id' => $target->id,
+            'action' => $action,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'ip_address' => $request->ip(),
+            'user_agent' => (string) $request->userAgent(),
+            'performed_at' => now(),
+        ]);
     }
 }

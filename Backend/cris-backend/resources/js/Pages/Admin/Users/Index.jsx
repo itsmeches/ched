@@ -1,4 +1,4 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+﻿import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminFilterCard from '@/Components/Admin/AdminFilterCard';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import AdminStatCardGrid from '@/Components/Admin/AdminStatCardGrid';
@@ -26,6 +26,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
     const [search, setSearch] = useState(filters.search ?? '');
     const [role, setRole] = useState(filters.role ?? '');
     const [institutionId, setInstitutionId] = useState(filters.institution_id ?? '');
+    const [deactivated, setDeactivated] = useState(Boolean(filters.deactivated));
     const [joinedDateRange, setJoinedDateRange] = useState(
         filters.from && filters.to ? [dayjs(filters.from), dayjs(filters.to)] : null,
     );
@@ -91,12 +92,18 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
             align: 'right',
             render: (_, user) => (
                 <Space>
-                    <Button type="link" onClick={() => router.visit(route('admin.users.edit', user.id))}>Edit</Button>
-                    <Button danger type="link" onClick={() => deleteUser(user.id)}>Delete</Button>
+                    {deactivated ? (
+                        <Button type="link" onClick={() => restoreUser(user.id)}>Restore</Button>
+                    ) : (
+                        <>
+                            <Button type="link" onClick={() => router.visit(route('admin.users.edit', user.id))}>Edit</Button>
+                            <Button danger type="link" onClick={() => deleteUser(user.id)}>Deactivate</Button>
+                        </>
+                    )}
                 </Space>
             ),
         },
-    ], []);
+    ], [deactivated]);
 
     function applyFilter() {
         router.get(route('admin.users.index'), {
@@ -105,6 +112,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
             institution_id: institutionId,
             from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '',
             to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '',
+            deactivated: deactivated ? 1 : 0,
         }, { preserveState: true, replace: true });
     }
 
@@ -117,6 +125,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
             institution_id: institutionId,
             from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '',
             to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '',
+            deactivated: deactivated ? 1 : 0,
         }, { preserveState: true, replace: true });
     }
 
@@ -124,6 +133,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
         setSearch('');
         setRole('');
         setInstitutionId('');
+        setDeactivated(false);
         setJoinedDateRange(null);
 
         router.get(route('admin.users.index'), {
@@ -132,15 +142,16 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
             institution_id: '',
             from: '',
             to: '',
+            deactivated: 0,
         }, { preserveState: true, replace: true });
     }
 
     function deleteUser(id) {
         Modal.confirm({
-            title: 'Delete this user?',
+            title: 'Deactivate this user?',
             icon: <ExclamationCircleOutlined />,
-            content: 'This action cannot be undone.',
-            okText: 'Delete',
+            content: 'The account will be soft-deleted and can be restored later.',
+            okText: 'Deactivate',
             okButtonProps: { danger: true },
             onOk: () => {
                 const previous = tableData;
@@ -149,14 +160,27 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
                 router.delete(route('admin.users.destroy', id), {
                     preserveScroll: true,
                     onSuccess: () => {
-                        message.success('User deleted.');
+                        message.success('User deactivated.');
                         router.reload({ only: ['users'] });
                     },
                     onError: () => {
                         setTableData(previous);
-                        message.error('Delete failed. Restored previous table state.');
+                        message.error('Deactivate failed. Restored previous table state.');
                     },
                 });
+            },
+        });
+    }
+
+    function restoreUser(id) {
+        router.post(route('admin.users.restore', id), {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                message.success('User reactivated.');
+                router.reload({ only: ['users'] });
+            },
+            onError: () => {
+                message.error('Restore failed.');
             },
         });
     }
@@ -167,11 +191,16 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
                 <AdminPageHeader
                     title="User Management"
                     actions={(
-                        <Link href={route('admin.users.create')}>
-                            <Button size="large" type="primary" icon={<PlusOutlined />}>
-                                Create User
-                            </Button>
-                        </Link>
+                        <Space>
+                            <Link href={route('admin.users.audits')}>
+                                <Button size="large">View Audits</Button>
+                            </Link>
+                            <Link href={route('admin.users.create')}>
+                                <Button size="large" type="primary" icon={<PlusOutlined />}>
+                                    Create User
+                                </Button>
+                            </Link>
+                        </Space>
                     )}
                 />
             )}
@@ -239,6 +268,19 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
                                     />
                                 </Col>
                                 <Col xs={24} md={8}>
+                                    <Select
+                                        size="large"
+                                        aria-label="Filter active or deactivated users"
+                                        value={deactivated ? 'deactivated' : 'active'}
+                                        options={[
+                                            { value: 'active', label: 'Active users' },
+                                            { value: 'deactivated', label: 'Deactivated users' },
+                                        ]}
+                                        onChange={(value) => setDeactivated(value === 'deactivated')}
+                                        style={{ width: '100%' }}
+                                    />
+                                </Col>
+                                <Col xs={24} md={8}>
                                     <DatePicker.RangePicker
                                         size="large"
                                         aria-label="Filter users by join date"
@@ -263,9 +305,9 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
 
                     <AdminTableCard
                         title={roleLabelMap[role || 'all']}
-                        summary={`${users.total} user${users.total === 1 ? '' : 's'} in this category`}
+                        summary={`${users.total} ${deactivated ? 'deactivated' : 'active'} user${users.total === 1 ? '' : 's'} in this category`}
                     >
-                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, institution_id: institutionId, from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '', to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '', page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: 'No users matched your filter criteria.' }} />
+                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, institution_id: institutionId, from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '', to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '', deactivated: deactivated ? 1 : 0, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: 'No users matched your filter criteria.' }} />
                     </AdminTableCard>
             </div>
         </AuthenticatedLayout>

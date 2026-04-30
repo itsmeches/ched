@@ -8,6 +8,7 @@ use App\Models\Discipline;
 use App\Models\EditPermissionRequest;
 use App\Models\Institution;
 use App\Models\Keyword;
+use App\Models\ResearchHistory;
 use App\Models\ResearchCategory;
 use App\Models\ResearchProposal;
 use App\Models\ResearchProposalHistory;
@@ -286,6 +287,7 @@ class ResearchProposalController extends Controller
         $this->syncKeywords($proposal, $normalizedKeywords);
 
         $this->logHistory($proposal, $request->user()->id, 'created', null, $this->trackedValues($proposal));
+        $this->logResearchHistory($proposal, $request->user(), 'submitted');
 
         return redirect()->route('research.show', ['proposal' => $proposal->id])
             ->with('success', 'Research paper submitted for faculty review.');
@@ -310,6 +312,7 @@ class ResearchProposalController extends Controller
         }
 
         $proposal->load(['submitter:id,name', 'viewer:id,name', 'reviewer:id,name', 'approver:id,name', 'rejector:id,name', 'institution:id,name']);
+        $proposal->load(['researchHistories.actor:id,name']);
 
         $lastActionBy = $proposal->submitter?->name;
         $lastActionAt = $proposal->submitted_at ?? $proposal->created_at;
@@ -367,6 +370,17 @@ class ResearchProposalController extends Controller
 
         return Inertia::render('Research/Show', [
             'proposal'            => $proposal,
+            'researchHistory'     => $proposal->researchHistories
+                ->map(fn (ResearchHistory $entry) => [
+                    'id' => $entry->id,
+                    'action' => $entry->action,
+                    'role' => $entry->role,
+                    'remarks' => $entry->remarks,
+                    'created_at' => $entry->created_at,
+                    'performed_by' => $entry->performed_by,
+                    'actor_name' => $entry->actor?->name,
+                ])
+                ->values(),
             'canEdit'             => $user?->can('update', $proposal) ?? false,
             'canReview'           => $user?->can('review', $proposal) ?? false,
             'canDelete'           => $user?->can('delete', $proposal) ?? false,
@@ -450,6 +464,7 @@ class ResearchProposalController extends Controller
 
         $newValues = $this->trackedValues($proposal->fresh());
         $this->logHistory($proposal, $request->user()->id, 'updated', $oldValues, $newValues);
+        $this->logResearchHistory($proposal, $request->user(), 'edited');
 
         // Consume the approved edit permission so the lock re-engages after this edit
         $proposal->editPermissionRequests()
@@ -494,6 +509,7 @@ class ResearchProposalController extends Controller
             'status' => $proposal->status,
             'submitted_at' => $proposal->submitted_at,
         ]);
+        $this->logResearchHistory($proposal, $user, 'submitted', 'Resubmitted after revision.');
 
         return redirect()->route('research.show', ['proposal' => $proposal->id])
             ->with('success', 'Submission resubmitted and routed back to Faculty review.');
@@ -654,6 +670,12 @@ class ResearchProposalController extends Controller
             'status'   => $proposal->status,
             'comments' => $proposal->comments,
         ]);
+        $this->logResearchHistory(
+            $proposal,
+            $reviewer,
+            $request->action === 'approve' ? 'approved' : 'rejected',
+            $request->action === 'reject' ? (string) $request->comments : null,
+        );
 
         $proposal->loadMissing('submitter:id,name,email');
 
@@ -781,6 +803,22 @@ class ResearchProposalController extends Controller
             'old_values'           => $oldValues,
             'new_values'           => $newValues,
             'performed_at'         => now(),
+        ]);
+    }
+
+    private function logResearchHistory(
+        ResearchProposal $proposal,
+        ?User $actor,
+        string $action,
+        ?string $remarks = null,
+    ): void {
+        ResearchHistory::create([
+            'research_id' => $proposal->id,
+            'action' => $action,
+            'performed_by' => $actor?->id,
+            'role' => $actor?->role ?? 'system',
+            'remarks' => $remarks,
+            'created_at' => now(),
         ]);
     }
 

@@ -158,6 +158,11 @@ class ResearchProposal extends Model
         return $this->hasMany(ResearchProposalHistory::class)->orderByDesc('performed_at');
     }
 
+    public function researchHistories(): HasMany
+    {
+        return $this->hasMany(ResearchHistory::class, 'research_id')->orderByDesc('created_at');
+    }
+
     public function isPending(): bool
     {
         return in_array($this->status, self::PENDING_STATUSES, true);

@@ -2,11 +2,11 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { formatDateTime } from '@/utils/date';
-import { Alert, Button, Card, Divider, Input, Modal, Popconfirm, Space, Tag, Typography, message } from 'antd';
+import { Alert, Button, Card, Divider, Input, Modal, Popconfirm, Space, Tag, Timeline, Typography, message } from 'antd';
 import { DownloadOutlined, FilePdfOutlined, KeyOutlined, LockOutlined } from '@ant-design/icons';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-export default function ResearchShow({ proposal, canEdit, canReview, canDelete, editPermission, pendingEditRequests }) {
+export default function ResearchShow({ proposal, researchHistory = [], canEdit, canReview, canDelete, editPermission, pendingEditRequests }) {
     const { flash, auth } = usePage().props;
     const deleteForm = useForm({});
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -17,6 +17,7 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete, 
         error: '',
     });
     const [pdfOpen, setPdfOpen] = useState(false);
+    const [showRaw, setShowRaw] = useState(false);
     const pdfCardRef = useRef(null);
     const editPermForm = useForm({ reason: '' });
 
@@ -168,6 +169,52 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete, 
                 ? 'CHED Reject Submission'
                 : 'Reject Submission';
 
+    const actionMeta = {
+        submitted: { label: 'Submitted', color: 'blue' },
+        approved: { label: 'Approved', color: 'green' },
+        rejected: { label: 'Rejected', color: 'red' },
+        edited: { label: 'Edited', color: 'gold' },
+    };
+
+    const roleColor = {
+        student: 'geekblue',
+        faculty: 'cyan',
+        hei: 'blue',
+        ched: 'volcano',
+        super_admin: 'purple',
+        system: 'default',
+    };
+
+    const groupedResearchHistory = useMemo(() => {
+        const toDateKey = (value) => {
+            if (!value) return '';
+            const str = String(value);
+            return str.length >= 10 ? str.slice(0, 10) : str;
+        };
+
+        return (researchHistory || []).reduce((acc, item) => {
+            const previous = acc[acc.length - 1];
+            const sameDate = previous && previous.date_key === toDateKey(item.created_at);
+            const sameAction = previous && previous.action === item.action;
+
+            if (sameDate && sameAction) {
+                previous.count += 1;
+                previous.latest_created_at = item.created_at;
+                previous.remarks = previous.remarks || item.remarks;
+                return acc;
+            }
+
+            acc.push({
+                ...item,
+                count: 1,
+                date_key: toDateKey(item.created_at),
+                latest_created_at: item.created_at,
+            });
+
+            return acc;
+        }, []);
+    }, [researchHistory]);
+
     return (
         <AuthenticatedLayout header={
             <div className="flex items-center gap-3">
@@ -312,6 +359,48 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete, 
                             />
                         </Card>
                     )}
+
+                    <Card
+                        className="admin-dashboard-shell"
+                        bordered={false}
+                        title={<Typography.Title level={5} style={{ margin: 0 }}>Research Timeline</Typography.Title>}
+                        extra={<Button size="small" onClick={() => setShowRaw(!showRaw)}>{showRaw ? 'Show Grouped' : 'Show Raw'}</Button>}
+                    >
+                        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 14 }}>
+                            History for this paper only.
+                        </Typography.Text>
+
+                        {(showRaw ? researchHistory : groupedResearchHistory).length === 0 ? (
+                            <Typography.Text type="secondary">No timeline entries yet.</Typography.Text>
+                        ) : (
+                            <Timeline
+                                items={(showRaw ? researchHistory : groupedResearchHistory).map((item) => ({
+                                    color: actionMeta[item.action]?.color ?? 'blue',
+                                    children: (
+                                        <Space direction="vertical" size={4}>
+                                            <Space size={[6, 6]} wrap>
+                                                <Tag color={actionMeta[item.action]?.color ?? 'blue'} style={{ marginInlineEnd: 0 }}>
+                                                    {actionMeta[item.action]?.label ?? String(item.action || '').replace('_', ' ').toUpperCase()}
+                                                </Tag>
+                                                <Tag color={roleColor[item.role] ?? 'default'} style={{ marginInlineEnd: 0 }}>
+                                                    {String(item.role || 'unknown').toUpperCase()}
+                                                </Tag>
+                                                {!showRaw && item.count > 1 ? (
+                                                    <Tag style={{ marginInlineEnd: 0 }}>x{item.count}</Tag>
+                                                ) : null}
+                                            </Space>
+                                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                By {item.actor_name || 'Unknown'} on {formatDateTime(showRaw ? item.created_at : item.latest_created_at) || '—'}
+                                            </Typography.Text>
+                                            {item.remarks ? (
+                                                <Typography.Text style={{ whiteSpace: 'pre-line' }}>{item.remarks}</Typography.Text>
+                                            ) : null}
+                                        </Space>
+                                    ),
+                                }))}
+                            />
+                        )}
+                    </Card>
 
                     {proposal.comments && (
                         <Alert
