@@ -9,6 +9,7 @@ use App\Http\Controllers\ResearchProposalController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\InstitutionManagementController;
 use App\Http\Controllers\Admin\KeywordManagementController;
+use App\Http\Controllers\Admin\ResearchTaxonomyManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/robots.txt', function () {
@@ -118,6 +119,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('keywords', KeywordManagementController::class)
             ->except(['show', 'create', 'edit']);
+
+        Route::get('taxonomy', [ResearchTaxonomyManagementController::class, 'index'])
+            ->name('taxonomy.index');
+        Route::post('taxonomy/categories', [ResearchTaxonomyManagementController::class, 'storeCategory'])
+            ->name('taxonomy.categories.store');
+        Route::put('taxonomy/categories/{category}', [ResearchTaxonomyManagementController::class, 'updateCategory'])
+            ->name('taxonomy.categories.update');
+        Route::delete('taxonomy/categories/{category}', [ResearchTaxonomyManagementController::class, 'destroyCategory'])
+            ->name('taxonomy.categories.destroy');
+
+        Route::post('taxonomy/disciplines', [ResearchTaxonomyManagementController::class, 'storeDiscipline'])
+            ->name('taxonomy.disciplines.store');
+        Route::put('taxonomy/disciplines/{discipline}', [ResearchTaxonomyManagementController::class, 'updateDiscipline'])
+            ->name('taxonomy.disciplines.update');
+        Route::delete('taxonomy/disciplines/{discipline}', [ResearchTaxonomyManagementController::class, 'destroyDiscipline'])
+            ->name('taxonomy.disciplines.destroy');
     });
 });
 

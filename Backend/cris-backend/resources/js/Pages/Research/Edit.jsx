@@ -11,7 +11,7 @@ function parseKeywordItems(value) {
         .filter(Boolean);
 }
 
-export default function ResearchEdit({ proposal, keywordOptions = [] }) {
+export default function ResearchEdit({ proposal, keywordOptions = [], disciplineOptions = [], researchCategoryGroups = [] }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
         _method:           'PUT',
@@ -24,7 +24,9 @@ export default function ResearchEdit({ proposal, keywordOptions = [] }) {
         co_author_phones:  proposal.co_author_phones  ?? '',
         school:            proposal.school            ?? '',
         year:       proposal.year       ?? new Date().getFullYear(),
-        category:   proposal.category   ?? '',
+        research_category: proposal.research_category ?? proposal.category ?? '',
+        category_type: proposal.category_type ?? '',
+        discipline: proposal.discipline_code ?? '',
         keywords:   proposal.keywords   ?? '',
         keyword_items: parseKeywordItems(proposal.keywords),
         abstract:   proposal.abstract   ?? '',
@@ -65,6 +67,8 @@ export default function ResearchEdit({ proposal, keywordOptions = [] }) {
                             processing={processing}
                             onSubmit={submit}
                             keywordOptions={keywordOptions}
+                            disciplineOptions={disciplineOptions}
+                            researchCategoryGroups={researchCategoryGroups}
                             submitLabel="Update Paper"
                             showCurrentFile={true}
                             currentFileName={proposal.file_path ? proposal.file_path.split('/').pop() : ''}

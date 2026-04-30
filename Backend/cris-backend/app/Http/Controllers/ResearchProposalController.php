@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreResearchProposalRequest;
 use App\Http\Requests\UpdateResearchProposalRequest;
+use App\Models\Discipline;
 use App\Models\EditPermissionRequest;
 use App\Models\Keyword;
+use App\Models\ResearchCategory;
 use App\Models\ResearchProposal;
 use App\Models\ResearchProposalHistory;
 use App\Models\User;
@@ -93,15 +95,10 @@ class ResearchProposalController extends Controller
                         ->where('user_id', $user->id));
             });
         } elseif ($user->role === \App\Models\User::ROLE_HEI) {
-            // HEI: papers linked to this HEI via direct linkage, faculty linkage, or institution fallback.
+            // HEI: proposals from faculty directly under this HEI, or from students whose faculty is under this HEI.
             $query->whereHas('submitter', function ($inner) use ($user) {
                 $inner->where('hei_id', $user->id)
-                    ->orWhere('id', $user->id)
-                    ->orWhere('institution_id', $user->institution_id)
-                    ->orWhereHas('faculty', function ($faculty) use ($user) {
-                        $faculty->where('hei_id', $user->id)
-                            ->orWhere('institution_id', $user->institution_id);
-                    });
+                    ->orWhereHas('faculty', fn ($faculty) => $faculty->where('hei_id', $user->id));
             });
         }
 
@@ -170,6 +167,8 @@ class ResearchProposalController extends Controller
 
         return Inertia::render('Research/Create', [
             'keywordOptions' => Keyword::query()->orderBy('name')->pluck('name'),
+            'disciplineOptions' => $this->disciplineOptions(),
+            'researchCategoryGroups' => $this->researchCategoryGroups(),
         ]);
     }
 
@@ -182,6 +181,9 @@ class ResearchProposalController extends Controller
         }
 
         $data = $request->validated();
+        $data['category'] = $data['research_category'];
+        $data['category_type'] = $this->resolveCategoryType($data['research_category']) ?? $data['category_type'] ?? null;
+        $data['discipline_code'] = $data['discipline'];
         $normalizedKeywords = $this->parseKeywords($data['keywords'] ?? null);
         $data['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
 
@@ -191,6 +193,7 @@ class ResearchProposalController extends Controller
         }
 
         unset($data['pdf_file']);
+        unset($data['discipline']);
 
         $proposal = ResearchProposal::create([
             ...$data,
@@ -335,6 +338,8 @@ class ResearchProposalController extends Controller
         return Inertia::render('Research/Edit', [
             'proposal' => $proposal,
             'keywordOptions' => Keyword::query()->orderBy('name')->pluck('name'),
+            'disciplineOptions' => $this->disciplineOptions(),
+            'researchCategoryGroups' => $this->researchCategoryGroups(),
         ]);
     }
 
@@ -346,6 +351,9 @@ class ResearchProposalController extends Controller
         }
 
         $data = $request->validated();
+        $data['category'] = $data['research_category'];
+        $data['category_type'] = $this->resolveCategoryType($data['research_category']) ?? $data['category_type'] ?? null;
+        $data['discipline_code'] = $data['discipline'];
         $normalizedKeywords = $this->parseKeywords($data['keywords'] ?? null);
         $data['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
 
@@ -359,6 +367,7 @@ class ResearchProposalController extends Controller
         }
 
         unset($data['pdf_file']);
+        unset($data['discipline']);
 
         $oldValues = $this->trackedValues($proposal);
 
@@ -595,9 +604,68 @@ class ResearchProposalController extends Controller
         return $proposal->only([
             'title', 'authors', 'author_email', 'author_phone',
             'co_authors', 'co_author_emails', 'co_author_phones',
-            'year', 'school', 'abstract', 'category', 'keywords',
+            'year', 'school', 'abstract', 'category', 'research_category', 'category_type', 'discipline_code', 'keywords',
             'status', 'comments',
         ]);
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function disciplineOptions(): array
+    {
+        return Discipline::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('code')
+            ->get(['code', 'name'])
+            ->map(fn (Discipline $discipline) => [
+                'value' => $discipline->code,
+                'label' => $discipline->code . ' - ' . $discipline->name,
+            ])
+            ->all();
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function researchCategoryGroups(): array
+    {
+        $categories = ResearchCategory::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('label')
+            ->get(['type', 'value', 'label']);
+
+        $labelByType = [
+            'data_type' => 'By Data Type',
+            'purpose' => 'By Purpose',
+            'method' => 'By Method',
+        ];
+
+        return collect($labelByType)
+            ->map(function (string $groupLabel, string $type) use ($categories) {
+                $options = $categories
+                    ->where('type', $type)
+                    ->map(fn (ResearchCategory $category) => [
+                        'label' => $category->label,
+                        'value' => $category->value,
+                    ])
+                    ->values()
+                    ->all();
+
+                return [
+                    'label' => $groupLabel,
+                    'type' => $type,
+                    'options' => $options,
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private function resolveCategoryType(string $categoryValue): ?string
+    {
+        return ResearchCategory::query()
+            ->where('value', $categoryValue)
+            ->where('is_active', true)
+            ->value('type');
     }
 
     /**

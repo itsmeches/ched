@@ -148,7 +148,10 @@ class DashboardController extends Controller
         $user = $request->user();
 
         $base = ResearchProposal::query()
-            ->whereHas('submitter', fn ($query) => $query->where('hei_id', $user->id));
+            ->whereHas('submitter', fn ($query) => $query
+                ->where('hei_id', $user->id)
+                ->orWhereHas('faculty', fn ($f) => $f->where('hei_id', $user->id))
+            );
 
         $stats = [
             'total' => (clone $base)->count(),
@@ -168,7 +171,10 @@ class DashboardController extends Controller
         $forReview = ResearchProposal::query()
             ->with(['submitter:id,name', 'institution:id,name'])
             ->where('status', ResearchProposal::STATUS_UNDER_REVIEW_HEI)
-            ->whereHas('submitter', fn ($query) => $query->where('hei_id', $user->id))
+            ->whereHas('submitter', fn ($query) => $query
+                ->where('hei_id', $user->id)
+                ->orWhereHas('faculty', fn ($f) => $f->where('hei_id', $user->id))
+            )
             ->orderByDesc('submitted_at')
             ->orderByDesc('updated_at')
             ->limit(12)

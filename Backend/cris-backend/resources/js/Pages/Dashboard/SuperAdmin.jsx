@@ -6,7 +6,7 @@ import {
     Skeleton,
     Space,
 } from 'antd';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { lazy, Suspense } from 'react';
 
 const SuperAdminHero = lazy(() => import('./Partials/SuperAdminHero'));
@@ -51,6 +51,23 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminStats stats={stats} />
                     </Suspense>
+
+                    <Card title="Admin Shortcuts" className="admin-dashboard-shell">
+                        <Space wrap>
+                            <Link href={route('admin.taxonomy.index')}>
+                                <Button type="primary">Research Taxonomy</Button>
+                            </Link>
+                            <Link href={route('admin.users.index')}>
+                                <Button>User Management</Button>
+                            </Link>
+                            <Link href={route('admin.institutions.index')}>
+                                <Button>Institutions</Button>
+                            </Link>
+                            <Link href={route('admin.keywords.index')}>
+                                <Button>Keywords</Button>
+                            </Link>
+                        </Space>
+                    </Card>
 
                     <Card title="Unread Notifications" className="admin-dashboard-shell">
                         <div style={{ marginBottom: 12 }}>

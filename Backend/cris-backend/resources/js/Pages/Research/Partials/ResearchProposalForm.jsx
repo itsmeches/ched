@@ -38,6 +38,8 @@ export default function ResearchProposalForm({
     processing,
     onSubmit,
     keywordOptions = [],
+    disciplineOptions = [],
+    researchCategoryGroups = [],
     submitLabel,
     currentFileName,
     showCurrentFile = false,
@@ -204,11 +206,41 @@ export default function ResearchProposalForm({
 
             <Row gutter={16}>
                 <Col xs={24} md={12}>
-                    <Form.Item label="Category" validateStatus={errors.category ? 'error' : ''} help={errors.category}>
-                        <Input size="large" value={data.category} onChange={(event) => setData('category', event.target.value)} placeholder="Education, Environment, Health" />
+                    <Form.Item label="Discipline" validateStatus={errors.discipline ? 'error' : ''} help={errors.discipline}>
+                        <Select
+                            size="large"
+                            value={data.discipline || undefined}
+                            placeholder="Select discipline"
+                            options={disciplineOptions}
+                            onChange={(value) => setData('discipline', String(value ?? ''))}
+                        />
                     </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
+                    <Form.Item
+                        label="Research Category"
+                        validateStatus={errors.research_category || errors.category_type ? 'error' : ''}
+                        help={errors.research_category || errors.category_type}
+                    >
+                        <Select
+                            size="large"
+                            value={data.research_category || undefined}
+                            placeholder="Select a research category"
+                            options={researchCategoryGroups.map((group) => ({
+                                label: group.label,
+                                options: group.options,
+                            }))}
+                            onChange={(value) => {
+                                const selectedValue = String(value ?? '');
+                                setData((prev) => ({
+                                    ...prev,
+                                    research_category: selectedValue,
+                                }));
+                            }}
+                        />
+                    </Form.Item>
+                </Col>
+                <Col xs={24} md={24}>
                     <Form.Item label="Keywords" validateStatus={errors.keywords ? 'error' : ''} help={errors.keywords}>
                         <Select
                             mode="tags"

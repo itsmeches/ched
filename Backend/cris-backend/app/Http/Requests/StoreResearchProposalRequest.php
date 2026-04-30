@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreResearchProposalRequest extends FormRequest
 {
@@ -26,7 +27,9 @@ class StoreResearchProposalRequest extends FormRequest
             'co_author_phones' => ['nullable', 'string', 'max:500', 'regex:' . self::PHONE_LIST_PATTERN],
             'abstract'   => ['required', 'string'],
             'keywords'   => ['nullable', 'string', 'max:500'],
-            'category'   => ['required', 'string', 'max:100'],
+            'research_category' => ['required', 'string', Rule::exists('research_categories', 'value')->where('is_active', true)],
+            'category_type' => ['nullable', 'string'],
+            'discipline' => ['required', 'string', Rule::exists('disciplines', 'code')->where('is_active', true)],
             'school'     => ['required', 'string', 'max:255'],
             'year'       => ['required', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
             'pdf_file'   => ['required', 'file', 'mimes:pdf', 'max:10240'], // 10 MB

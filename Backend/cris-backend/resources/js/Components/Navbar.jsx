@@ -41,6 +41,7 @@ export default function Navbar() {
                 { label: 'User Management', href: route('admin.users.index'), activePatterns: ['admin.users.*'] },
                 { label: 'Institutions', href: route('admin.institutions.index'), activePatterns: ['admin.institutions.*'] },
                 { label: 'Keywords', href: route('admin.keywords.index'), activePatterns: ['admin.keywords.*'] },
+                { label: 'Research Taxonomy', href: route('admin.taxonomy.index'), activePatterns: ['admin.taxonomy.*'] },
                 { label: 'History', href: route('history.index'), activePatterns: ['history.index'] },
             ];
         }

@@ -22,6 +22,9 @@ use Illuminate\Support\Facades\Auth;
  * @property string $abstract
  * @property int|null $institution_id
  * @property string|null $category
+ * @property string|null $research_category
+ * @property string|null $category_type
+ * @property string|null $discipline_code
  * @property string|null $keywords
  * @property string $status
  * @property string|null $file_path
@@ -80,6 +83,9 @@ class ResearchProposal extends Model
         'abstract',
         'institution_id',
         'category',
+        'research_category',
+        'category_type',
+        'discipline_code',
         'keywords',
         'status',
         'file_path',
