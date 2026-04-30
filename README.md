@@ -1,4 +1,4 @@
-# Calabarzon Research Information System (CRIS)
+# CALABARZON Research Information System (CRIS)
 
 CRIS is a role-based research management platform for handling research proposal submission, review, approval, and archival across the CALABARZON region. It is built around a Laravel 11 backend with an Inertia.js + React interface, and supports three primary user groups: Super Admin, CHED reviewers, and HEI researchers.
 
