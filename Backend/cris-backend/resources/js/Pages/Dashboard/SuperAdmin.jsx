@@ -54,9 +54,6 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
 
                     <Card title="Admin Shortcuts" className="admin-dashboard-shell">
                         <Space wrap>
-                            <Link href={route('admin.taxonomy.index')}>
-                                <Button type="primary">Research Taxonomy</Button>
-                            </Link>
                             <Link href={route('admin.users.index')}>
                                 <Button>User Management</Button>
                             </Link>
@@ -66,6 +63,10 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
                             <Link href={route('admin.keywords.index')}>
                                 <Button>Keywords</Button>
                             </Link>
+                            <Link href={route('admin.taxonomy.index')}>
+                                <Button>Research Taxonomy</Button>
+                            </Link>
+                            
                         </Space>
                     </Card>
 
