@@ -15,7 +15,7 @@ export default function Edit({ mustVerifyEmail, status }) {
         >
             <Head title="Profile" />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                         <UpdateProfileInformationForm
                             mustVerifyEmail={mustVerifyEmail}
@@ -35,3 +35,4 @@ export default function Edit({ mustVerifyEmail, status }) {
         </AuthenticatedLayout>
     );
 }
+

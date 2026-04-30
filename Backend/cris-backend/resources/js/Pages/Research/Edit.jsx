@@ -50,7 +50,7 @@ export default function ResearchEdit({ proposal, keywordOptions = [], discipline
     return (
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Edit Research Paper</h2>}>
             <Head title="Edit Research Paper" />
-            <div className="space-y-6">
+            <div className="space-y-4">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
                     <Card className="admin-dashboard-shell" bordered={false}>
@@ -80,3 +80,4 @@ export default function ResearchEdit({ proposal, keywordOptions = [], discipline
         </AuthenticatedLayout>
     );
 }
+

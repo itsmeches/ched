@@ -40,7 +40,7 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Super Admin Dashboard</h2>}>
             <Head title="Super Admin Dashboard" />
 
-            <div className="space-y-8">
+            <div className="space-y-5">
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminHero stats={stats} />
                     </Suspense>

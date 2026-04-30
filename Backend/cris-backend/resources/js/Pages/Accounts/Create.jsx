@@ -57,7 +57,7 @@ export default function AccountsCreate({ creatorRole, targetRole, targetRoleLabe
         >
             <Head title={`Create ${targetRoleLabel} Account`} />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                 {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                 {flash?.error && <Alert type="error" showIcon message={flash.error} />}
                 {errors?.role_linkage && <Alert type="error" showIcon message={errors.role_linkage} />}
@@ -194,3 +194,4 @@ export default function AccountsCreate({ creatorRole, targetRole, targetRoleLabe
         </AuthenticatedLayout>
     );
 }
+

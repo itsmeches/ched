@@ -43,7 +43,7 @@ export default function CHEDDecisions({ decisions }) {
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">My Decisions</h2>}>
             <Head title="My Decisions" />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                 <Card className="admin-dashboard-shell" bordered={false}>
                     <Typography.Title level={4} style={{ marginBottom: 6 }}>
                         My Decisions
@@ -71,3 +71,4 @@ export default function CHEDDecisions({ decisions }) {
         </AuthenticatedLayout>
     );
 }
+

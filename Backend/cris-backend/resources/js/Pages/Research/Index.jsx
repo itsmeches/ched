@@ -88,7 +88,7 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Research Papers</h2>}>
             <Head title="Research Papers" />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
@@ -205,3 +205,4 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
         </AuthenticatedLayout>
     );
 }
+

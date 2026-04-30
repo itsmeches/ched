@@ -13,19 +13,18 @@ use Inertia\Response;
 
 class ResearchTaxonomyManagementController extends Controller
 {
-    public function index(): Response
+    public function index(): RedirectResponse
+    {
+        return redirect()->route('admin.taxonomy.categories.index');
+    }
+
+    public function categoriesPage(): Response
     {
         $categoryUsageCounts = ResearchProposal::query()
             ->selectRaw('research_category, COUNT(*) as aggregate')
             ->whereNotNull('research_category')
             ->groupBy('research_category')
             ->pluck('aggregate', 'research_category');
-
-        $disciplineUsageCounts = ResearchProposal::query()
-            ->selectRaw('discipline_code, COUNT(*) as aggregate')
-            ->whereNotNull('discipline_code')
-            ->groupBy('discipline_code')
-            ->pluck('aggregate', 'discipline_code');
 
         $categories = ResearchCategory::query()
             ->select(['id', 'type', 'value', 'label', 'sort_order', 'is_active'])
@@ -40,6 +39,24 @@ class ResearchTaxonomyManagementController extends Controller
             })
             ->values();
 
+        return Inertia::render('Admin/Taxonomy/Categories', [
+            'categories' => $categories,
+            'categoryTypes' => [
+                ['label' => 'By Data Type', 'value' => 'data_type'],
+                ['label' => 'By Purpose', 'value' => 'purpose'],
+                ['label' => 'By Method', 'value' => 'method'],
+            ],
+        ]);
+    }
+
+    public function disciplinesPage(): Response
+    {
+        $disciplineUsageCounts = ResearchProposal::query()
+            ->selectRaw('discipline_code, COUNT(*) as aggregate')
+            ->whereNotNull('discipline_code')
+            ->groupBy('discipline_code')
+            ->pluck('aggregate', 'discipline_code');
+
         $disciplines = Discipline::query()
             ->select(['id', 'code', 'name', 'sort_order', 'is_active'])
             ->orderBy('sort_order')
@@ -53,14 +70,8 @@ class ResearchTaxonomyManagementController extends Controller
             })
             ->values();
 
-        return Inertia::render('Admin/Taxonomy/Index', [
-            'categories' => $categories,
+        return Inertia::render('Admin/Taxonomy/Disciplines', [
             'disciplines' => $disciplines,
-            'categoryTypes' => [
-                ['label' => 'By Data Type', 'value' => 'data_type'],
-                ['label' => 'By Purpose', 'value' => 'purpose'],
-                ['label' => 'By Method', 'value' => 'method'],
-            ],
         ]);
     }
 
@@ -80,7 +91,7 @@ class ResearchTaxonomyManagementController extends Controller
             'is_active' => $data['is_active'] ?? true,
         ]);
 
-        return redirect()->route('admin.taxonomy.index')->with('success', 'Research category created.');
+        return redirect()->route('admin.taxonomy.categories.index')->with('success', 'Research category created.');
     }
 
     public function updateCategory(Request $request, ResearchCategory $category): RedirectResponse
@@ -118,7 +129,7 @@ class ResearchTaxonomyManagementController extends Controller
                 ]);
         }
 
-        return redirect()->route('admin.taxonomy.index')->with('success', 'Research category updated.');
+        return redirect()->route('admin.taxonomy.categories.index')->with('success', 'Research category updated.');
     }
 
     public function destroyCategory(ResearchCategory $category): RedirectResponse
@@ -128,13 +139,13 @@ class ResearchTaxonomyManagementController extends Controller
             ->exists();
 
         if ($isInUse) {
-            return redirect()->route('admin.taxonomy.index')
+            return redirect()->route('admin.taxonomy.categories.index')
                 ->with('error', 'Cannot delete a research category that is currently used by submissions.');
         }
 
         $category->delete();
 
-        return redirect()->route('admin.taxonomy.index')->with('success', 'Research category deleted.');
+        return redirect()->route('admin.taxonomy.categories.index')->with('success', 'Research category deleted.');
     }
 
     public function storeDiscipline(Request $request): RedirectResponse
@@ -152,7 +163,7 @@ class ResearchTaxonomyManagementController extends Controller
             'is_active' => $data['is_active'] ?? true,
         ]);
 
-        return redirect()->route('admin.taxonomy.index')->with('success', 'Discipline created.');
+        return redirect()->route('admin.taxonomy.disciplines.index')->with('success', 'Discipline created.');
     }
 
     public function updateDiscipline(Request $request, Discipline $discipline): RedirectResponse
@@ -179,7 +190,7 @@ class ResearchTaxonomyManagementController extends Controller
                 ->update(['discipline_code' => $newCode]);
         }
 
-        return redirect()->route('admin.taxonomy.index')->with('success', 'Discipline updated.');
+        return redirect()->route('admin.taxonomy.disciplines.index')->with('success', 'Discipline updated.');
     }
 
     public function destroyDiscipline(Discipline $discipline): RedirectResponse
@@ -189,12 +200,12 @@ class ResearchTaxonomyManagementController extends Controller
             ->exists();
 
         if ($isInUse) {
-            return redirect()->route('admin.taxonomy.index')
+            return redirect()->route('admin.taxonomy.disciplines.index')
                 ->with('error', 'Cannot delete a discipline that is currently used by submissions.');
         }
 
         $discipline->delete();
 
-        return redirect()->route('admin.taxonomy.index')->with('success', 'Discipline deleted.');
+        return redirect()->route('admin.taxonomy.disciplines.index')->with('success', 'Discipline deleted.');
     }
 }

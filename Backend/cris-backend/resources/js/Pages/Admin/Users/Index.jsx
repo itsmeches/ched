@@ -6,8 +6,9 @@ import AdminTableCard from '@/Components/Admin/AdminTableCard';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Avatar, Button, Col, Input, Modal, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
+import { Alert, Avatar, Button, Col, DatePicker, Input, Modal, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
 const roleColorMap = { pending: 'orange', super_admin: 'purple', ched: '#0033a0', hei: '#0047d4', faculty: 'cyan', student: 'geekblue' };
 const roleLabelMap = {
@@ -20,10 +21,14 @@ const roleLabelMap = {
     student: 'Student',
 };
 
-export default function UsersIndex({ users, filters, roleCounts }) {
+export default function UsersIndex({ users, filters, roleCounts, institutions }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [role, setRole] = useState(filters.role ?? '');
+    const [institutionId, setInstitutionId] = useState(filters.institution_id ?? '');
+    const [joinedDateRange, setJoinedDateRange] = useState(
+        filters.from && filters.to ? [dayjs(filters.from), dayjs(filters.to)] : null,
+    );
     const [tableData, setTableData] = useState(users.data ?? []);
 
     const categoryItems = useMemo(() => [
@@ -94,13 +99,40 @@ export default function UsersIndex({ users, filters, roleCounts }) {
     ], []);
 
     function applyFilter() {
-        router.get(route('admin.users.index'), { search, role }, { preserveState: true, replace: true });
+        router.get(route('admin.users.index'), {
+            search,
+            role,
+            institution_id: institutionId,
+            from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '',
+            to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '',
+        }, { preserveState: true, replace: true });
     }
 
     function applyRoleCategory(nextRole) {
         const normalizedRole = nextRole === 'all' ? '' : nextRole;
         setRole(normalizedRole);
-        router.get(route('admin.users.index'), { search, role: normalizedRole }, { preserveState: true, replace: true });
+        router.get(route('admin.users.index'), {
+            search,
+            role: normalizedRole,
+            institution_id: institutionId,
+            from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '',
+            to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '',
+        }, { preserveState: true, replace: true });
+    }
+
+    function clearFilters() {
+        setSearch('');
+        setRole('');
+        setInstitutionId('');
+        setJoinedDateRange(null);
+
+        router.get(route('admin.users.index'), {
+            search: '',
+            role: '',
+            institution_id: '',
+            from: '',
+            to: '',
+        }, { preserveState: true, replace: true });
     }
 
     function deleteUser(id) {
@@ -146,9 +178,15 @@ export default function UsersIndex({ users, filters, roleCounts }) {
         >
             <Head title="Users" />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
+
+                    <AdminStatCardGrid
+                        items={categoryItems}
+                        activeKey={role || 'all'}
+                        onSelect={applyRoleCategory}
+                    />
 
                     <AdminFilterCard
                         title="Manage user accounts"
@@ -185,28 +223,52 @@ export default function UsersIndex({ users, filters, roleCounts }) {
                                         style={{ width: '100%' }}
                                     />
                                 </Col>
+                                <Col xs={24} md={8}>
+                                    <Select
+                                        size="large"
+                                        aria-label="Filter users by institution"
+                                        value={institutionId || undefined}
+                                        placeholder="All institutions"
+                                        allowClear
+                                        options={(institutions ?? []).map((institution) => ({
+                                            value: institution.id,
+                                            label: institution.name,
+                                        }))}
+                                        onChange={(value) => setInstitutionId(value ?? '')}
+                                        style={{ width: '100%' }}
+                                    />
+                                </Col>
+                                <Col xs={24} md={8}>
+                                    <DatePicker.RangePicker
+                                        size="large"
+                                        aria-label="Filter users by join date"
+                                        value={joinedDateRange}
+                                        onChange={(value) => setJoinedDateRange(value)}
+                                        style={{ width: '100%' }}
+                                    />
+                                </Col>
                                 <Col xs={24} md={4}>
                                     <Button size="large" block type="primary" onClick={applyFilter} icon={<TeamOutlined />}>
                                         Apply
+                                    </Button>
+                                </Col>
+                                <Col xs={24} md={4}>
+                                    <Button size="large" block onClick={clearFilters}>
+                                        Clear
                                     </Button>
                                 </Col>
                             </Row>
                         )}
                     />
 
-                    <AdminStatCardGrid
-                        items={categoryItems}
-                        activeKey={role || 'all'}
-                        onSelect={applyRoleCategory}
-                    />
-
                     <AdminTableCard
                         title={roleLabelMap[role || 'all']}
                         summary={`${users.total} user${users.total === 1 ? '' : 's'} in this category`}
                     >
-                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: 'No users matched your filter criteria.' }} />
+                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, institution_id: institutionId, from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '', to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '', page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: 'No users matched your filter criteria.' }} />
                     </AdminTableCard>
             </div>
         </AuthenticatedLayout>
     );
 }
+

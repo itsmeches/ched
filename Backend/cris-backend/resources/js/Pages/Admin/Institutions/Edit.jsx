@@ -15,7 +15,7 @@ export default function InstitutionsEdit({ institution }) {
     return (
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Edit Institution</h2>}>
             <Head title={`Edit ${institution.name}`} />
-            <div className="space-y-6">
+            <div className="space-y-4">
                     <Card className="admin-dashboard-shell" bordered={false}>
                         <Typography.Text type="secondary">Update institution details without leaving the management workflow.</Typography.Text>
                     </Card>
@@ -24,3 +24,4 @@ export default function InstitutionsEdit({ institution }) {
         </AuthenticatedLayout>
     );
 }
+

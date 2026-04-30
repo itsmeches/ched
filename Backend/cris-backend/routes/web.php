@@ -122,6 +122,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('taxonomy', [ResearchTaxonomyManagementController::class, 'index'])
             ->name('taxonomy.index');
+        Route::get('taxonomy/categories', [ResearchTaxonomyManagementController::class, 'categoriesPage'])
+            ->name('taxonomy.categories.index');
+        Route::get('taxonomy/disciplines', [ResearchTaxonomyManagementController::class, 'disciplinesPage'])
+            ->name('taxonomy.disciplines.index');
         Route::post('taxonomy/categories', [ResearchTaxonomyManagementController::class, 'storeCategory'])
             ->name('taxonomy.categories.store');
         Route::put('taxonomy/categories/{category}', [ResearchTaxonomyManagementController::class, 'updateCategory'])

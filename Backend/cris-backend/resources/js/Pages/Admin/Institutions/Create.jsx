@@ -15,7 +15,7 @@ export default function InstitutionsCreate() {
     return (
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Add Institution</h2>}>
             <Head title="Add Institution" />
-            <div className="space-y-6">
+            <div className="space-y-4">
                     <Card className="admin-dashboard-shell" bordered={false}>
                         <Typography.Text type="secondary">Create the school record first, then attach HEI user accounts to it.</Typography.Text>
                     </Card>
@@ -24,3 +24,4 @@ export default function InstitutionsCreate() {
         </AuthenticatedLayout>
     );
 }
+

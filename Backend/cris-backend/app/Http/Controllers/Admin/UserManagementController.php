@@ -17,17 +17,28 @@ class UserManagementController extends Controller
 {
     public function index(Request $request): Response
     {
+        $search = trim((string) $request->input('search', ''));
+        $role = trim((string) $request->input('role', ''));
+        $institutionId = (int) $request->input('institution_id', 0);
+        $from = trim((string) $request->input('from', ''));
+        $to = trim((string) $request->input('to', ''));
+
         $roleCounts = User::query()
             ->selectRaw('role, COUNT(*) as total')
             ->groupBy('role')
             ->pluck('total', 'role');
 
         $users = User::with('institution:id,name')
-            ->when($request->search, fn ($q, $s) =>
-                $q->where('name', 'like', "%{$s}%")
-                  ->orWhere('email', 'like', "%{$s}%")
+            ->when($search !== '', fn ($q) =>
+                $q->where(function ($inner) use ($search) {
+                    $inner->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })
             )
-            ->when($request->role, fn ($q, $r) => $q->where('role', $r))
+            ->when($role !== '', fn ($q) => $q->where('role', $role))
+            ->when($institutionId > 0, fn ($q) => $q->where('institution_id', $institutionId))
+            ->when($from !== '', fn ($q) => $q->whereDate('created_at', '>=', $from))
+            ->when($to !== '', fn ($q) => $q->whereDate('created_at', '<=', $to))
             ->orderByDesc('created_at')
             ->paginate(20)
             ->withQueryString();
@@ -35,7 +46,13 @@ class UserManagementController extends Controller
         return Inertia::render('Admin/Users/Index', [
             'users'        => $users,
             'institutions' => Institution::select('id', 'name')->get(),
-            'filters'      => $request->only(['search', 'role']),
+            'filters'      => [
+                'search' => $search,
+                'role' => $role,
+                'institution_id' => $institutionId > 0 ? $institutionId : '',
+                'from' => $from,
+                'to' => $to,
+            ],
             'roleCounts'   => [
                 'all' => User::count(),
                 'pending' => (int) ($roleCounts['pending'] ?? 0),

@@ -14,7 +14,7 @@ export default function UsersCreate({ institutions, roles }) {
     return (
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Create User Account</h2>}>
             <Head title="Create User" />
-            <div className="space-y-6">
+            <div className="space-y-4">
                     <Card className="admin-dashboard-shell" bordered={false}>
                         <Typography.Text type="secondary">The creation form opens in a drawer so you can stay close to the user list workflow.</Typography.Text>
                     </Card>
@@ -23,3 +23,4 @@ export default function UsersCreate({ institutions, roles }) {
         </AuthenticatedLayout>
     );
 }
+

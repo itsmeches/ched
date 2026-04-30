@@ -123,7 +123,7 @@ export default function InstitutionsIndex({ institutions, filters }) {
         >
             <Head title="Institutions" />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
@@ -159,3 +159,4 @@ export default function InstitutionsIndex({ institutions, filters }) {
         </AuthenticatedLayout>
     );
 }
+

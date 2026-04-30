@@ -25,11 +25,11 @@ export default function ErrorPage({ status }) {
                     minHeight: '100vh',
                     background:
                         'radial-gradient(circle at 0% 0%, rgba(14, 116, 144, 0.18), transparent 28%), radial-gradient(circle at 100% 0%, rgba(217, 119, 6, 0.16), transparent 30%), linear-gradient(180deg, #f8fbfd 0%, #edf4f7 100%)',
-                    padding: '24px 16px',
+                    padding: '16px 14px',
                 }}
             >
                 <div style={{ maxWidth: 1120, margin: '0 auto' }}>
-                    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
+                    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
                         <div>
                             <Space size={10} align="center" style={{ marginBottom: 2 }}>
                                 <img src="/cris-mark.svg" alt="CRIS" style={{ width: 38, height: 38, borderRadius: 10 }} />
@@ -37,13 +37,13 @@ export default function ErrorPage({ status }) {
                                     <Space size={10} align="center">
                                         <Tag style={{ borderRadius: 999, fontWeight: 700, marginInlineEnd: 0, backgroundColor: '#0033a0', color: '#fff', border: 'none' }}>CRIS</Tag>
                                         <Typography.Title level={4} style={{ margin: 0, color: '#0f172a' }}>
-                                            Calabarzon Research Information System
+                                            CALABARZON Research Information System
                                         </Typography.Title>
                                     </Space>
                                 </div>
                             </Space>
                         </div>
-                        <Space>
+                        <Space style={{ marginLeft: 'auto' }}>
                             <Link href="/">
                                 <Button>Public Archive</Button>
                             </Link>
@@ -59,7 +59,7 @@ export default function ErrorPage({ status }) {
                         </Space>
                     </header>
 
-                    <Card className="admin-dashboard-shell" bordered={false} style={{ borderRadius: 22 }}>
+                    <Card className="admin-dashboard-shell" bordered={false} style={{ borderRadius: 14 }}>
                         <Result
                             status={status === 403 ? '403' : '404'}
                             title={copy.title}

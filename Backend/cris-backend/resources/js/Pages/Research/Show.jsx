@@ -177,7 +177,7 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete, 
         }>
             <Head title={proposal.title} />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
@@ -541,3 +541,4 @@ export default function ResearchShow({ proposal, canEdit, canReview, canDelete, 
         </AuthenticatedLayout>
     );
 }
+

@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Dropdown from './Dropdown';
 
 export default function Navbar() {
@@ -39,9 +39,17 @@ export default function Navbar() {
             return [
                 ...commonItems,
                 { label: 'User Management', href: route('admin.users.index'), activePatterns: ['admin.users.*'] },
-                { label: 'Institutions', href: route('admin.institutions.index'), activePatterns: ['admin.institutions.*'] },
-                { label: 'Keywords', href: route('admin.keywords.index'), activePatterns: ['admin.keywords.*'] },
-                { label: 'Research Taxonomy', href: route('admin.taxonomy.index'), activePatterns: ['admin.taxonomy.*'] },
+                {
+                    label: 'Settings',
+                    dropdown: true,
+                    activePatterns: ['admin.institutions.*', 'admin.keywords.*', 'admin.taxonomy.*'],
+                    children: [
+                        { label: 'Institutions', href: route('admin.institutions.index'), activePatterns: ['admin.institutions.*'], isLink: true },
+                        { label: 'Keywords', href: route('admin.keywords.index'), activePatterns: ['admin.keywords.*'], isLink: true },
+                        { label: 'Categories', href: route('admin.taxonomy.categories.index'), activePatterns: ['admin.taxonomy.categories.*'], isLink: true },
+                        { label: 'Disciplines', href: route('admin.taxonomy.disciplines.index'), activePatterns: ['admin.taxonomy.disciplines.*'], isLink: true },
+                    ],
+                },
                 { label: 'History', href: route('history.index'), activePatterns: ['history.index'] },
             ];
         }
@@ -101,11 +109,26 @@ export default function Navbar() {
     };
 
     const navItems = getNavItems();
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    const settingsRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (settingsRef.current && !settingsRef.current.contains(e.target)) {
+                setSettingsOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const isActive = (item) => {
         if (item.tab && route().current('research.index')) {
             return currentTab === item.tab;
         }
-
+        if (item.dropdown) {
+            return item.activePatterns?.some((pattern) => route().current(pattern));
+        }
         return item.activePatterns?.some((pattern) => route().current(pattern));
     };
 
@@ -124,20 +147,74 @@ export default function Navbar() {
 
                         {/* Desktop Navigation */}
                         <div className="hidden md:flex items-center gap-1">
-                            {navItems.map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                        isActive(item)
-                                            ? 'bg-blue-50 text-blue-900 border-b-2'
-                                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                                    }`}
-                                    style={isActive(item) ? { borderColor: '#0033a0' } : {}}
-                                >
-                                    {item.label}
-                                </Link>
-                            ))}
+                            {navItems.map((item) =>
+                                item.dropdown ? (
+                                    <div key="settings-dropdown" className="relative" ref={settingsRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setSettingsOpen((o) => !o)}
+                                            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                                isActive(item)
+                                                    ? 'bg-blue-50 text-blue-900 border-b-2'
+                                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                            }`}
+                                            style={isActive(item) ? { borderColor: '#0033a0' } : {}}
+                                        >
+                                            {item.label}
+                                            <svg
+                                                className={`h-3.5 w-3.5 transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`}
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                        {settingsOpen && (
+                                            <div className="absolute left-0 top-full mt-1 w-48 rounded-xl border border-slate-200 bg-white py-1 shadow-lg z-50">
+                                            {item.children.map((child) => {
+                                                const childActive = child.activePatterns?.some((p) => route().current(p));
+                                                const cls = `flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
+                                                    childActive
+                                                        ? 'bg-blue-50 text-blue-900'
+                                                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                                }`;
+                                                return child.isLink ? (
+                                                    <Link
+                                                        key={child.href}
+                                                        href={child.href}
+                                                        onClick={() => setSettingsOpen(false)}
+                                                        className={cls}
+                                                    >
+                                                        {child.label}
+                                                    </Link>
+                                                ) : (
+                                                    <a
+                                                        key={child.href}
+                                                        href={child.href}
+                                                        onClick={() => setSettingsOpen(false)}
+                                                        className={cls}
+                                                    >
+                                                        {child.label}
+                                                    </a>
+                                                );
+                                            })}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                            isActive(item)
+                                                ? 'bg-blue-50 text-blue-900 border-b-2'
+                                                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                        }`}
+                                        style={isActive(item) ? { borderColor: '#0033a0' } : {}}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                )
+                            )}
                         </div>
                     </div>
 
@@ -200,20 +277,55 @@ export default function Navbar() {
                 {menuOpen && (
                     <div id="mobile-nav-menu" className="md:hidden border-t border-slate-200 bg-slate-50 py-2">
                         <div className="space-y-1">
-                            {navItems.map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`block px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                        isActive(item)
-                                            ? 'bg-blue-50 text-blue-900'
-                                            : 'text-slate-600 hover:bg-white hover:text-slate-900'
-                                    }`}
-                                    onClick={() => setMenuOpen(false)}
-                                >
-                                    {item.label}
-                                </Link>
-                            ))}
+                            {navItems.map((item) =>
+                                item.dropdown ? (
+                                    <div key="settings-mobile">
+                                        <div className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                            {item.label}
+                                        </div>
+                                        {item.children.map((child) => {
+                                                const childActive = child.activePatterns?.some((p) => route().current(p));
+                                                const cls = `block pl-7 pr-4 py-2 text-sm font-medium transition-all duration-200 ${
+                                                    childActive
+                                                        ? 'bg-blue-50 text-blue-900'
+                                                        : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                                                }`;
+                                                return child.isLink ? (
+                                                    <Link
+                                                        key={child.href}
+                                                        href={child.href}
+                                                        className={cls}
+                                                        onClick={() => setMenuOpen(false)}
+                                                    >
+                                                        {child.label}
+                                                    </Link>
+                                                ) : (
+                                                    <a
+                                                        key={child.href}
+                                                        href={child.href}
+                                                        className={cls}
+                                                        onClick={() => setMenuOpen(false)}
+                                                    >
+                                                        {child.label}
+                                                    </a>
+                                                );
+                                            })}
+                                    </div>
+                                ) : (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={`block px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                            isActive(item)
+                                                ? 'bg-blue-50 text-blue-900'
+                                                : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                                        }`}
+                                        onClick={() => setMenuOpen(false)}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                )
+                            )}
                         </div>
                         <div className="border-t border-slate-200 mt-2 px-4 py-3">
                             <p className="text-sm font-semibold leading-none text-slate-900">{user.name}</p>

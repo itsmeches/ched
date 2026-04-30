@@ -1,4 +1,4 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+﻿import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button, Card, Checkbox, Col, DatePicker, Input, Pagination, Row, Select, Space, Tag, Timeline, Typography } from 'antd';
 import {
@@ -294,7 +294,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
         }>
             <Head title="History" />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                 <Row gutter={[12, 12]}>
                     {statItems.map((item) => (
                         <Col key={item.key} xs={12} sm={8} lg={4}>
@@ -312,7 +312,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
 
                 {/* Filters */}
                 <Card className="admin-dashboard-shell" bordered={false}>
-                    <Space wrap size={12} align="start">
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
                         <Input
                             prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
                             placeholder="Search by paper title…"
@@ -324,7 +324,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                                 setSearch('');
                                 applyFilters({ search: '' });
                             }}
-                            style={{ width: 280 }}
+                            style={{ width: 260 }}
                         />
                         <Select
                             placeholder="Filter by action"
@@ -334,7 +334,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                                 applyFilters({ action: val ?? '', page: 1 });
                             }}
                             allowClear
-                            style={{ width: 180 }}
+                            style={{ width: 170 }}
                             options={[
                                 { value: 'created',  label: 'Submitted'  },
                                 { value: 'updated',  label: 'Updated'    },
@@ -349,14 +349,13 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                             onChange={(val) => {
                                 const nextRange = val ?? '';
                                 setRange(nextRange);
-
                                 if (nextRange !== 'custom') {
                                     setCustomRange(null);
                                     applyFilters({ range: nextRange, from: undefined, to: undefined, page: 1 });
                                 }
                             }}
                             allowClear
-                            style={{ width: 180 }}
+                            style={{ width: 160 }}
                             options={[
                                 { value: 'today', label: 'Today' },
                                 { value: '7d', label: 'Last 7 days' },
@@ -374,55 +373,52 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                         <Button type="primary" onClick={() => applyFilters({ search, action, page: 1 })}>
                             Apply Filters
                         </Button>
-                        {role === 'super_admin' && (
-                            <Space direction="vertical" size={6}>
-                                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <Button onClick={resetFilters}>Reset</Button>
+                            <Typography.Text type="secondary" style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
+                                Showing {totalRecords} {totalRecords === 1 ? 'entry' : 'entries'}
+                            </Typography.Text>
+                        </div>
+                    </div>
+
+                    {/* Export CSV — super_admin only */}
+                    {role === 'super_admin' && (
+                        <div style={{
+                            marginTop: 14,
+                            paddingTop: 14,
+                            borderTop: '1px solid #f1f5f9',
+                        }}>
+                            <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <Typography.Text strong style={{ fontSize: 12, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                                     Export columns
                                 </Typography.Text>
-                                <Space size={8} wrap>
-                                    <Checkbox
-                                        checked={allColumnsSelected}
-                                        indeterminate={someColumnsSelected}
-                                        onChange={(event) => {
-                                            setExportColumns(event.target.checked ? DEFAULT_EXPORT_COLUMNS : []);
-                                        }}
-                                    >
-                                        All columns
-                                    </Checkbox>
-                                    <Button
-                                        size="small"
-                                        type="link"
-                                        style={{ padding: 0 }}
-                                        onClick={() => setExportColumns(DEFAULT_EXPORT_COLUMNS)}
-                                    >
-                                        Select all
-                                    </Button>
-                                    <Button
-                                        size="small"
-                                        type="link"
-                                        style={{ padding: 0 }}
-                                        onClick={() => setExportColumns([])}
-                                    >
-                                        Clear all
-                                    </Button>
-                                </Space>
+                                <Button size="small" type="link" style={{ padding: 0, height: 'auto', fontSize: 12 }} onClick={() => setExportColumns(DEFAULT_EXPORT_COLUMNS)}>
+                                    Select all
+                                </Button>
+                                <Button size="small" type="link" style={{ padding: 0, height: 'auto', fontSize: 12 }} onClick={() => setExportColumns([])}>
+                                    Clear all
+                                </Button>
+                                <Checkbox
+                                    checked={allColumnsSelected}
+                                    indeterminate={someColumnsSelected}
+                                    onChange={(e) => setExportColumns(e.target.checked ? DEFAULT_EXPORT_COLUMNS : [])}
+                                    style={{ marginLeft: 4 }}
+                                >
+                                    <span style={{ fontSize: 12 }}>All</span>
+                                </Checkbox>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
                                 <Checkbox.Group
                                     options={EXPORT_COLUMN_OPTIONS}
                                     value={exportColumns}
                                     onChange={(values) => setExportColumns(values)}
                                 />
-                                <Button icon={<DownloadOutlined />} onClick={exportCsv}>
+                                <Button icon={<DownloadOutlined />} type="primary" ghost onClick={exportCsv} style={{ flexShrink: 0 }}>
                                     Export CSV
                                 </Button>
-                            </Space>
-                        )}
-                        <Button onClick={resetFilters}>
-                            Reset
-                        </Button>
-                        <Typography.Text type="secondary" style={{ fontSize: 13 }}>
-                            Showing {totalRecords} {totalRecords === 1 ? 'entry' : 'entries'}
-                        </Typography.Text>
-                    </Space>
+                            </div>
+                        </div>
+                    )}
                 </Card>
 
                 {/* Timeline */}
@@ -434,7 +430,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                         </div>
                     ) : (
                         <>
-                            <div className="space-y-6">
+                            <div className="space-y-4">
                                 {groupedKeys.map((groupKey) => (
                                     <div key={groupKey}>
                                         <div style={{ marginBottom: 10 }}>
@@ -473,3 +469,4 @@ export default function HistoryIndex({ history, filters, role, stats }) {
         </AuthenticatedLayout>
     );
 }
+

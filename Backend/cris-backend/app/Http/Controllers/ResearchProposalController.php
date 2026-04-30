@@ -6,6 +6,7 @@ use App\Http\Requests\StoreResearchProposalRequest;
 use App\Http\Requests\UpdateResearchProposalRequest;
 use App\Models\Discipline;
 use App\Models\EditPermissionRequest;
+use App\Models\Institution;
 use App\Models\Keyword;
 use App\Models\ResearchCategory;
 use App\Models\ResearchProposal;
@@ -27,17 +28,48 @@ class ResearchProposalController extends Controller
 {
     public function publicIndex(Request $request): Response
     {
+        $sort = (string) $request->input('sort', 'recent');
+        $allowedSorts = ['recent', 'oldest', 'year_desc', 'year_asc', 'title_asc', 'title_desc'];
+        if (! in_array($sort, $allowedSorts, true)) {
+            $sort = 'recent';
+        }
+
         $query = ResearchProposal::with(['institution:id,name'])
-            ->select(['id', 'title', 'authors', 'school', 'year', 'keywords', 'status', 'institution_id', 'approved_at', 'updated_at'])
-            ->where('status', ResearchProposal::STATUS_APPROVED)
-            ->orderByDesc('approved_at')
-            ->orderByDesc('updated_at');
+            ->select(['id', 'title', 'authors', 'school', 'year', 'keywords', 'category', 'research_category', 'discipline_code', 'status', 'institution_id', 'approved_at', 'updated_at'])
+            ->where('status', ResearchProposal::STATUS_APPROVED);
+
+        if ($sort === 'oldest') {
+            $query->orderBy('approved_at')->orderBy('updated_at');
+        } elseif ($sort === 'year_desc') {
+            $query->orderByDesc('year')->orderByDesc('approved_at');
+        } elseif ($sort === 'year_asc') {
+            $query->orderBy('year')->orderByDesc('approved_at');
+        } elseif ($sort === 'title_asc') {
+            $query->orderBy('title')->orderByDesc('approved_at');
+        } elseif ($sort === 'title_desc') {
+            $query->orderByDesc('title')->orderByDesc('approved_at');
+        } else {
+            $query->orderByDesc('approved_at')->orderByDesc('updated_at');
+        }
 
         $this->applySearchFilters($query, $request, includeStatus: false);
+        $disciplineLabels = Discipline::query()->pluck('name', 'code');
+        $proposals = $query->paginate(12)->withQueryString();
+        $proposals->getCollection()->transform(function (ResearchProposal $proposal) use ($disciplineLabels) {
+            $code = (string) ($proposal->discipline_code ?? '');
+            $name = $code !== '' ? $disciplineLabels->get($code) : null;
+
+            $proposal->setAttribute('discipline_label', $name ? ($code . ' - ' . $name) : ($code !== '' ? $code : null));
+
+            return $proposal;
+        });
 
         return Inertia::render('Research/PublicIndex', [
-            'proposals'    => $query->paginate(12)->withQueryString(),
-            'filters'      => $request->only(['search', 'year', 'school']),
+            'proposals'    => $proposals,
+            'filters'      => (object) $request->only(['search', 'year', 'year_from', 'year_to', 'school', 'institution_id', 'category', 'discipline_code', 'sort']),
+            'institutions' => Institution::query()->orderBy('name')->get(['id', 'name']),
+            'categories'   => ResearchCategory::query()->orderBy('label')->get(['value', 'label']),
+            'disciplines'  => Discipline::query()->orderBy('code')->get(['code', 'name']),
             'canLogin'     => Route::has('login'),
             'canRegister'  => Route::has('register'),
         ]);
@@ -48,6 +80,17 @@ class ResearchProposalController extends Controller
         abort_unless($proposal->status === ResearchProposal::STATUS_APPROVED, 404);
 
         $proposal->load(['institution:id,name', 'approver:id,name']);
+
+        $disciplineName = $proposal->discipline_code
+            ? Discipline::query()->where('code', $proposal->discipline_code)->value('name')
+            : null;
+
+        $proposal->setAttribute(
+            'discipline_label',
+            $disciplineName
+                ? ($proposal->discipline_code . ' - ' . $disciplineName)
+                : ($proposal->discipline_code ?: null)
+        );
 
         return Inertia::render('Research/PublicShow', [
             'proposal'    => $proposal,
@@ -141,6 +184,8 @@ class ResearchProposalController extends Controller
                 $inner->where('title', 'like', "%{$search}%")
                     ->orWhere('authors', 'like', "%{$search}%")
                     ->orWhere('keywords', 'like', "%{$search}%")
+                    ->orWhere('school', 'like', "%{$search}%")
+                    ->orWhereHas('institution', fn ($institutionQuery) => $institutionQuery->where('name', 'like', "%{$search}%"))
                     ->orWhereHas('keywordItems', fn ($keywordQuery) => $keywordQuery->where('name', 'like', "%{$search}%"));
             });
         }
@@ -152,9 +197,38 @@ class ResearchProposalController extends Controller
         if ($request->filled('year') && $year > 0) {
             $year = max($minYear, min($maxYear, $year));
             $query->where('year', $year);
+        } else {
+            $yearFrom = (int) $request->input('year_from');
+            $yearTo = (int) $request->input('year_to');
+
+            if ($request->filled('year_from') && $yearFrom > 0) {
+                $yearFrom = max($minYear, min($maxYear, $yearFrom));
+                $query->where('year', '>=', $yearFrom);
+            }
+
+            if ($request->filled('year_to') && $yearTo > 0) {
+                $yearTo = max($minYear, min($maxYear, $yearTo));
+                $query->where('year', '<=', $yearTo);
+            }
         }
 
         $query->when($request->filled('school'), fn ($q) => $q->where('school', 'like', '%' . trim((string) $request->input('school')) . '%'));
+        $query->when($request->filled('institution_id'), fn ($q) => $q->where('institution_id', (int) $request->input('institution_id')));
+
+        if (! $includeStatus) {
+            $query->when($request->filled('category'), function ($q) use ($request) {
+                $category = trim((string) $request->input('category'));
+
+                if ($category !== '') {
+                    $q->where(function ($categoryQuery) use ($category) {
+                        $categoryQuery->where('research_category', $category)
+                            ->orWhere('category', $category);
+                    });
+                }
+            });
+
+            $query->when($request->filled('discipline_code'), fn ($q) => $q->where('discipline_code', trim((string) $request->input('discipline_code'))));
+        }
 
         if ($includeStatus) {
             $query->when($request->filled('status'), fn ($q) => $q->where('status', (string) $request->input('status')));

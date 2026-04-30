@@ -13,13 +13,13 @@ export default function AuthenticatedLayout({ header, children, showHeader = fal
 
             {showHeader && header && (
                 <header className="bg-white border-b border-slate-200">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
                         {header}
                     </div>
                 </header>
             )}
 
-            <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+            <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                 {children}
             </main>
         </div>

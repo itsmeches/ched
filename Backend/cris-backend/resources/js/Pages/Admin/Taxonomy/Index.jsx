@@ -399,10 +399,11 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
         >
             <Head title="Research Taxonomy" />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                 {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                 {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
+                <div id="categories">
                 <AdminTableCard summary={`${categories.length} research categor${categories.length === 1 ? 'y' : 'ies'} configured`}>
                     <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
                         <Col xs={24} md={10}>
@@ -447,7 +448,9 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
                         scroll={{ x: 860 }}
                     />
                 </AdminTableCard>
+                </div>
 
+                <div id="disciplines">
                 <AdminTableCard summary={`${disciplines.length} discipline${disciplines.length === 1 ? '' : 's'} configured`}>
                     <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
                         <Col xs={24} md={14}>
@@ -480,6 +483,7 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
                         scroll={{ x: 780 }}
                     />
                 </AdminTableCard>
+                </div>
             </div>
 
             <Modal
@@ -578,3 +582,4 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
         </AuthenticatedLayout>
     );
 }
+

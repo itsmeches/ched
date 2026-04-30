@@ -44,7 +44,7 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
         >
             <Head title="Account Hierarchy" />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                 <Card className="admin-dashboard-shell" bordered={false}>
                     <Space direction="vertical" size={8} style={{ width: '100%' }}>
                         <Space wrap>
@@ -85,3 +85,4 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
         </AuthenticatedLayout>
     );
 }
+

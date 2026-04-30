@@ -14,7 +14,7 @@ export default function UsersEdit({ user, institutions, roles }) {
     return (
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Edit User</h2>}>
             <Head title={`Edit ${user.name}`} />
-            <div className="space-y-6">
+            <div className="space-y-4">
                     <Card className="admin-dashboard-shell" bordered={false}>
                         <Typography.Text type="secondary">Update role assignments, institution mapping, or credentials from the drawer.</Typography.Text>
                     </Card>
@@ -23,3 +23,4 @@ export default function UsersEdit({ user, institutions, roles }) {
         </AuthenticatedLayout>
     );
 }
+
