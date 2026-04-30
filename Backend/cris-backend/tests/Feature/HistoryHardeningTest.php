@@ -16,7 +16,7 @@ class HistoryHardeningTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_hei_history_is_scoped_to_own_submissions_only(): void
+    public function test_hei_history_is_scoped_to_faculty_and_students_under_faculty_only(): void
     {
         $actors = $this->makeUsersAndInstitution();
         $hei = $actors['hei'];
@@ -24,7 +24,21 @@ class HistoryHardeningTest extends TestCase
         $admin = $actors['admin'];
         $institution = $actors['institution'];
 
+        $faculty = User::factory()->create([
+            'role' => User::ROLE_FACULTY,
+            'institution_id' => $institution->id,
+            'hei_id' => $hei->id,
+        ]);
+
+        $student = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'institution_id' => $institution->id,
+            'faculty_id' => $faculty->id,
+            'hei_id' => $hei->id,
+        ]);
+
         $ownProposal = $this->makeProposal($institution->id, $hei->id, 'HEI Own Proposal');
+        $studentProposal = $this->makeProposal($institution->id, $student->id, 'HEI Student Proposal');
         $otherProposal = $this->makeProposal($institution->id, $otherHei->id, 'Other HEI Proposal');
 
         ResearchProposalHistory::query()->create([
@@ -34,6 +48,15 @@ class HistoryHardeningTest extends TestCase
             'old_values' => ['title' => 'Old HEI Own Proposal'],
             'new_values' => ['title' => 'HEI Own Proposal'],
             'performed_at' => now(),
+        ]);
+
+        ResearchProposalHistory::query()->create([
+            'research_proposal_id' => $studentProposal->id,
+            'user_id' => $admin->id,
+            'action' => 'updated',
+            'old_values' => ['title' => 'Old HEI Student Proposal'],
+            'new_values' => ['title' => 'HEI Student Proposal'],
+            'performed_at' => now()->subMinutes(30),
         ]);
 
         ResearchProposalHistory::query()->create([
@@ -48,7 +71,8 @@ class HistoryHardeningTest extends TestCase
         $response = $this->actingAs($hei)->get(route('history.index'));
 
         $response->assertOk();
-        $response->assertSee('HEI Own Proposal');
+        $response->assertDontSee('HEI Own Proposal');
+        $response->assertSee('HEI Student Proposal');
         $response->assertDontSee('Other HEI Proposal');
     }
 

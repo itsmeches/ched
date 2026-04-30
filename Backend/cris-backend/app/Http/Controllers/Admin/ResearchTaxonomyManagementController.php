@@ -15,17 +15,27 @@ class ResearchTaxonomyManagementController extends Controller
 {
     public function index(): Response
     {
+        $categoryUsageCounts = ResearchProposal::query()
+            ->selectRaw('research_category, COUNT(*) as aggregate')
+            ->whereNotNull('research_category')
+            ->groupBy('research_category')
+            ->pluck('aggregate', 'research_category');
+
+        $disciplineUsageCounts = ResearchProposal::query()
+            ->selectRaw('discipline_code, COUNT(*) as aggregate')
+            ->whereNotNull('discipline_code')
+            ->groupBy('discipline_code')
+            ->pluck('aggregate', 'discipline_code');
+
         $categories = ResearchCategory::query()
             ->select(['id', 'type', 'value', 'label', 'sort_order', 'is_active'])
             ->orderBy('sort_order')
             ->orderBy('label')
             ->get()
-            ->map(function (ResearchCategory $category) {
+            ->map(function (ResearchCategory $category) use ($categoryUsageCounts) {
                 return [
                     ...$category->toArray(),
-                    'proposals_count' => ResearchProposal::query()
-                        ->where('research_category', $category->value)
-                        ->count(),
+                    'proposals_count' => (int) ($categoryUsageCounts[$category->value] ?? 0),
                 ];
             })
             ->values();
@@ -35,12 +45,10 @@ class ResearchTaxonomyManagementController extends Controller
             ->orderBy('sort_order')
             ->orderBy('code')
             ->get()
-            ->map(function (Discipline $discipline) {
+            ->map(function (Discipline $discipline) use ($disciplineUsageCounts) {
                 return [
                     ...$discipline->toArray(),
-                    'proposals_count' => ResearchProposal::query()
-                        ->where('discipline_code', $discipline->code)
-                        ->count(),
+                    'proposals_count' => (int) ($disciplineUsageCounts[$discipline->code] ?? 0),
                 ];
             })
             ->values();

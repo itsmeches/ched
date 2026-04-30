@@ -95,10 +95,10 @@ class ResearchProposalController extends Controller
                         ->where('user_id', $user->id));
             });
         } elseif ($user->role === \App\Models\User::ROLE_HEI) {
-            // HEI: proposals from faculty directly under this HEI, or from students whose faculty is under this HEI.
+            // HEI: only student proposals where student -> faculty -> HEI matches current user.
             $query->whereHas('submitter', function ($inner) use ($user) {
-                $inner->where('hei_id', $user->id)
-                    ->orWhereHas('faculty', fn ($faculty) => $faculty->where('hei_id', $user->id));
+                $inner->where('role', User::ROLE_STUDENT)
+                    ->whereHas('faculty', fn ($faculty) => $faculty->where('hei_id', $user->id));
             });
         }
 

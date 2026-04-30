@@ -48,7 +48,7 @@ class ResearchEditLockTest extends TestCase
         $this->assertSame('Locked Submission', $proposal->fresh()->title);
     }
 
-    public function test_ched_can_update_when_submission_is_locked_and_history_is_logged(): void
+    public function test_ched_cannot_update_when_submission_is_locked(): void
     {
         $institution = Institution::query()->create([
             'name' => 'Batangas State Research Institute',
@@ -67,7 +67,7 @@ class ResearchEditLockTest extends TestCase
         ]);
 
         $proposal = $this->makeProposal($institution->id, $hei->id, [
-            'title' => 'CHED Editable Submission',
+            'title' => 'CHED Non Editable Submission',
             'viewed_by' => $ched->id,
             'viewed_at' => now(),
         ]);
@@ -76,22 +76,16 @@ class ResearchEditLockTest extends TestCase
             ->from(route('research.show', $proposal->id))
             ->put(route('research.update', $proposal->id), $this->validPayload('Updated by CHED'));
 
-        $response->assertRedirect(route('research.show', $proposal->id));
+        $response->assertForbidden();
 
         $proposal->refresh();
 
-        $this->assertSame('Updated by CHED', $proposal->title);
-        $this->assertDatabaseHas('research_proposal_histories', [
+        $this->assertSame('CHED Non Editable Submission', $proposal->title);
+        $this->assertDatabaseMissing('research_proposal_histories', [
             'research_proposal_id' => $proposal->id,
             'user_id' => $ched->id,
             'action' => 'updated',
         ]);
-
-        $lastHistory = ResearchProposalHistory::query()->where('research_proposal_id', $proposal->id)->latest('id')->first();
-
-        $this->assertNotNull($lastHistory);
-        $this->assertArrayHasKey('title', $lastHistory->old_values ?? []);
-        $this->assertArrayHasKey('title', $lastHistory->new_values ?? []);
     }
 
     private function validPayload(string $title): array

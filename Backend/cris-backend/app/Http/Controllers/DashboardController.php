@@ -149,8 +149,8 @@ class DashboardController extends Controller
 
         $base = ResearchProposal::query()
             ->whereHas('submitter', fn ($query) => $query
-                ->where('hei_id', $user->id)
-                ->orWhereHas('faculty', fn ($f) => $f->where('hei_id', $user->id))
+                ->where('role', User::ROLE_STUDENT)
+                ->whereHas('faculty', fn ($f) => $f->where('hei_id', $user->id))
             );
 
         $stats = [
@@ -172,8 +172,8 @@ class DashboardController extends Controller
             ->with(['submitter:id,name', 'institution:id,name'])
             ->where('status', ResearchProposal::STATUS_UNDER_REVIEW_HEI)
             ->whereHas('submitter', fn ($query) => $query
-                ->where('hei_id', $user->id)
-                ->orWhereHas('faculty', fn ($f) => $f->where('hei_id', $user->id))
+                ->where('role', User::ROLE_STUDENT)
+                ->whereHas('faculty', fn ($f) => $f->where('hei_id', $user->id))
             )
             ->orderByDesc('submitted_at')
             ->orderByDesc('updated_at')

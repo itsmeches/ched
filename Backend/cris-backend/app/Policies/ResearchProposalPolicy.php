@@ -19,7 +19,7 @@ class ResearchProposalPolicy
             return true;
         }
 
-        if ($proposal->submitted_by === $user->id) {
+        if ($user->isStudent() && $proposal->submitted_by === $user->id) {
             return true;
         }
 
@@ -30,44 +30,18 @@ class ResearchProposalPolicy
         }
 
         if ($user->isFaculty()) {
-            // Faculty can view any proposal at the faculty review stage,
-            // plus proposals from students linked to them.
-            if ($submitter->faculty_id === $user->id) {
-                return true;
-            }
-
-            // Allow faculty to view faculty-stage proposals
-            if (in_array($proposal->status, [
-                ResearchProposal::STATUS_UNDER_REVIEW_FACULTY,
-                ResearchProposal::STATUS_SUBMITTED,
-            ])) {
-                return true;
-            }
-
-            // Fallback for other stages: let faculty who previously rejected re-access
-            return $proposal->histories()
-                ->where('action', 'rejected')
-                ->where('user_id', $user->id)
-                ->exists();
+            // Faculty can only access proposals from students directly assigned to them.
+            return $submitter->faculty_id === $user->id;
         }
 
         if ($user->role === User::ROLE_HEI) {
-            $resolvedHeiId = $submitter->hei_id
-                ?? $submitter->faculty?->hei_id
-                ?? $submitter->creator?->hei_id;
-
-            $isInstitutionMatch = $submitter->institution_id
-                && $user->institution_id
-                && (int) $submitter->institution_id === (int) $user->institution_id;
-
-            $isFacultyInstitutionMatch = $submitter->faculty?->institution_id
-                && $user->institution_id
-                && (int) $submitter->faculty->institution_id === (int) $user->institution_id;
-
-            return $resolvedHeiId === $user->id
-                || $submitter->id === $user->id
-                || $isInstitutionMatch
-                || $isFacultyInstitutionMatch;
+            return (
+                $submitter->role === User::ROLE_FACULTY
+                && (int) $submitter->hei_id === (int) $user->id
+            ) || (
+                $submitter->role === User::ROLE_STUDENT
+                && (int) ($submitter->faculty?->hei_id ?? 0) === (int) $user->id
+            );
         }
 
         return false;
@@ -109,31 +83,20 @@ class ResearchProposalPolicy
         }
 
         if ($user->isFaculty()) {
-            // Faculty can review any proposal at the faculty review stage.
-            // This allows faculty to review submissions even if students aren't 
-            // directly linked to them, supporting institutional workflows.
-            return $proposal->isPendingFaculty();
+            return $proposal->isPendingFaculty()
+                && $submitter->faculty_id === $user->id;
         }
 
         if ($user->role === User::ROLE_HEI) {
-            $resolvedHeiId = $submitter->hei_id
-                ?? $submitter->faculty?->hei_id
-                ?? $submitter->creator?->hei_id;
-
-            $isInstitutionMatch = $submitter->institution_id
-                && $user->institution_id
-                && (int) $submitter->institution_id === (int) $user->institution_id;
-
-            $isFacultyInstitutionMatch = $submitter->faculty?->institution_id
-                && $user->institution_id
-                && (int) $submitter->faculty->institution_id === (int) $user->institution_id;
-
             return $proposal->isPendingHei()
                 && (
-                    $resolvedHeiId === $user->id
-                    || $submitter->id === $user->id
-                    || $isInstitutionMatch
-                    || $isFacultyInstitutionMatch
+                    (
+                        $submitter->role === User::ROLE_FACULTY
+                        && (int) $submitter->hei_id === (int) $user->id
+                    ) || (
+                        $submitter->role === User::ROLE_STUDENT
+                        && (int) ($submitter->faculty?->hei_id ?? 0) === (int) $user->id
+                    )
                 );
         }
 

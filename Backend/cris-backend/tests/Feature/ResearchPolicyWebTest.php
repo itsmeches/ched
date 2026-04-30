@@ -73,7 +73,7 @@ class ResearchPolicyWebTest extends TestCase
         $this->assertDatabaseMissing('research_proposals', ['id' => $proposal->id]);
     }
 
-    public function test_faculty_can_review_resubmitted_pending_faculty_paper_via_rejection_history_fallback(): void
+    public function test_faculty_cannot_review_pending_faculty_paper_without_direct_student_linkage(): void
     {
         $institution = Institution::query()->create([
             'name' => 'Calamba Research College',
@@ -137,8 +137,8 @@ class ResearchPolicyWebTest extends TestCase
                 'comments' => 'Approved after revision.',
             ]);
 
-        $response->assertRedirect(route('research.show', $proposal));
-        $this->assertSame(ResearchProposal::STATUS_UNDER_REVIEW_HEI, $proposal->fresh()->status);
+        $response->assertForbidden();
+        $this->assertSame(ResearchProposal::STATUS_UNDER_REVIEW_FACULTY, $proposal->fresh()->status);
     }
 
     /**

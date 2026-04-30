@@ -13,10 +13,18 @@ class UpdateResearchProposalRequest extends FormRequest
     public function authorize(): bool
     {
         $proposal = $this->route('proposal');
+        $user = $this->user();
 
-        return $proposal
-            && $this->user()?->isStudent()
-            && $proposal->submitted_by === $this->user()->id
+        if (! $proposal || ! $user) {
+            return false;
+        }
+
+        // Only students can edit, and only their own editable (rejected) submissions.
+        if (! $user->isStudent()) {
+            return false;
+        }
+
+        return $proposal->submitted_by === $user->id
             && $proposal->isEditable();
     }
 

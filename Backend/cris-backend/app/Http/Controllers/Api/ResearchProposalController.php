@@ -56,11 +56,14 @@ class ResearchProposalController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
         } elseif ($user->role === \App\Models\User::ROLE_HEI) {
-            // HEI sees proposals under their faculty hierarchy
+            // HEI sees student proposals where student -> faculty -> HEI matches current user.
             $proposals = ResearchProposal::query()
                 ->select($selectColumns)
                 ->with(['institution:id,name,code'])
-                ->whereHas('submitter', fn ($inner) => $inner->where('hei_id', $user->id))
+                ->whereHas('submitter', fn ($inner) => $inner
+                    ->where('role', \App\Models\User::ROLE_STUDENT)
+                    ->whereHas('faculty', fn ($faculty) => $faculty->where('hei_id', $user->id))
+                )
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
         } else {

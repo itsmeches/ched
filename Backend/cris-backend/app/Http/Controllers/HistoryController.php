@@ -152,8 +152,16 @@ class HistoryController extends Controller
         }
 
         if ($user->role === User::ROLE_HEI) {
-            // HEI: only activity on submissions created by this HEI account.
-            $query->whereHas('proposal', fn ($q) => $q->where('submitted_by', $user->id));
+            // HEI: activity on proposals within this HEI hierarchy.
+            $query->whereHas('proposal.submitter', fn ($inner) => $inner
+                ->where(function ($submitter) use ($user) {
+                    $submitter->where('role', User::ROLE_FACULTY)
+                        ->where('hei_id', $user->id);
+                })->orWhere(function ($submitter) use ($user) {
+                    $submitter->where('role', User::ROLE_STUDENT)
+                        ->whereHas('faculty', fn ($faculty) => $faculty->where('hei_id', $user->id));
+                })
+            );
             return;
         }
 

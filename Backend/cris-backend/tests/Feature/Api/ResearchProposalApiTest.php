@@ -89,9 +89,16 @@ class ResearchProposalApiTest extends TestCase
             'institution_id' => $institution->id,
         ]);
 
+        $faculty = User::factory()->create([
+            'role' => User::ROLE_FACULTY,
+            'institution_id' => $institution->id,
+            'hei_id' => $hei->id,
+        ]);
+
         $student = User::factory()->create([
             'role' => User::ROLE_STUDENT,
             'institution_id' => $institution->id,
+            'faculty_id' => $faculty->id,
             'hei_id' => $hei->id,
         ]);
 
@@ -100,9 +107,16 @@ class ResearchProposalApiTest extends TestCase
             'institution_id' => $otherInstitution->id,
         ]);
 
+        $otherFaculty = User::factory()->create([
+            'role' => User::ROLE_FACULTY,
+            'institution_id' => $otherInstitution->id,
+            'hei_id' => $otherHei->id,
+        ]);
+
         $otherStudent = User::factory()->create([
             'role' => User::ROLE_STUDENT,
             'institution_id' => $otherInstitution->id,
+            'faculty_id' => $otherFaculty->id,
             'hei_id' => $otherHei->id,
         ]);
 
