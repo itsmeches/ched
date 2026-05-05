@@ -273,16 +273,19 @@ class HierarchicalAccountController extends Controller
         return [];
     }
 
-    public function edit(Request $request, User $user): Response|RedirectResponse
+    public function edit(Request $request, int $user): Response|RedirectResponse
     {
-        Gate::authorize('update', $user);
+        $target = User::withTrashed()->findOrFail($user);
+
+        Gate::authorize('update', $target);
 
         return Inertia::render('Accounts/Edit', [
             'account' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
+                'id' => $target->id,
+                'name' => $target->name,
+                'email' => $target->email,
+                'role' => $target->role,
+                'deleted_at' => $target->deleted_at,
             ],
         ]);
     }
@@ -352,6 +355,33 @@ class HierarchicalAccountController extends Controller
 
         return redirect()->route('accounts.hierarchy')
             ->with('success', 'Account deactivated successfully.');
+    }
+
+    public function reactivate(Request $request, int $user): RedirectResponse
+    {
+        $target = User::withTrashed()->findOrFail($user);
+
+        Gate::authorize('restore', $target);
+
+        if (! $target->trashed()) {
+            return redirect()->route('accounts.hierarchy')
+                ->with('error', 'Account is already active.');
+        }
+
+        $oldValues = ['deleted_at' => $target->deleted_at?->toDateTimeString()];
+
+        $target->restore();
+
+        $this->logUserManagementAudit(
+            request: $request,
+            target: $target,
+            action: 'hierarchy_account_reactivated',
+            oldValues: $oldValues,
+            newValues: ['deleted_at' => $target->fresh()?->deleted_at?->toDateTimeString()]
+        );
+
+        return redirect()->route('accounts.hierarchy')
+            ->with('success', 'Account reactivated successfully.');
     }
 
     private function logUserManagementAudit(

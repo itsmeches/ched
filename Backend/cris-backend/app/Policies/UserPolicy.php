@@ -46,4 +46,13 @@ class UserPolicy
 
         return $this->canManage($actor, $target);
     }
+
+    public function restore(User $actor, User $target): bool
+    {
+        if ($actor->id === $target->id) {
+            return false;
+        }
+
+        return $this->canManage($actor, $target);
+    }
 }

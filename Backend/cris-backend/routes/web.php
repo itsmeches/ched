@@ -115,6 +115,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('accounts.reset-password');
         Route::delete('/accounts/{user}', [HierarchicalAccountController::class, 'deactivate'])
             ->name('accounts.deactivate');
+        Route::post('/accounts/{user}/reactivate', [HierarchicalAccountController::class, 'reactivate'])
+            ->name('accounts.reactivate');
     });
 
     // ── SUPER ADMIN ───────────────────────────────────────────────────────────
