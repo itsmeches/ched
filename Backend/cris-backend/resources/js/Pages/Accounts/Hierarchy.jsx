@@ -1,81 +1,13 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
-import { Alert, Button, Card, Modal, Popconfirm, Space, Table, Tabs, Tag, Tooltip, Typography } from 'antd';
-import { useState } from 'react';
+import { Alert, Button, Card, Popconfirm, Space, Table, Tabs, Tag, Typography } from 'antd';
 import { formatDateTime } from '@/utils/date';
 
 function roleLabel(role) {
     return String(role || '').replace('_', ' ').toUpperCase();
 }
 
-function ResetPasswordModal({ account, open, onClose }) {
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState('');
-
-    const handleSubmit = () => {
-        if (!password || password.length < 8) {
-            setError('Password must be at least 8 characters.');
-            return;
-        }
-        if (password !== confirmPassword) {
-            setError('Passwords do not match.');
-            return;
-        }
-        setError('');
-        setSubmitting(true);
-        router.post(
-            route('accounts.reset-password', { user: account.id }),
-            { password, password_confirmation: confirmPassword },
-            {
-                onFinish: () => { setSubmitting(false); onClose(); },
-                onError: (e) => { setError(e.password || 'Failed to reset password.'); setSubmitting(false); },
-            }
-        );
-    };
-
-    return (
-        <Modal
-            title="Reset Password"
-            open={open}
-            onOk={handleSubmit}
-            onCancel={onClose}
-            okText="Reset Password"
-            confirmLoading={submitting}
-            destroyOnClose
-        >
-            <Space direction="vertical" style={{ width: '100%' }}>
-                <Typography.Text>Reset password for <strong>{account?.name}</strong></Typography.Text>
-                {error && <Typography.Text type="danger">{error}</Typography.Text>}
-                <div>
-                    <label style={{ display: 'block', marginBottom: 4 }}>New Password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #d9d9d9', borderRadius: 4 }}
-                        placeholder="Minimum 8 characters"
-                    />
-                </div>
-                <div>
-                    <label style={{ display: 'block', marginBottom: 4 }}>Confirm Password</label>
-                    <input
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #d9d9d9', borderRadius: 4 }}
-                        placeholder="Re-enter new password"
-                    />
-                </div>
-            </Space>
-        </Modal>
-    );
-}
-
 export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
-    const [resetTarget, setResetTarget] = useState(null);
-
     const columns = [
         {
             title: 'Name',
@@ -111,30 +43,46 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
             render: (value) => formatDateTime(value) || '—',
         },
         {
-            title: 'Actions',
+            title: 'Action',
             key: 'actions',
-            fixed: 'right',
-            width: 200,
+            align: 'center',
+            fixed: 'center',
+            width: 180,
             render: (_, row) => {
-                if (!row.can_manage || row.deleted_at) return null;
-                return (
-                    <Space size={4}>
-                        <Tooltip title="Edit account details">
+                if (!row.can_manage) return null;
+
+                if (row.deleted_at) {
+                    return (
+                        <Space>
                             <Button
-                                size="small"
+                                type="link"
                                 onClick={() => router.get(route('accounts.edit', { user: row.id }))}
                             >
                                 Edit
                             </Button>
-                        </Tooltip>
-                        <Tooltip title="Reset password">
-                            <Button
-                                size="small"
-                                onClick={() => setResetTarget(row)}
+                            <Popconfirm
+                                title="Reactivate account?"
+                                description="This will restore the user account and allow log in again."
+                                okText="Reactivate"
+                                cancelText="Cancel"
+                                onConfirm={() =>
+                                    router.post(route('accounts.reactivate', { user: row.id }))
+                                }
                             >
-                                Reset PW
-                            </Button>
-                        </Tooltip>
+                                <Button type="link">Reactivate</Button>
+                            </Popconfirm>
+                        </Space>
+                    );
+                }
+
+                return (
+                    <Space>
+                        <Button
+                            type="link"
+                            onClick={() => router.get(route('accounts.edit', { user: row.id }))}
+                        >
+                            Edit
+                        </Button>
                         <Popconfirm
                             title="Deactivate account?"
                             description="This will deactivate the user. They will not be able to log in."
@@ -145,9 +93,7 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
                                 router.delete(route('accounts.deactivate', { user: row.id }))
                             }
                         >
-                            <Tooltip title="Deactivate user">
-                                <Button size="small" danger>Deactivate</Button>
-                            </Tooltip>
+                            <Button type="link" danger>Deactivate</Button>
                         </Popconfirm>
                     </Space>
                 );
@@ -160,14 +106,6 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
             header={<h2 className="text-xl font-semibold text-slate-900">Account Hierarchy</h2>}
         >
             <Head title="Account Hierarchy" />
-
-            {resetTarget && (
-                <ResetPasswordModal
-                    account={resetTarget}
-                    open={!!resetTarget}
-                    onClose={() => setResetTarget(null)}
-                />
-            )}
 
             <div className="space-y-4">
                 <Card className="admin-dashboard-shell" bordered={false}>
