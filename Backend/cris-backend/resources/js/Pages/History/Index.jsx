@@ -1,19 +1,20 @@
 ﻿import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link, router } from '@inertiajs/react';
-import { Button, Card, Checkbox, Col, DatePicker, Input, Pagination, Row, Select, Space, Tag, Timeline, Typography } from 'antd';
+import { Button, Card, Checkbox, Col, Collapse, DatePicker, Input, Pagination, Row, Select, Space, Tag, Timeline, Typography } from 'antd';
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
     DownloadOutlined,
     DeleteOutlined,
     EditOutlined,
+    FileTextOutlined,
     HistoryOutlined,
     PlusCircleOutlined,
     SearchOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
 
 const ACTION_CONFIG = {
@@ -174,120 +175,159 @@ export default function HistoryIndex({ history, filters, role, stats }) {
         { key: 'deleted', label: 'Deleted', value: stats?.deleted ?? 0, color: '#dc2626' },
     ];
 
-    const timelineItems = history.data.map((entry) => {
-        const cfg = ACTION_CONFIG[entry.action] ?? { color: '#64748b', icon: <HistoryOutlined />, label: entry.action };
-        return {
-            key: entry.id,
-            color: cfg.color,
-            dot: <span style={{ fontSize: 16, color: cfg.color }}>{cfg.icon}</span>,
-            label: (
-                <span style={{ fontSize: 12, color: textMuted, minWidth: 140, display: 'inline-block' }}>
-                    {formatTs(entry.performed_at)}
-                </span>
-            ),
-            children: (
-                <div style={{ paddingBottom: 12 }}>
-                    {/* Paper title link */}
-                    {entry.proposal && (
-                        <Link href={route('research.show', entry.proposal.id)}>
-                            <Typography.Text
-                                strong
-                                style={{ color: '#0033a0', fontSize: 13, display: 'block', marginBottom: 4 }}
-                            >
-                                {entry.proposal.title}
-                            </Typography.Text>
-                        </Link>
-                    )}
+    // ── Group entries by paper, then by date within each paper ────────────────
+    const paperGroups = useMemo(() => {
+        const map = new Map(); // proposalId (or '__no_paper__') → { title, id, entries[] }
 
-                    {/* Action + actor */}
-                    <Space wrap size={4} style={{ marginBottom: 6 }}>
-                        <Tag color={cfg.color} style={{ marginInlineEnd: 0 }}>{cfg.label}</Tag>
-                        <span style={{ fontSize: 13, color: textSecondary }}>
-                            {entry.actor ? entry.actor.name : 'System'}
-                        </span>
-                        {entry.actor?.role && (
-                            <Tag style={{ fontSize: 11 }}>{entry.actor.role.toUpperCase()}</Tag>
-                        )}
-                    </Space>
+        history.data.forEach((entry) => {
+            const key = entry.proposal ? String(entry.proposal.id) : '__no_paper__';
+            if (!map.has(key)) {
+                map.set(key, {
+                    key,
+                    title: entry.proposal?.title ?? '(No paper — system event)',
+                    proposalId: entry.proposal?.id ?? null,
+                    entries: [],
+                });
+            }
+            map.get(key).entries.push(entry);
+        });
 
-                    {/* Diff for updates */}
-                    {entry.action === 'updated' && entry.new_values && (
-                        <div style={{ marginTop: 6 }}>
-                            {(expandedEntryId === entry.id
-                                ? Object.keys(entry.new_values)
-                                : Object.keys(entry.new_values).slice(0, 3)
-                            ).map((field) => (
-                                <div
-                                    key={field}
-                                    style={{
-                                        marginBottom: 6,
-                                        padding: '6px 10px',
-                                        background: bgMuted,
-                                        borderRadius: 6,
-                                        border: `1px solid ${borderColor}`,
-                                    }}
-                                >
-                                    <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', color: textMuted, letterSpacing: '0.05em' }}>
-                                        {FIELD_LABELS[field] ?? field}
-                                    </span>
-                                    <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-                                        <span style={{
-                                            fontSize: 12, color: '#b91c1c', background: '#fef2f2',
-                                            borderRadius: 4, padding: '2px 6px',
-                                            maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block',
-                                        }}>
-                                            {formatValue(entry.old_values?.[field])}
-                                        </span>
-                                        <span style={{ color: '#94a3b8' }}>→</span>
-                                        <span style={{
-                                            fontSize: 12, color: '#15803d', background: '#f0fdf4',
-                                            borderRadius: 4, padding: '2px 6px',
-                                            maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block',
-                                        }}>
-                                            {formatValue(entry.new_values[field])}
-                                        </span>
-                                    </div>
+        // Sort groups so the most-recently-touched paper appears first
+        return Array.from(map.values()).sort((a, b) => {
+            const latestA = dayjs(a.entries[0]?.performed_at ?? 0).valueOf();
+            const latestB = dayjs(b.entries[0]?.performed_at ?? 0).valueOf();
+            return latestB - latestA;
+        });
+    }, [history.data]);
+
+    // Build Collapse items — one panel per paper
+    const collapseItems = useMemo(() => paperGroups.map((group) => {
+        const lastEntry = group.entries[0];
+        const lastCfg = ACTION_CONFIG[lastEntry?.action] ?? { color: '#64748b', label: lastEntry?.action ?? '—' };
+
+        // Group entries inside the panel by date
+        const byDate = group.entries.reduce((acc, entry) => {
+            const dk = dayjs(entry.performed_at).format('YYYY-MM-DD');
+            if (!acc[dk]) acc[dk] = [];
+            acc[dk].push(entry);
+            return acc;
+        }, {});
+        const dateKeys = Object.keys(byDate).sort((a, b) => dayjs(b).valueOf() - dayjs(a).valueOf());
+
+        const timelineByDate = dateKeys.map((dk) => ({
+            dateKey: dk,
+            items: byDate[dk].map((entry) => {
+                const cfg = ACTION_CONFIG[entry.action] ?? { color: '#64748b', icon: <HistoryOutlined />, label: entry.action };
+                return {
+                    key: entry.id,
+                    color: cfg.color,
+                    dot: <span style={{ fontSize: 15, color: cfg.color }}>{cfg.icon}</span>,
+                    children: (
+                        <div style={{ paddingBottom: 10 }}>
+                            <Space wrap size={4} style={{ marginBottom: 4 }}>
+                                <Tag color={cfg.color} style={{ marginInlineEnd: 0 }}>{cfg.label}</Tag>
+                                <span style={{ fontSize: 12, color: textMuted }}>{formatTs(entry.performed_at)}</span>
+                            </Space>
+                            <div style={{ fontSize: 13, color: textSecondary }}>
+                                {entry.actor ? entry.actor.name : 'System'}
+                                {entry.actor?.role && (
+                                    <Tag style={{ fontSize: 11, marginLeft: 6 }}>{entry.actor.role.toUpperCase()}</Tag>
+                                )}
+                            </div>
+
+                            {/* Field diff for updates */}
+                            {entry.action === 'updated' && entry.new_values && (
+                                <div style={{ marginTop: 6 }}>
+                                    {(expandedEntryId === entry.id
+                                        ? Object.keys(entry.new_values)
+                                        : Object.keys(entry.new_values).slice(0, 3)
+                                    ).map((field) => (
+                                        <div
+                                            key={field}
+                                            style={{
+                                                marginBottom: 6,
+                                                padding: '5px 10px',
+                                                background: bgMuted,
+                                                borderRadius: 6,
+                                                border: `1px solid ${borderColor}`,
+                                            }}
+                                        >
+                                            <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', color: textMuted, letterSpacing: '0.05em' }}>
+                                                {FIELD_LABELS[field] ?? field}
+                                            </span>
+                                            <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+                                                <span style={{ fontSize: 12, color: '#b91c1c', background: '#fef2f2', borderRadius: 4, padding: '2px 6px', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>
+                                                    {formatValue(entry.old_values?.[field])}
+                                                </span>
+                                                <span style={{ color: '#94a3b8' }}>→</span>
+                                                <span style={{ fontSize: 12, color: '#15803d', background: '#f0fdf4', borderRadius: 4, padding: '2px 6px', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>
+                                                    {formatValue(entry.new_values[field])}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {Object.keys(entry.new_values).length > 3 && (
+                                        <Button type="link" size="small" style={{ paddingLeft: 0, marginTop: 2 }}
+                                            onClick={(e) => { e.stopPropagation(); setExpandedEntryId((prev) => (prev === entry.id ? null : entry.id)); }}>
+                                            {expandedEntryId === entry.id ? 'Show less' : `Show ${Object.keys(entry.new_values).length - 3} more changes`}
+                                        </Button>
+                                    )}
                                 </div>
-                            ))}
+                            )}
 
-                            {Object.keys(entry.new_values).length > 3 && (
-                                <Button
-                                    type="link"
-                                    size="small"
-                                    style={{ paddingLeft: 0, marginTop: 2 }}
-                                    onClick={() => setExpandedEntryId((prev) => (prev === entry.id ? null : entry.id))}
-                                >
-                                    {expandedEntryId === entry.id
-                                        ? 'Show less changes'
-                                        : `Show ${Object.keys(entry.new_values).length - 3} more changes`}
-                                </Button>
+                            {/* Review comments */}
+                            {(entry.action === 'approved' || entry.action === 'rejected') && entry.new_values?.comments && (
+                                <div style={{ marginTop: 4, fontSize: 12, color: textTertiary, fontStyle: 'italic' }}>
+                                    "{entry.new_values.comments}"
+                                </div>
                             )}
                         </div>
-                    )}
+                    ),
+                };
+            }),
+        }));
 
-                    {/* Review comments */}
-                    {(entry.action === 'approved' || entry.action === 'rejected') && entry.new_values?.comments && (
-                        <div style={{ marginTop: 4, fontSize: 12, color: textTertiary, fontStyle: 'italic' }}>
-                            "{entry.new_values.comments}"
+        return {
+            key: group.key,
+            label: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', minWidth: 0 }}>
+                    <FileTextOutlined style={{ color: '#0033a0', fontSize: 14, flexShrink: 0 }} />
+                    <span style={{ fontWeight: 600, fontSize: 13, color: textNormal, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {group.proposalId ? (
+                            <Link
+                                href={route('research.show', group.proposalId)}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ color: '#0033a0' }}
+                            >
+                                {group.title}
+                            </Link>
+                        ) : group.title}
+                    </span>
+                    <Space size={4} style={{ flexShrink: 0 }}>
+                        <Tag color={lastCfg.color} style={{ marginInlineEnd: 0 }}>{lastCfg.label}</Tag>
+                        <Tag style={{ marginInlineEnd: 0, background: 'transparent', borderColor: borderColor, color: textMuted }}>
+                            {group.entries.length} {group.entries.length === 1 ? 'event' : 'events'}
+                        </Tag>
+                        <span style={{ fontSize: 11, color: textMuted }}>{formatTs(lastEntry?.performed_at)}</span>
+                    </Space>
+                </div>
+            ),
+            children: (
+                <div className="space-y-4" style={{ paddingTop: 4 }}>
+                    {timelineByDate.map(({ dateKey, items }) => (
+                        <div key={dateKey}>
+                            <div style={{ marginBottom: 8 }}>
+                                <Tag style={{ borderRadius: 999, paddingInline: 10, border: `1px solid ${borderColor}`, color: textSecondary, background: bgMuted, fontWeight: 600, fontSize: 11 }}>
+                                    {getDayLabel(dateKey)}
+                                </Tag>
+                            </div>
+                            <Timeline items={items} />
                         </div>
-                    )}
+                    ))}
                 </div>
             ),
         };
-    });
-
-    const groupedTimeline = history.data.reduce((acc, entry, index) => {
-        const key = dayjs(entry.performed_at).format('YYYY-MM-DD');
-
-        if (!acc[key]) {
-            acc[key] = [];
-        }
-
-        acc[key].push(timelineItems[index]);
-        return acc;
-    }, {});
-
-    const groupedKeys = Object.keys(groupedTimeline).sort((a, b) => dayjs(b).valueOf() - dayjs(a).valueOf());
+    }), [paperGroups, expandedEntryId, dark]);
 
     // Pagination helpers
     const lastPage = history.meta?.last_page ?? history.last_page ?? 1;
@@ -425,7 +465,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                     )}
                 </Card>
 
-                {/* Timeline */}
+                {/* Timeline — grouped by paper, collapsible */}
                 <Card className="admin-dashboard-shell" bordered={false}>
                     {history.data.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>
@@ -434,25 +474,13 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                         </div>
                     ) : (
                         <>
-                            <div className="space-y-4">
-                                {groupedKeys.map((groupKey) => (
-                                    <div key={groupKey}>
-                                        <div style={{ marginBottom: 10 }}>
-                                            <Tag style={{
-                                                borderRadius: 999,
-                                                paddingInline: 10,
-                                                border: `1px solid ${borderColor}`,
-                                                color: textSecondary,
-                                                background: bgMuted,
-                                                fontWeight: 600,
-                                            }}>
-                                                {getDayLabel(groupKey)}
-                                            </Tag>
-                                        </div>
-                                        <Timeline mode="left" items={groupedTimeline[groupKey]} />
-                                    </div>
-                                ))}
-                            </div>
+                            <Collapse
+                                accordion={false}
+                                ghost={false}
+                                defaultActiveKey={paperGroups.length > 0 ? [paperGroups[0].key] : []}
+                                style={{ background: 'transparent' }}
+                                items={collapseItems}
+                            />
 
                             {/* Pagination */}
                             {lastPage > 1 && (

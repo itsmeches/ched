@@ -1,33 +1,77 @@
-# Calabarzon Research Information System (CRIS) - Backend
+# CALABARZON Research Information System (CRIS)
 
 ## Overview
 
-This is the Laravel 11 backend API for the Calabarzon Research Information System (CRIS). It provides authentication and CRUD operations for research proposals and institutions.
+This directory contains the main CRIS application:
 
-## Requirements
+- Laravel 11 backend
+- Inertia.js + React frontend
+- Role-based workflows for Super Admin, CHED, HEI, Faculty, and Student users
+- Public research archive and public paper detail pages
+
+CRIS manages end-to-end research submission, review, approval, archival, and audit/history tracking for Region IV-A institutions.
+
+This README is operations-focused for this app folder (setup, commands, routes, API, and deployment build flow). For repository-level overview and broader project context, see [../../README.md](../../README.md).
+
+## Core Capabilities
+
+- Authentication and role-based authorization
+- Research submission and multi-stage review workflow
+- CHED decisioning and review history
+- Admin management for users, institutions, keywords, and taxonomy
+- Public research listing and detail pages with PDF viewing/downloading
+- History page with filters, CSV export (super_admin), and collapsible grouping by paper
+- Global light/dark mode support (authenticated and public views)
+- Responsive admin tables with mobile column-priority behavior
+- Shared empty states and standardized confirmation dialogs
+
+## Stack
 
 - PHP 8.2+
-- Composer
-- MySQL (via XAMPP)
 - Laravel 11
+- React 18
+- Inertia.js
+- Vite
+- Ant Design
+- Tailwind CSS
+- MySQL or MariaDB
 
-## Setup
+## Local Setup
 
-### 1. Install Dependencies
+### 1. Install backend dependencies
 
 ```bash
 composer install
 ```
 
-### 2. Configure Environment
+### 2. Install frontend dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure environment
+
+Windows:
+
+```bash
+copy .env.example .env
+```
+
+macOS/Linux:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env`:
+Then edit .env with database values.
+
+Example:
 
 ```env
+APP_NAME=CRIS
+APP_URL=http://127.0.0.1:8001
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -36,103 +80,133 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-### 3. Create Database
-
-```sql
-CREATE DATABASE cris_db;
-```
-
-### 4. Run Migrations & Seed
+### 4. Generate application key
 
 ```bash
-php artisan migrate
-php artisan db:seed
+php artisan key:generate
 ```
 
-### 5. Start Server
+### 5. Run migrations and seeders
 
 ```bash
-php artisan serve --host=127.0.0.1 --port=8000
+php artisan migrate --seed
 ```
 
-## API Endpoints
+### 6. Start the app
+
+Terminal 1:
+
+```bash
+php artisan serve --host=127.0.0.1 --port=8001
+```
+
+Terminal 2:
+
+```bash
+npm run dev
+```
+
+Open:
+
+- http://127.0.0.1:8001
+
+## Production Build
+
+```bash
+npm run build
+```
+
+The build pipeline includes a sanitizer step for generated assets to reduce scanner false positives.
+
+## Main Routes
+
+### Public
+
+- /
+- /public/research
+- /public/research/{proposal}
+- /public/research/{proposal}/file
+
+### Authenticated
+
+- /dashboard
+- /profile
+- /research
+- /history
+- /history/export
+
+### Role-focused Areas
+
+- /hei/dashboard
+- /ched/dashboard
+- /ched/decisions
+- /admin/dashboard
+- /admin/users
+- /admin/institutions
+- /admin/keywords
+- /admin/taxonomy
+
+## API Summary
 
 ### Authentication
 
-| Method | Endpoint           | Description      |
-| ------ | ------------------ | ---------------- |
-| POST   | `/api/auth/login`  | Login            |
-| POST   | `/api/auth/logout` | Logout           |
-| GET    | `/api/auth/me`     | Get current user |
+- POST /api/auth/login
+- GET /api/auth/me
+- POST /api/auth/logout
 
-### Research Proposals
+### Proposals
 
-| Method | Endpoint                     | Description     |
-| ------ | ---------------------------- | --------------- |
-| GET    | `/api/proposals`             | List proposals  |
-| POST   | `/api/proposals`             | Create proposal |
-| GET    | `/api/proposals/{id}`        | View proposal   |
-| PUT    | `/api/proposals/{id}`        | Update proposal |
-| DELETE | `/api/proposals/{id}`        | Delete proposal |
-| POST   | `/api/proposals/{id}/review` | Review proposal |
+- GET /api/proposals
+- POST /api/proposals
+- GET /api/proposals/{proposal}
+- PUT /api/proposals/{proposal}
+- DELETE /api/proposals/{proposal}
+- POST /api/proposals/{proposal}/review
 
 ### Institutions
 
-| Method | Endpoint                 | Description        |
-| ------ | ------------------------ | ------------------ |
-| GET    | `/api/institutions`      | List institutions  |
-| POST   | `/api/institutions`      | Create institution |
-| GET    | `/api/institutions/{id}` | View institution   |
-| PUT    | `/api/institutions/{id}` | Update institution |
-| DELETE | `/api/institutions/{id}` | Delete institution |
+- GET /api/institutions
+- POST /api/institutions
+- GET /api/institutions/{institution}
+- PUT /api/institutions/{institution}
+- DELETE /api/institutions/{institution}
 
-## Test Users
+## Seeded Development Accounts
 
-| Role        | Email                    | Password   |
-| ----------- | ------------------------ | ---------- |
-| Super Admin | `superadmin@cris.gov.ph` | `password` |
-| CHED        | `ched@cris.gov.ph`       | `password` |
-| HEI         | `hei@edu.ph`             | `password` |
+| Role           | Email                  | Password |
+| -------------- | ---------------------- | -------- |
+| Super Admin    | superadmin@cris.gov.ph | password |
+| CHED Reviewer  | ched@cris.gov.ph       | password |
+| HEI Researcher | hei@edu.ph             | password |
 
-## Project Structure
+## Important Directories
 
-```
+```text
 cris-backend/
 ├── app/
-│   ├── Http/Controllers/Api/
-│   │   ├── AuthController.php
-│   │   ├── InstitutionController.php
-│   │   └── ResearchProposalController.php
-│   └── Models/
-│       ├── User.php
-│       ├── Institution.php
-│       └── ResearchProposal.php
+├── bootstrap/
+├── config/
 ├── database/
-│   ├── migrations/
-│   └── seeders/
-└── routes/
-    └── api.php
+├── public/
+├── resources/
+│   ├── js/
+│   ├── css/
+│   └── views/
+├── routes/
+├── scripts/
+└── tests/
 ```
 
-## Technology Stack
+## Security Notes
 
-- Laravel 11
-- Laravel Sanctum (API Authentication)
-- MySQL
-- XAMPP (Development)
+The app includes security hardening for:
 
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- Content Security Policy handling
+- Frame protection and secure headers
+- CORS controls
+- Safe API fallback behavior
+- Scanner-compatible asset output
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project follows the Laravel ecosystem licensing model and dependencies under their respective licenses.
