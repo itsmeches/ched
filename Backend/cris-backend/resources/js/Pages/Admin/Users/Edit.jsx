@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Card, Typography } from 'antd';
 import UserFormDrawer from './Partials/UserFormDrawer';
@@ -12,7 +13,7 @@ export default function UsersEdit({ user, institutions, roles }) {
     }
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Edit User</h2>}>
+        <AuthenticatedLayout header={<AdminPageHeader title="Edit User" />}>
             <Head title={`Edit ${user.name}`} />
             <div className="space-y-4">
                     <Card className="admin-dashboard-shell" bordered={false}>

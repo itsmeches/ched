@@ -97,6 +97,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/notifications/read-all', [DashboardController::class, 'markAllNotificationsRead'])
         ->name('notifications.read-all');
 
+    Route::post('/notifications/{id}/read', [DashboardController::class, 'markNotificationRead'])
+        ->name('notifications.read-one')
+        ->whereNumber('id');
+
     // Hierarchical account creation (CHED -> HEI -> Faculty -> Student)
     Route::middleware('role:ched,hei,faculty')->group(function () {
         Route::get('/accounts/create', [HierarchicalAccountController::class, 'create'])

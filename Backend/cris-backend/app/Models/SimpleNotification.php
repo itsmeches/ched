@@ -14,6 +14,7 @@ class SimpleNotification extends Model
     protected $fillable = [
         'user_id',
         'message',
+        'link_url',
         'is_read',
     ];
 

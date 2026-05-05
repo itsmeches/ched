@@ -1,10 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import AdminTableCard from '@/Components/Admin/AdminTableCard';
+import EmptyState from '@/Components/EmptyState';
+import { confirmAction } from '@/utils/confirmAction';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useMemo, useState, useEffect } from 'react';
 import { Alert, Button, Col, Input, InputNumber, Modal, Row, Select, Space, Switch, Table, Tag, Typography, message } from 'antd';
-import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 
 function escapeRegExp(value) {
     return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -153,7 +155,8 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
         {
             title: 'Action',
             key: 'action',
-            align: 'right',
+            align: 'center',
+            onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, row) => (
                 <Space>
                     <Button type="link" onClick={() => openCategoryEdit(row)}>Edit</Button>
@@ -199,7 +202,8 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
         {
             title: 'Action',
             key: 'action',
-            align: 'right',
+            align: 'center',
+            onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, row) => (
                 <Space>
                     <Button type="link" onClick={() => openDisciplineEdit(row)}>Edit</Button>
@@ -286,12 +290,11 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
             return;
         }
 
-        Modal.confirm({
+        confirmAction({
             title: 'Delete this research category?',
-            icon: <ExclamationCircleOutlined />,
             content: 'This action cannot be undone.',
             okText: 'Delete',
-            okButtonProps: { danger: true },
+            danger: true,
             onOk: () => router.delete(route('admin.taxonomy.categories.destroy', category.id), { preserveScroll: true }),
         });
     }
@@ -372,12 +375,11 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
             return;
         }
 
-        Modal.confirm({
+        confirmAction({
             title: 'Delete this discipline?',
-            icon: <ExclamationCircleOutlined />,
             content: 'This action cannot be undone.',
             okText: 'Delete',
-            okButtonProps: { danger: true },
+            danger: true,
             onOk: () => router.delete(route('admin.taxonomy.disciplines.destroy', discipline.id), { preserveScroll: true }),
         });
     }
@@ -446,6 +448,7 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
                         dataSource={filteredCategories}
                         pagination={{ pageSize: 10 }}
                         scroll={{ x: 860 }}
+                        locale={{ emptyText: <EmptyState title="No categories found" description="Adjust filters or add a new research category." /> }}
                     />
                 </AdminTableCard>
                 </div>
@@ -481,6 +484,7 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
                         dataSource={filteredDisciplines}
                         pagination={{ pageSize: 10 }}
                         scroll={{ x: 780 }}
+                        locale={{ emptyText: <EmptyState title="No disciplines found" description="Try changing filters or create a new discipline." /> }}
                     />
                 </AdminTableCard>
                 </div>

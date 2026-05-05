@@ -3,11 +3,13 @@ import AdminFilterCard from '@/Components/Admin/AdminFilterCard';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import AdminStatCardGrid from '@/Components/Admin/AdminStatCardGrid';
 import AdminTableCard from '@/Components/Admin/AdminTableCard';
+import EmptyState from '@/Components/EmptyState';
+import { confirmAction } from '@/utils/confirmAction';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Avatar, Button, Col, DatePicker, Input, Modal, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
-import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
+import { Alert, Avatar, Button, Col, DatePicker, Input, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
+import { PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
 const roleColorMap = { pending: 'orange', super_admin: 'purple', ched: '#0033a0', hei: '#0047d4', faculty: 'cyan', student: 'geekblue' };
@@ -33,7 +35,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
     const [tableData, setTableData] = useState(users.data ?? []);
 
     const categoryItems = useMemo(() => [
-        { key: 'all', label: roleLabelMap.all, count: roleCounts?.all ?? 0, color: '#0f172a' },
+        { key: 'all', label: roleLabelMap.all, count: roleCounts?.all ?? 0, color: '#0033a0' },
         { key: 'pending', label: roleLabelMap.pending, count: roleCounts?.pending ?? 0, color: '#d97706' },
         { key: 'super_admin', label: roleLabelMap.super_admin, count: roleCounts?.super_admin ?? 0, color: '#7c3aed' },
         { key: 'ched', label: roleLabelMap.ched, count: roleCounts?.ched ?? 0, color: '#0033a0' },
@@ -78,18 +80,21 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
         {
             title: 'Institution',
             key: 'institution',
+            responsive: ['sm'],
             render: (_, user) => user.institution?.name ?? 'Global account',
         },
         {
             title: 'Joined',
             dataIndex: 'created_at',
             key: 'created_at',
+            responsive: ['md'],
             render: (value) => formatDate(value),
         },
         {
             title: 'Action',
             key: 'action',
-            align: 'right',
+            align: 'center',
+            onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, user) => (
                 <Space>
                     {deactivated ? (
@@ -147,12 +152,11 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
     }
 
     function deleteUser(id) {
-        Modal.confirm({
+        confirmAction({
             title: 'Deactivate this user?',
-            icon: <ExclamationCircleOutlined />,
             content: 'The account will be soft-deleted and can be restored later.',
             okText: 'Deactivate',
-            okButtonProps: { danger: true },
+            danger: true,
             onOk: () => {
                 const previous = tableData;
                 setTableData((current) => current.filter((item) => item.id !== id));
@@ -307,7 +311,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
                         title={roleLabelMap[role || 'all']}
                         summary={`${users.total} ${deactivated ? 'deactivated' : 'active'} user${users.total === 1 ? '' : 's'} in this category`}
                     >
-                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, institution_id: institutionId, from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '', to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '', deactivated: deactivated ? 1 : 0, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: 'No users matched your filter criteria.' }} />
+                        <Table rowKey="id" size="middle" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, institution_id: institutionId, from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '', to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '', deactivated: deactivated ? 1 : 0, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: <EmptyState title="No users matched your filters" description="Adjust role, institution, date, or search terms to find users." /> }} />
                     </AdminTableCard>
             </div>
         </AuthenticatedLayout>

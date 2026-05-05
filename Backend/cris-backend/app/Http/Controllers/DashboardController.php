@@ -82,7 +82,6 @@ class DashboardController extends Controller
             'stageCounts'   => $stageCounts,
             'recentUploads' => $recentUploads,
             'pendingQueue'  => $pendingQueue,
-            'notifications' => $this->dashboardNotifications($user->id),
         ]);
     }
 
@@ -139,7 +138,6 @@ class DashboardController extends Controller
             'stageCounts' => $stageCounts,
             'forReview' => $forReview,
             'recentDecisions' => $recentDecisions,
-            'notifications' => $this->dashboardNotifications($user->id),
         ]);
     }
 
@@ -192,7 +190,6 @@ class DashboardController extends Controller
             'stageCounts' => $stageCounts,
             'forReview' => $forReview,
             'recentDecisions' => $recentDecisions,
-            'notifications' => $this->dashboardNotifications($user->id),
         ]);
     }
 
@@ -238,7 +235,6 @@ class DashboardController extends Controller
             'stageCounts'  => $stageCounts,
             'forReview'    => $forReview,
             'editRequests' => $editRequests,
-            'notifications' => $this->dashboardNotifications($request->user()->id),
         ]);
     }
 
@@ -304,7 +300,6 @@ class DashboardController extends Controller
             'recentUsers'         => $recentUsers,
             'recentProposals'     => $recentProposals,
             'institutionOverview' => $institutionOverview,
-            'notifications'       => $this->dashboardNotifications(request()->user()->id),
             'institutions'        => Institution::orderBy('name')->get(['id', 'name', 'code']),
             'roles'               => [
                 ['value' => 'hei', 'label' => 'HEI'],
@@ -334,5 +329,19 @@ class DashboardController extends Controller
             ->update(['is_read' => true]);
 
         return back()->with('success', 'All notifications marked as read.');
+    }
+
+    public function markNotificationRead(Request $request, int $id): RedirectResponse
+    {
+        SimpleNotification::query()
+            ->where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->update(['is_read' => true]);
+
+        $url = $request->input('redirect');
+
+        return $url
+            ? redirect($url)
+            : back();
     }
 }

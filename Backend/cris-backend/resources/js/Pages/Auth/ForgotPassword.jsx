@@ -20,21 +20,21 @@ export default function ForgotPassword({ status }) {
             <Head title="Forgot Password" />
 
             <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900">Forgot password</h2>
-                <p className="mt-1 text-sm text-slate-500">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Forgot password</h2>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Enter your account email and we will send a reset link.
                 </p>
             </div>
 
             {status && (
-                <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-900" style={{ borderColor: '#b3d9ff', backgroundColor: '#e6f2ff', color: '#0033a0' }}>
+                <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
                     {status}
                 </div>
             )}
 
             <form onSubmit={submit} className="space-y-5">
                 <div>
-                    <label htmlFor="email" className="text-sm font-medium text-slate-700">Email address</label>
+                    <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">Email address</label>
                 <TextInput
                     id="email"
                     type="email"
@@ -54,11 +54,9 @@ export default function ForgotPassword({ status }) {
                 </PrimaryButton>
             </form>
 
-            <p className="mt-6 text-center text-sm text-slate-500">
+            <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 Remembered your password?{' '}
-                <Link href={route('login')} className="font-medium transition-colors" style={{ color: '#0033a0' }}
-                    onMouseEnter={(e) => e.target.style.color = '#001f66'}
-                    onMouseLeave={(e) => e.target.style.color = '#0033a0'}>
+                <Link href={route('login')} className="font-medium text-[#0033a0] transition-colors hover:text-[#001f66] dark:text-blue-300 dark:hover:text-blue-200">
                     Back to sign in
                 </Link>
             </p>

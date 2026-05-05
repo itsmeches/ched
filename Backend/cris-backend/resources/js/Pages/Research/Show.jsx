@@ -1,12 +1,14 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
+import Breadcrumb from '@/Components/Breadcrumb';
 import { formatDateTime } from '@/utils/date';
 import { Alert, Button, Card, Divider, Input, Modal, Popconfirm, Space, Tag, Timeline, Typography, message } from 'antd';
 import { DownloadOutlined, FilePdfOutlined, KeyOutlined, LockOutlined } from '@ant-design/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-export default function ResearchShow({ proposal, researchHistory = [], canEdit, canReview, canDelete, editPermission, pendingEditRequests }) {
+export default function ResearchShow({ proposal, researchHistory = [], canEdit, canReview, canDelete, editPermission, pendingEditRequests, breadcrumbs = [] }) {
     const { flash, auth } = usePage().props;
     const deleteForm = useForm({});
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -216,15 +218,12 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
     }, [researchHistory]);
 
     return (
-        <AuthenticatedLayout header={
-            <div className="flex items-center gap-3">
-                <Link href={route('research.index')} className="text-sm text-slate-500 hover:text-slate-700">Back</Link>
-                <h2 className="text-xl font-semibold text-slate-900 truncate">Research Record</h2>
-            </div>
-        }>
+        <AuthenticatedLayout header={<AdminPageHeader title="Research Record" />}>
             <Head title={proposal.title} />
+            {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
 
             <div className="space-y-4">
+                    <Link href={route('research.index')} className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-[#0033a0] dark:hover:text-blue-300 transition-colors">← Back to Research Papers</Link>
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
@@ -296,13 +295,13 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                                 </Space>
                             </div>
 
-                            <div className="rounded-2xl border border-blue-200 bg-blue-50/65 p-3.5">
-                                <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">Audit Summary</p>
+                            <div className="rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/65 dark:bg-blue-950/30 p-3.5">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">Audit Summary</p>
                                 <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
                                     {auditSummaryItems.map((item) => (
-                                        <div key={item.label} className="rounded-xl border border-blue-200/80 bg-white/80 px-3 py-2">
-                                            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{item.label}</p>
-                                            <p className="mt-0.5 break-words text-[13px] leading-snug text-slate-800">{item.value}</p>
+                                        <div key={item.label} className="rounded-xl border border-blue-200/80 dark:border-blue-900/40 bg-white/80 dark:bg-[#111827] px-3 py-2">
+                                            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{item.label}</p>
+                                            <p className="mt-0.5 break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">{item.value}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -310,9 +309,9 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
 
                             <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
                                 {metadataItems.map((item) => (
-                                    <div key={item.label} className="rounded-xl border border-slate-200/80 bg-white/65 px-3.5 py-2.5">
-                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{item.label}</p>
-                                        <p className="mt-0.5 break-words text-[13px] leading-snug text-slate-800">{item.value}</p>
+                                    <div key={item.label} className="rounded-xl border border-slate-200/80 dark:border-[#1e2d47] bg-slate-50/80 dark:bg-[#0d1526] px-3.5 py-2.5">
+                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{item.label}</p>
+                                        <p className="mt-0.5 break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">{item.value}</p>
                                     </div>
                                 ))}
                             </div>
@@ -329,7 +328,6 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                                 whiteSpace: 'pre-line',
                                 fontSize: 17,
                                 lineHeight: 1.9,
-                                color: '#334155',
                                 marginBottom: 0,
                             }}
                         >

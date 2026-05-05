@@ -1,9 +1,18 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router, useForm } from '@inertiajs/react';
-import { Alert, Button, Card, Form, Input, Space, Typography } from 'antd';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import Breadcrumb from '@/Components/Breadcrumb';
+import { Alert, Button, Card, Form, Input, Popconfirm, Space, Typography, message } from 'antd';
+import { useEffect, useState } from 'react';
 
-export default function AccountEdit({ account }) {
+export default function AccountEdit({ account, breadcrumbs = [] }) {
     const isDeactivated = Boolean(account.deleted_at);
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash?.success) message.success(flash.success);
+        if (flash?.error) message.error(flash.error);
+    }, [flash?.success, flash?.error]);
 
     const { data, setData, put, processing, errors } = useForm({
         name: account.name ?? '',
@@ -34,15 +43,21 @@ export default function AccountEdit({ account }) {
         });
     };
 
+    const [reactivating, setReactivating] = useState(false);
+
     const handleReactivate = () => {
-        router.post(route('accounts.reactivate', { user: account.id }));
+        setReactivating(true);
+        router.post(route('accounts.reactivate', { user: account.id }), {}, {
+            onFinish: () => setReactivating(false),
+        });
     };
 
     return (
         <AuthenticatedLayout
-            header={<h2 className="text-xl font-semibold text-slate-900">Edit Account</h2>}
+            header={<AdminPageHeader title="Edit Account" />}
         >
             <Head title="Edit Account" />
+            {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
 
             <div className="max-w-xl mx-auto space-y-4">
                 <Card className="admin-dashboard-shell" bordered={false}>
@@ -62,11 +77,19 @@ export default function AccountEdit({ account }) {
                                 showIcon
                                 message="This account is currently deactivated."
                                 description="Reactivate this account to allow sign in and continue editing details."
-                                action={(
-                                    <Button type="primary" onClick={handleReactivate}>
-                                        Reactivate
-                                    </Button>
-                                )}
+                                action={
+                                    <Popconfirm
+                                        title="Reactivate this account?"
+                                        description="The user will be able to log in again after reactivation."
+                                        okText="Reactivate"
+                                        cancelText="Cancel"
+                                        onConfirm={handleReactivate}
+                                    >
+                                        <Button type="primary" loading={reactivating}>
+                                            Reactivate
+                                        </Button>
+                                    </Popconfirm>
+                                }
                             />
                         )}
 

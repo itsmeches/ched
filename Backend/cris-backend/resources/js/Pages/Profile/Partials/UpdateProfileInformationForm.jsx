@@ -27,11 +27,11 @@ export default function UpdateProfileInformation({
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-semibold text-slate-900">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                     Profile Information
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                     Update your account's profile information and email address.
                 </p>
             </header>
@@ -71,23 +71,20 @@ export default function UpdateProfileInformation({
 
                 {mustVerifyEmail && user.email_verified_at === null && (
                     <div>
-                        <p className="mt-2 text-sm text-slate-700">
+                        <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
                             Your email address is unverified.
                             <Link
                                 href={route('verification.send')}
                                 method="post"
                                 as="button"
-                                className="ml-1 rounded-md text-sm font-medium underline focus:outline-none focus:ring-2 focus:ring-offset-2" 
-                                style={{ color: '#0033a0' }}
-                                onMouseEnter={(e) => e.target.style.color = '#001f66'}
-                                onMouseLeave={(e) => e.target.style.color = '#0033a0'}
+                                className="ml-1 rounded-md text-sm font-medium text-[#0033a0] underline transition-colors hover:text-[#001f66] focus:outline-none focus:ring-2 focus:ring-[#0033a0]/40 focus:ring-offset-2 focus:ring-offset-white dark:text-blue-300 dark:hover:text-blue-200 dark:focus:ring-blue-400/50 dark:focus:ring-offset-[#111827]"
                             >
                                 Click here to re-send the verification email.
                             </Link>
                         </p>
 
                         {status === 'verification-link-sent' && (
-                            <div className="mt-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-900" style={{ borderColor: '#b3d9ff', backgroundColor: '#e6f2ff', color: '#0033a0' }}>
+                            <div className="mt-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
                                 A new verification link has been sent to your
                                 email address.
                             </div>
@@ -105,7 +102,7 @@ export default function UpdateProfileInformation({
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-slate-600">
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
                             Saved.
                         </p>
                     </Transition>

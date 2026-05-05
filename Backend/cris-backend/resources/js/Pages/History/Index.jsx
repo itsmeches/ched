@@ -1,4 +1,5 @@
 ﻿import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button, Card, Checkbox, Col, DatePicker, Input, Pagination, Row, Select, Space, Tag, Timeline, Typography } from 'antd';
 import {
@@ -13,6 +14,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useState } from 'react';
+import { useTheme } from '@/utils/ThemeContext';
 
 const ACTION_CONFIG = {
     created:  { color: '#16a34a', icon: <PlusCircleOutlined />,  label: 'Submitted' },
@@ -85,6 +87,15 @@ function getDayLabel(dateKey) {
 }
 
 export default function HistoryIndex({ history, filters, role, stats }) {
+    const { dark } = useTheme();
+    
+    // Theme-aware colors
+    const textMuted = dark ? '#94a3b8' : '#64748b';
+    const textSecondary = dark ? '#cbd5e1' : '#334155';
+    const textTertiary = dark ? '#64748b' : '#475569';
+    const borderColor = dark ? '#1e2d47' : '#f1f5f9';
+    const bgMuted = dark ? 'rgba(30,45,71,0.4)' : '#f8fafc';
+    const textNormal = dark ? '#e2e8f0' : '#0f172a';
     const [search, setSearch] = useState(filters.search ?? '');
     const [action, setAction] = useState(filters.action ?? '');
     const [range, setRange] = useState(filters.range ?? '');
@@ -155,7 +166,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
     }
 
     const statItems = [
-        { key: 'total', label: 'Total Entries', value: stats?.total ?? 0, color: '#0f172a' },
+        { key: 'total', label: 'Total Entries', value: stats?.total ?? 0, color: '#0033a0' },
         { key: 'created', label: 'Submitted', value: stats?.created ?? 0, color: '#16a34a' },
         { key: 'updated', label: 'Updated', value: stats?.updated ?? 0, color: '#2563eb' },
         { key: 'approved', label: 'Approved', value: stats?.approved ?? 0, color: '#0033a0' },
@@ -170,7 +181,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
             color: cfg.color,
             dot: <span style={{ fontSize: 16, color: cfg.color }}>{cfg.icon}</span>,
             label: (
-                <span style={{ fontSize: 12, color: '#64748b', minWidth: 140, display: 'inline-block' }}>
+                <span style={{ fontSize: 12, color: textMuted, minWidth: 140, display: 'inline-block' }}>
                     {formatTs(entry.performed_at)}
                 </span>
             ),
@@ -191,7 +202,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                     {/* Action + actor */}
                     <Space wrap size={4} style={{ marginBottom: 6 }}>
                         <Tag color={cfg.color} style={{ marginInlineEnd: 0 }}>{cfg.label}</Tag>
-                        <span style={{ fontSize: 13, color: '#334155' }}>
+                        <span style={{ fontSize: 13, color: textSecondary }}>
                             {entry.actor ? entry.actor.name : 'System'}
                         </span>
                         {entry.actor?.role && (
@@ -211,12 +222,12 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                                     style={{
                                         marginBottom: 6,
                                         padding: '6px 10px',
-                                        background: '#f8fafc',
+                                        background: bgMuted,
                                         borderRadius: 6,
-                                        border: '1px solid #e2e8f0',
+                                        border: `1px solid ${borderColor}`,
                                     }}
                                 >
-                                    <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+                                    <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', color: textMuted, letterSpacing: '0.05em' }}>
                                         {FIELD_LABELS[field] ?? field}
                                     </span>
                                     <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -256,7 +267,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
 
                     {/* Review comments */}
                     {(entry.action === 'approved' || entry.action === 'rejected') && entry.new_values?.comments && (
-                        <div style={{ marginTop: 4, fontSize: 12, color: '#475569', fontStyle: 'italic' }}>
+                        <div style={{ marginTop: 4, fontSize: 12, color: textTertiary, fontStyle: 'italic' }}>
                             "{entry.new_values.comments}"
                         </div>
                     )}
@@ -284,14 +295,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
     const totalRecords = history.meta?.total ?? history.total;
 
     return (
-        <AuthenticatedLayout header={
-            <div className="flex items-center gap-3">
-                <HistoryOutlined style={{ color: '#0033a0', fontSize: 18 }} />
-                <h2 className="text-xl font-semibold text-slate-900">
-                    {ROLE_HEADING[role] ?? 'History'}
-                </h2>
-            </div>
-        }>
+        <AuthenticatedLayout header={<AdminPageHeader title={ROLE_HEADING[role] ?? 'History'} />}>
             <Head title="History" />
 
             <div className="space-y-4">
@@ -299,7 +303,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                     {statItems.map((item) => (
                         <Col key={item.key} xs={12} sm={8} lg={4}>
                             <Card className="admin-dashboard-shell" bordered={false} bodyStyle={{ padding: 14 }}>
-                                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', color: '#64748b', textTransform: 'uppercase' }}>
+                                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', color: textMuted, textTransform: 'uppercase' }}>
                                     {item.label}
                                 </div>
                                 <div style={{ marginTop: 4, fontSize: 24, fontWeight: 700, color: item.color }}>
@@ -386,10 +390,10 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                         <div style={{
                             marginTop: 14,
                             paddingTop: 14,
-                            borderTop: '1px solid #f1f5f9',
+                            borderTop: `1px solid ${borderColor}`,
                         }}>
                             <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Typography.Text strong style={{ fontSize: 12, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                <Typography.Text strong style={{ fontSize: 12, color: textTertiary, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                                     Export columns
                                 </Typography.Text>
                                 <Button size="small" type="link" style={{ padding: 0, height: 'auto', fontSize: 12 }} onClick={() => setExportColumns(DEFAULT_EXPORT_COLUMNS)}>
@@ -437,9 +441,9 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                                             <Tag style={{
                                                 borderRadius: 999,
                                                 paddingInline: 10,
-                                                border: '1px solid #cbd5e1',
-                                                color: '#334155',
-                                                background: '#f8fafc',
+                                                border: `1px solid ${borderColor}`,
+                                                color: textSecondary,
+                                                background: bgMuted,
                                                 fontWeight: 600,
                                             }}>
                                                 {getDayLabel(groupKey)}

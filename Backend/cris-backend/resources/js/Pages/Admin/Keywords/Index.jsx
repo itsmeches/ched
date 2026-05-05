@@ -2,10 +2,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminFilterCard from '@/Components/Admin/AdminFilterCard';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import AdminTableCard from '@/Components/Admin/AdminTableCard';
+import EmptyState from '@/Components/EmptyState';
+import { confirmAction } from '@/utils/confirmAction';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Col, Input, Modal, Row, Space, Table, Tag, Tooltip, Typography, message } from 'antd';
-import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, TagsOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, TagsOutlined } from '@ant-design/icons';
 
 export default function KeywordsIndex({ keywords, filters }) {
     const { flash } = usePage().props;
@@ -40,11 +42,13 @@ export default function KeywordsIndex({ keywords, filters }) {
             title: 'Used By Papers',
             dataIndex: 'research_proposals_count',
             key: 'research_proposals_count',
+            responsive: ['sm'],
         },
         {
             title: 'Action',
             key: 'action',
-            align: 'right',
+            align: 'center',
+            onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, keyword) => (
                 <Space>
                     <Button type="link" onClick={() => openEdit(keyword)}>Edit</Button>
@@ -111,12 +115,11 @@ export default function KeywordsIndex({ keywords, filters }) {
             return;
         }
 
-        Modal.confirm({
+        confirmAction({
             title: 'Delete this keyword?',
-            icon: <ExclamationCircleOutlined />,
             content: 'This keyword is not currently used. This action cannot be undone.',
             okText: 'Delete',
-            okButtonProps: { danger: true },
+            danger: true,
             onOk: () => {
                 const previous = tableData;
                 setTableData((current) => current.filter((item) => item.id !== keyword.id));
@@ -192,7 +195,7 @@ export default function KeywordsIndex({ keywords, filters }) {
                             onChange: (page) => router.get(route('admin.keywords.index'), { search, page }, { preserveState: true, replace: true }),
                         }}
                         scroll={{ x: 720 }}
-                        locale={{ emptyText: 'No keywords matched your search.' }}
+                        locale={{ emptyText: <EmptyState title="No keywords matched" description="Try another search term or add a new keyword." /> }}
                     />
                 </AdminTableCard>
             </div>

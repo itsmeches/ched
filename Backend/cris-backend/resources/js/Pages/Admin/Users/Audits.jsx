@@ -2,6 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminFilterCard from '@/Components/Admin/AdminFilterCard';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import AdminTableCard from '@/Components/Admin/AdminTableCard';
+import EmptyState from '@/Components/EmptyState';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDateTime } from '@/utils/date';
 import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons';
@@ -42,6 +43,7 @@ export default function UserAudits({ audits, filters, actionOptions = [] }) {
         {
             title: 'Actor',
             key: 'actor',
+            responsive: ['sm'],
             render: (_, row) => (
                 <div>
                     <div style={{ fontWeight: 600 }}>{row.actor?.name ?? 'System/Unknown'}</div>
@@ -69,6 +71,7 @@ export default function UserAudits({ audits, filters, actionOptions = [] }) {
         {
             title: 'Details',
             key: 'details',
+            responsive: ['md'],
             render: (_, row) => (
                 <Space direction="vertical" size={2}>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
@@ -223,7 +226,7 @@ export default function UserAudits({ audits, filters, actionOptions = [] }) {
                             onChange: (page) => applyFilters(page),
                         }}
                         scroll={{ x: 1100 }}
-                        locale={{ emptyText: 'No audit events found for the selected filters.' }}
+                        locale={{ emptyText: <EmptyState title="No audit events found" description="Try another date range, action, or search query." /> }}
                     />
                 </AdminTableCard>
             </div>

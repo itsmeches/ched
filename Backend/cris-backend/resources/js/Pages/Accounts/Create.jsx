@@ -1,7 +1,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Table, Tabs, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Table, Tabs, Tag, Typography, message } from 'antd';
 import { UserAddOutlined } from '@ant-design/icons';
+import { useEffect } from 'react';
 import { formatDateTime } from '@/utils/date';
 
 function institutionLabel(option) {
@@ -10,6 +12,11 @@ function institutionLabel(option) {
 
 export default function AccountsCreate({ creatorRole, targetRole, targetRoleLabel, institutions, requiresInstitutionSelection, institutionName, hierarchyTabs = [] }) {
     const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash?.success) message.success(flash.success);
+        if (flash?.error) message.error(flash.error);
+    }, [flash?.success, flash?.error]);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -53,13 +60,11 @@ export default function AccountsCreate({ creatorRole, targetRole, targetRoleLabe
 
     return (
         <AuthenticatedLayout
-            header={<h2 className="text-xl font-semibold text-slate-900">Create {targetRoleLabel} Account</h2>}
+            header={<AdminPageHeader title={`Create ${targetRoleLabel} Account`} />}
         >
             <Head title={`Create ${targetRoleLabel} Account`} />
 
             <div className="space-y-4">
-                {flash?.success && <Alert type="success" showIcon message={flash.success} />}
-                {flash?.error && <Alert type="error" showIcon message={flash.error} />}
                 {errors?.role_linkage && <Alert type="error" showIcon message={errors.role_linkage} />}
 
                 <Card className="admin-dashboard-shell" bordered={false}>

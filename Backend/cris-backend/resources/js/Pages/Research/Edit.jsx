@@ -1,5 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, useForm, usePage } from '@inertiajs/react';
+import Breadcrumb from '@/Components/Breadcrumb';
 import { Alert, Card, message, Typography } from 'antd';
 import { useEffect } from 'react';
 import ResearchProposalForm from './Partials/ResearchProposalForm';
@@ -11,7 +13,7 @@ function parseKeywordItems(value) {
         .filter(Boolean);
 }
 
-export default function ResearchEdit({ proposal, keywordOptions = [], disciplineOptions = [], researchCategoryGroups = [] }) {
+export default function ResearchEdit({ proposal, keywordOptions = [], disciplineOptions = [], researchCategoryGroups = [], breadcrumbs = [] }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
         _method:           'PUT',
@@ -48,8 +50,9 @@ export default function ResearchEdit({ proposal, keywordOptions = [], discipline
     }, [flash?.success, flash?.error]);
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Edit Research Paper</h2>}>
+        <AuthenticatedLayout header={<AdminPageHeader title="Edit Research Paper" />}>
             <Head title="Edit Research Paper" />
+            {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
             <div className="space-y-4">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}

@@ -1,13 +1,16 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
+import { MoonOutlined, SunOutlined } from '@ant-design/icons';
+import { useTheme } from '@/utils/ThemeContext';
 import Dropdown from './Dropdown';
 
 export default function Navbar() {
     const page = usePage();
-    const { auth } = page.props;
+    const { auth, notifications = [] } = page.props;
     const user = auth.user;
     const [menuOpen, setMenuOpen] = useState(false);
     const currentTab = new URLSearchParams((page.url || '').split('?')[1] || '').get('tab');
+    const { dark, toggleDark } = useTheme();
 
     const getRoleLabel = () => {
         switch (user.role) {
@@ -111,6 +114,8 @@ export default function Navbar() {
     const navItems = getNavItems();
     const [settingsOpen, setSettingsOpen] = useState(false);
     const settingsRef = useRef(null);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const notifRef = useRef(null);
 
     useEffect(() => {
         function handleClickOutside(e) {
@@ -121,6 +126,22 @@ export default function Navbar() {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (notifRef.current && !notifRef.current.contains(e.target)) {
+                setNotifOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const formatNotifDate = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    };
 
     const isActive = (item) => {
         if (item.tab && route().current('research.index')) {
@@ -133,7 +154,7 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white shadow-sm">
+        <nav className="sticky top-0 z-50 border-b border-slate-200 dark:border-[#1e2d47] bg-white dark:bg-[#0a0f1e] shadow-sm transition-colors duration-300">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo Section */}
@@ -142,7 +163,7 @@ export default function Navbar() {
                             <div className="relative">
                                 <img src="/cris-mark.svg" alt="CRIS" className="h-8 w-8" />
                             </div>
-                            <span className="hidden sm:block font-bold text-slate-900">CRIS</span>
+                            <span className="hidden sm:block font-bold text-slate-900 dark:text-white">CRIS</span>
                         </Link>
 
                         {/* Desktop Navigation */}
@@ -155,8 +176,8 @@ export default function Navbar() {
                                             onClick={() => setSettingsOpen((o) => !o)}
                                             className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                                                 isActive(item)
-                                                    ? 'bg-blue-50 text-blue-900 border-b-2'
-                                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                                    ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300 border-b-2'
+                                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-white'
                                             }`}
                                             style={isActive(item) ? { borderColor: '#0033a0' } : {}}
                                         >
@@ -169,13 +190,13 @@ export default function Navbar() {
                                             </svg>
                                         </button>
                                         {settingsOpen && (
-                                            <div className="absolute left-0 top-full mt-1 w-48 rounded-xl border border-slate-200 bg-white py-1 shadow-lg z-50">
+                                            <div className="absolute left-0 top-full mt-1 w-48 rounded-xl border border-slate-200 dark:border-[#1e2d47] bg-white dark:bg-[#111827] py-1 shadow-lg z-50">
                                             {item.children.map((child) => {
                                                 const childActive = child.activePatterns?.some((p) => route().current(p));
                                                 const cls = `flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
                                                     childActive
-                                                        ? 'bg-blue-50 text-blue-900'
-                                                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                                        ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300'
+                                                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-white'
                                                 }`;
                                                 return child.isLink ? (
                                                     <Link
@@ -206,8 +227,8 @@ export default function Navbar() {
                                         href={item.href}
                                         className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                                             isActive(item)
-                                                ? 'bg-blue-50 text-blue-900 border-b-2'
-                                                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                                ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300 border-b-2'
+                                                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-white'
                                         }`}
                                         style={isActive(item) ? { borderColor: '#0033a0' } : {}}
                                     >
@@ -218,10 +239,105 @@ export default function Navbar() {
                         </div>
                     </div>
 
-                    {/* Right Section: User Info & Dropdown */}
-                    <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex h-9 items-center px-3">
-                            <span className="text-sm font-medium leading-5 text-slate-700">{user.name}</span>
+                    {/* Right Section: Theme toggle, Notifications, User Info & Dropdown */}
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        {/* Dark / Light toggle */}
+                        <button
+                            type="button"
+                            onClick={toggleDark}
+                            aria-label="Toggle theme"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-[#1e2d47] bg-white dark:bg-[#111827] text-slate-600 dark:text-yellow-300 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-[#1a2540] focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        >
+                            {dark ? <SunOutlined /> : <MoonOutlined />}
+                        </button>
+
+                        {/* Notification Bell */}
+                        <div className="relative" ref={notifRef}>
+                            <button
+                                type="button"
+                                aria-label={`Notifications${notifications.length > 0 ? `, ${notifications.length} unread` : ''}`}
+                                onClick={() => setNotifOpen((o) => !o)}
+                                className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-[#1e2d47] bg-white dark:bg-[#111827] text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-[#1a2540] hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                            >
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                {notifications.length > 0 && (
+                                    <span
+                                        className="absolute -right-1 -top-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                                        style={{ background: '#0033a0', lineHeight: 1 }}
+                                    >
+                                        {notifications.length > 9 ? '9+' : notifications.length}
+                                    </span>
+                                )}
+                            </button>
+
+                            {notifOpen && (
+                                <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-slate-200 dark:border-[#1e2d47] bg-white dark:bg-[#111827] shadow-lg">
+                                    <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1e2d47] px-4 py-3">
+                                        <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                                            Notifications
+                                            {notifications.length > 0 && (
+                                                <span className="ml-2 inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-bold text-white" style={{ background: '#0033a0' }}>
+                                                    {notifications.length}
+                                                </span>
+                                            )}
+                                        </span>
+                                        {notifications.length > 0 && (
+                                            <button
+                                                type="button"
+                                                className="text-xs font-medium hover:underline"
+                                                style={{ color: '#0033a0' }}
+                                                onClick={() => {
+                                                    router.post(route('notifications.read-all'), {}, {
+                                                        onSuccess: () => setNotifOpen(false),
+                                                        preserveScroll: true,
+                                                    });
+                                                }}
+                                            >
+                                                Mark all as read
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="max-h-80 divide-y divide-slate-100 dark:divide-[#1e2d47] overflow-y-auto">
+                                        {notifications.length === 0 ? (
+                                            <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                                                No new notifications.
+                                            </div>
+                                        ) : (
+                                            notifications.map((item) => (
+                                                item.link_url ? (
+                                                    <button
+                                                        key={item.id}
+                                                        type="button"
+                                                        className="w-full cursor-pointer px-4 py-3 text-left transition-colors hover:bg-blue-50 dark:hover:bg-[#1a2540]"
+                                                        onClick={() => {
+                                                            setNotifOpen(false);
+                                                            router.post(
+                                                                route('notifications.read-one', { id: item.id }),
+                                                                { redirect: item.link_url },
+                                                                { preserveScroll: false }
+                                                            );
+                                                        }}
+                                                    >
+                                                        <p className="text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
+                                                        <p className="mt-1 text-xs" style={{ color: '#0033a0' }}>{formatNotifDate(item.created_at)}</p>
+                                                    </button>
+                                                ) : (
+                                                    <div key={item.id} className="px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-[#1a2540]">
+                                                        <p className="text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
+                                                        <p className="mt-1 text-xs text-slate-400">{formatNotifDate(item.created_at)}</p>
+                                                    </div>
+                                                )
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="hidden h-9 items-center pl-1 pr-2 sm:flex">
+                            <span className="text-sm font-medium leading-5 text-slate-700 dark:text-slate-200">{user.name}</span>
                         </div>
 
                         {/* User Dropdown */}
@@ -231,7 +347,7 @@ export default function Navbar() {
                                     type="button"
                                     aria-label="Open user menu"
                                     aria-haspopup="menu"
-                                    className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white hover:shadow-md transition-shadow"
+                                    className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white shadow-sm transition-shadow hover:shadow-md"
                                     style={{ background: 'linear-gradient(to bottom right, #0047d4, #0033a0)' }}
                                 >
                                     {user.name.charAt(0).toUpperCase()}
@@ -239,9 +355,9 @@ export default function Navbar() {
                             </Dropdown.Trigger>
 
                             <Dropdown.Content align="right">
-                                <div className="px-4 py-2 text-sm text-slate-700 border-b border-slate-200">
-                                    <p className="font-semibold">{user.name}</p>
-                                    <p className="text-xs text-slate-500 mb-1">{user.email}</p>
+                                <div className="border-b border-slate-200 dark:border-[#1e2d47] px-4 py-2 text-sm text-slate-700 dark:text-slate-300">
+                                    <p className="font-semibold dark:text-white">{user.name}</p>
+                                    <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
                                     <p className="text-xs font-medium" style={{ color: '#0033a0' }}>{getRoleLabel()}</p>
                                 </div>
                                 <Dropdown.Link href={route('profile.edit')}>
@@ -260,7 +376,7 @@ export default function Navbar() {
                             aria-expanded={menuOpen}
                             aria-controls="mobile-nav-menu"
                             onClick={() => setMenuOpen(!menuOpen)}
-                            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-slate-600 hover:bg-slate-100 focus:outline-none"
+                            className="inline-flex items-center justify-center rounded-md p-2 text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-slate-300 dark:hover:bg-[#1a2540] md:hidden"
                         >
                             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 {menuOpen ? (
@@ -275,20 +391,20 @@ export default function Navbar() {
 
                 {/* Mobile Navigation Menu */}
                 {menuOpen && (
-                    <div id="mobile-nav-menu" className="md:hidden border-t border-slate-200 bg-slate-50 py-2">
+                    <div id="mobile-nav-menu" className="md:hidden border-t border-slate-200 dark:border-[#1e2d47] bg-slate-50 dark:bg-[#0d1526] py-2">
                         <div className="space-y-1">
                             {navItems.map((item) =>
                                 item.dropdown ? (
                                     <div key="settings-mobile">
-                                        <div className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                        <div className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                                             {item.label}
                                         </div>
                                         {item.children.map((child) => {
                                                 const childActive = child.activePatterns?.some((p) => route().current(p));
                                                 const cls = `block pl-7 pr-4 py-2 text-sm font-medium transition-all duration-200 ${
                                                     childActive
-                                                        ? 'bg-blue-50 text-blue-900'
-                                                        : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                                                        ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300'
+                                                        : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-white'
                                                 }`;
                                                 return child.isLink ? (
                                                     <Link
@@ -317,8 +433,8 @@ export default function Navbar() {
                                         href={item.href}
                                         className={`block px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                                             isActive(item)
-                                                ? 'bg-blue-50 text-blue-900'
-                                                : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                                                ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300'
+                                                : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-white'
                                         }`}
                                         onClick={() => setMenuOpen(false)}
                                     >
@@ -327,12 +443,12 @@ export default function Navbar() {
                                 )
                             )}
                         </div>
-                        <div className="border-t border-slate-200 mt-2 px-4 py-3">
-                            <p className="text-sm font-semibold leading-none text-slate-900">{user.name}</p>
-                            <p className="mt-1 text-xs leading-none text-slate-500 mb-2">{user.email}</p>
+                        <div className="border-t border-slate-200 dark:border-[#1e2d47] mt-2 px-4 py-3">
+                            <p className="text-sm font-semibold leading-none text-slate-900 dark:text-white">{user.name}</p>
+                            <p className="mt-1 text-xs leading-none text-slate-500 dark:text-slate-400 mb-2">{user.email}</p>
                             <Link
                                 href={route('profile.edit')}
-                                className="block text-sm text-slate-600 hover:text-slate-900 mb-2"
+                                className="block text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white mb-2"
                             >
                                 Profile Settings
                             </Link>

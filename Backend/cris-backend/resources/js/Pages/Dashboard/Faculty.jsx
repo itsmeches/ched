@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Row, Space, Statistic, Table, Tag } from 'antd';
@@ -13,7 +14,7 @@ const statItems = [
     { key: 'rejected', label: 'Rejected', icon: <StopOutlined style={{ color: '#dc2626' }} /> },
 ];
 
-export default function FacultyDashboard({ stats, stageCounts = {}, forReview, recentDecisions, notifications = [] }) {
+export default function FacultyDashboard({ stats, stageCounts = {}, forReview, recentDecisions }) {
     const DEFAULT_REJECT_REMARK = 'Faculty review: Please revise and improve the submission based on stage requirements.';
 
     const [rejectModal, setRejectModal] = useState({
@@ -133,7 +134,7 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
     ];
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Faculty Dashboard</h2>}>
+        <AuthenticatedLayout header={<AdminPageHeader title="Faculty Dashboard" />}>
             <Head title="Faculty Dashboard" />
 
             <div className="space-y-8">
@@ -179,20 +180,7 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
                     )}
                 </Card>
 
-                <Card title="Unread Notifications" className="admin-dashboard-shell">
-                    <div style={{ marginBottom: 12 }}>
-                        <Button size="small" onClick={() => router.post(route('notifications.read-all'))}>Mark all as read</Button>
-                    </div>
-                    {notifications.length === 0 ? (
-                        <Alert type="info" showIcon message="No new notifications." />
-                    ) : (
-                        <Space direction="vertical" size={10} style={{ width: '100%' }}>
-                            {notifications.map((item) => (
-                                <Alert key={item.id} type="info" showIcon message={item.message} description={formatDate(item.created_at)} />
-                            ))}
-                        </Space>
-                    )}
-                </Card>
+
 
                 <Card title="Recent Faculty Decisions" className="admin-dashboard-shell">
                     <Table rowKey="id" columns={decisionColumns} dataSource={recentDecisions} pagination={false} scroll={{ x: 840 }} />

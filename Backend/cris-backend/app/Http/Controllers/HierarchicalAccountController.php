@@ -26,7 +26,7 @@ class HierarchicalAccountController extends Controller
 
         return Inertia::render('Accounts/Hierarchy', [
             'viewerRole' => $viewer->role,
-            'tabs' => $this->hierarchyTabs($viewer),
+            'tabs' => $this->hierarchyTabs($viewer, $request),
         ]);
     }
 
@@ -69,7 +69,7 @@ class HierarchicalAccountController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'email' => ['required', 'email', 'unique:users,email,NULL,id,deleted_at,NULL'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'institution_id' => [
                 $requiresInstitutionSelection ? 'required' : 'nullable',
@@ -178,17 +178,20 @@ class HierarchicalAccountController extends Controller
         };
     }
 
-    private function hierarchyTabs(User $creator): array
+    private function hierarchyTabs(User $creator, ?Request $request = null): array
     {
+        $perPage = 15;
+
         if ($creator->isCHED()) {
-            $rows = User::withTrashed()
+            $page = (int) ($request?->input('hei_page', 1));
+            $paginator = User::withTrashed()
                 ->with('institution:id,name')
                 ->where('role', User::ROLE_HEI)
                 ->where('ched_id', $creator->id)
                 ->orderBy('name')
-                ->get(['id', 'name', 'email', 'institution_id', 'created_by', 'created_at', 'deleted_at']);
+                ->paginate($perPage, ['id', 'name', 'email', 'institution_id', 'created_by', 'created_at', 'deleted_at'], 'hei_page', $page);
 
-            $rows->transform(function (User $row) use ($creator) {
+            $paginator->getCollection()->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', 'CHED');
                 $row->setAttribute('can_manage', $row->created_by === $creator->id);
                 return $row;
@@ -198,25 +201,34 @@ class HierarchicalAccountController extends Controller
                 'key' => 'hei',
                 'label' => 'HEI Accounts',
                 'description' => 'HEI accounts linked under your CHED account.',
-                'rows' => $rows,
+                'rows' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page'     => $paginator->perPage(),
+                    'total'        => $paginator->total(),
+                    'page_param'   => 'hei_page',
+                ],
             ]];
         }
 
         if ($creator->role === User::ROLE_HEI) {
-            $facultyRows = User::withTrashed()
+            $facultyPage  = (int) ($request?->input('faculty_page', 1));
+            $studentPage  = (int) ($request?->input('student_page', 1));
+
+            $facultyPaginator = User::withTrashed()
                 ->with('institution:id,name')
                 ->where('role', User::ROLE_FACULTY)
                 ->where('hei_id', $creator->id)
                 ->orderBy('name')
-                ->get(['id', 'name', 'email', 'institution_id', 'created_by', 'created_at', 'deleted_at']);
+                ->paginate($perPage, ['id', 'name', 'email', 'institution_id', 'created_by', 'created_at', 'deleted_at'], 'faculty_page', $facultyPage);
 
-            $facultyRows->transform(function (User $row) use ($creator) {
+            $facultyPaginator->getCollection()->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', 'HEI');
                 $row->setAttribute('can_manage', $row->created_by === $creator->id);
                 return $row;
             });
 
-            $studentsRows = User::withTrashed()
+            $studentPaginator = User::withTrashed()
                 ->with(['institution:id,name', 'faculty:id,name'])
                 ->where('role', User::ROLE_STUDENT)
                 ->where(function ($query) use ($creator) {
@@ -224,9 +236,9 @@ class HierarchicalAccountController extends Controller
                         ->orWhereHas('faculty', fn ($faculty) => $faculty->where('hei_id', $creator->id));
                 })
                 ->orderBy('name')
-                ->get(['id', 'name', 'email', 'institution_id', 'faculty_id', 'created_by', 'created_at', 'deleted_at']);
+                ->paginate($perPage, ['id', 'name', 'email', 'institution_id', 'faculty_id', 'created_by', 'created_at', 'deleted_at'], 'student_page', $studentPage);
 
-            $studentsRows->transform(function (User $row) use ($creator) {
+            $studentPaginator->getCollection()->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', $row->faculty?->name ?? 'Unknown Faculty');
                 $row->setAttribute('can_manage', $row->created_by === $creator->id);
                 return $row;
@@ -237,26 +249,39 @@ class HierarchicalAccountController extends Controller
                     'key' => 'faculty',
                     'label' => 'Faculty Accounts',
                     'description' => 'Faculty accounts linked under your HEI account.',
-                    'rows' => $facultyRows,
+                    'rows' => $facultyPaginator->items(),
+                    'pagination' => [
+                        'current_page' => $facultyPaginator->currentPage(),
+                        'per_page'     => $facultyPaginator->perPage(),
+                        'total'        => $facultyPaginator->total(),
+                        'page_param'   => 'faculty_page',
+                    ],
                 ],
                 [
                     'key' => 'student',
                     'label' => 'Student Accounts',
                     'description' => 'Students under faculty accounts linked to your HEI account.',
-                    'rows' => $studentsRows,
+                    'rows' => $studentPaginator->items(),
+                    'pagination' => [
+                        'current_page' => $studentPaginator->currentPage(),
+                        'per_page'     => $studentPaginator->perPage(),
+                        'total'        => $studentPaginator->total(),
+                        'page_param'   => 'student_page',
+                    ],
                 ],
             ];
         }
 
         if ($creator->isFaculty()) {
-            $rows = User::withTrashed()
+            $page = (int) ($request?->input('student_page', 1));
+            $paginator = User::withTrashed()
                 ->with('institution:id,name')
                 ->where('role', User::ROLE_STUDENT)
                 ->where('faculty_id', $creator->id)
                 ->orderBy('name')
-                ->get(['id', 'name', 'email', 'institution_id', 'created_by', 'created_at', 'deleted_at']);
+                ->paginate($perPage, ['id', 'name', 'email', 'institution_id', 'created_by', 'created_at', 'deleted_at'], 'student_page', $page);
 
-            $rows->transform(function (User $row) use ($creator) {
+            $paginator->getCollection()->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', $creator->name);
                 $row->setAttribute('can_manage', $row->created_by === $creator->id);
                 return $row;
@@ -266,7 +291,13 @@ class HierarchicalAccountController extends Controller
                 'key' => 'student',
                 'label' => 'Student Accounts',
                 'description' => 'Student accounts linked under your faculty account.',
-                'rows' => $rows,
+                'rows' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page'     => $paginator->perPage(),
+                    'total'        => $paginator->total(),
+                    'page_param'   => 'student_page',
+                ],
             ]];
         }
 
@@ -287,53 +318,61 @@ class HierarchicalAccountController extends Controller
                 'role' => $target->role,
                 'deleted_at' => $target->deleted_at,
             ],
+            'breadcrumbs' => [
+                ['label' => 'Account Hierarchy', 'href' => route('accounts.hierarchy')],
+                ['label' => $target->name],
+            ],
         ]);
     }
 
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(Request $request, int $user): RedirectResponse
     {
-        Gate::authorize('update', $user);
+        $target = User::withTrashed()->findOrFail($user);
 
-        $oldValues = $user->only(['name', 'email']);
+        Gate::authorize('update', $target);
+
+        $oldValues = $target->only(['name', 'email']);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email,' . $user->id],
+            'email' => ['required', 'email', 'unique:users,email,' . $target->id],
         ]);
 
-        $user->update($data);
+        $target->update($data);
 
         $this->logUserManagementAudit(
             request: $request,
-            target: $user,
+            target: $target,
             action: 'hierarchy_account_updated',
             oldValues: $oldValues,
-            newValues: $user->only(['name', 'email'])
+            newValues: $target->only(['name', 'email'])
         );
 
         return redirect()->route('accounts.hierarchy')
             ->with('success', 'Account updated successfully.');
     }
 
-    public function resetPassword(Request $request, User $user): RedirectResponse
+    public function resetPassword(Request $request, int $user): RedirectResponse
     {
-        Gate::authorize('resetPassword', $user);
+        $target = User::withTrashed()->findOrFail($user);
+
+        Gate::authorize('resetPassword', $target);
 
         $data = $request->validate([
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $user->update(['password' => Hash::make($data['password'])]);
+        $target->update(['password' => Hash::make($data['password'])]);
 
         $this->logUserManagementAudit(
             request: $request,
-            target: $user,
+            target: $target,
             action: 'hierarchy_password_reset',
             oldValues: null,
             newValues: ['password_reset' => true]
         );
 
-        return redirect()->route('accounts.hierarchy')
+        return redirect()->route('accounts.edit', ['user' => $target->id])
             ->with('success', 'Password reset successfully.');
     }
 

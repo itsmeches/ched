@@ -1,4 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
+import EmptyState from '@/Components/EmptyState';
 import { Head, Link } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { formatDate } from '@/utils/date';
@@ -40,7 +42,7 @@ export default function CHEDDecisions({ decisions }) {
     ];
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">My Decisions</h2>}>
+        <AuthenticatedLayout header={<AdminPageHeader title="My Decisions" />}>
             <Head title="My Decisions" />
 
             <div className="space-y-4">
@@ -63,7 +65,7 @@ export default function CHEDDecisions({ decisions }) {
                             dataSource={decisions}
                             pagination={{ pageSize: 10 }}
                             scroll={{ x: 980 }}
-                            locale={{ emptyText: 'No decisions found.' }}
+                            locale={{ emptyText: <EmptyState title="No decisions yet" description="Your recent approvals and rejections will appear here." /> }}
                         />
                     )}
                 </Card>

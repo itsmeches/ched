@@ -26,8 +26,8 @@ export default function Register() {
             <Head title="Create Account" />
 
             <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900">Create your account</h2>
-                <p className="mt-1 text-sm text-slate-500">Set up your CRIS account. Access starts after Super Admin approval.</p>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Create your account</h2>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Set up your CRIS account. Access starts after Super Admin approval.</p>
             </div>
 
             <form onSubmit={submit} className="space-y-5">
@@ -100,11 +100,9 @@ export default function Register() {
                 </PrimaryButton>
             </form>
 
-            <p className="mt-6 text-center text-sm text-slate-500">
+            <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 Already have an account?{' '}
-                <Link href={route('login')} className="font-medium transition-colors" style={{ color: '#0033a0' }}
-                    onMouseEnter={(e) => e.target.style.color = '#001f66'}
-                    onMouseLeave={(e) => e.target.style.color = '#0033a0'}>
+                <Link href={route('login')} className="font-medium text-[#0033a0] transition-colors hover:text-[#001f66] dark:text-blue-300 dark:hover:text-blue-200">
                     Sign in
                 </Link>
             </p>

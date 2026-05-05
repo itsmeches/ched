@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Card, Typography } from 'antd';
 import UserFormDrawer from './Partials/UserFormDrawer';
@@ -12,7 +13,7 @@ export default function UsersCreate({ institutions, roles }) {
     }
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Create User Account</h2>}>
+        <AuthenticatedLayout header={<AdminPageHeader title="Create User Account" />}>
             <Head title="Create User" />
             <div className="space-y-4">
                     <Card className="admin-dashboard-shell" bordered={false}>
