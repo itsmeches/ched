@@ -2,6 +2,8 @@
 
 CRIS is a role-based research management platform for handling research proposal submission, review, approval, and archival across the CALABARZON region. It is built around a Laravel 11 backend with an Inertia.js + React interface, and supports three primary user groups: Super Admin, CHED reviewers, and HEI researchers.
 
+The system includes a public research archive and public paper detail pages, plus global light/dark mode support across authenticated and public views.
+
 ## Overview
 
 The application is designed to centralize the lifecycle of institutional research proposals.
@@ -22,7 +24,25 @@ The active production-style application lives inside [Backend/cris-backend](Back
 - Public research archive and file download endpoints
 - Proposal history and CSV export
 - Edit permission request workflow for restricted proposal updates
+- Global light/dark mode using a shared theme context (authenticated + public pages)
+- Responsive admin tables with mobile column-priority behavior
+- Collapsible history view grouped by paper for high-volume activity logs
+- Standardized empty states and destructive-action confirmation dialogs
 - Security hardening for CSP, frame protection, CORS, API fallback handling, and scanner-friendly asset serving
+
+## Recent UX/UI Updates (May 2026)
+
+The following front-end improvements were recently applied without changing business rules or workflow logic:
+
+- Improved dark mode coverage for profile settings, auth pages, and shared controls
+- Added public research detail theme toggle (light/dark) with persistent preference
+- Standardized table empty states through a shared reusable component
+- Consolidated destructive confirms via a shared helper for safer and consistent actions
+- Added mobile responsiveness improvements to admin filters, table cards, and drawer footers
+- Added responsive column visibility for high-density tables (show key columns first on small screens)
+- Refined timeline-heavy history screens by grouping entries into collapsible paper-based sections
+
+These updates are focused on readability, scalability, and mobile usability for large datasets and high-activity roles.
 
 ## User Roles
 
@@ -97,204 +117,16 @@ Backend/cris-backend/
 └── tests/
 ```
 
-## Main Routes
+## Documentation Scope
 
-### Public
+This root README is intentionally project-level.
 
-- `/`
-- `/public/research`
-- `/public/research/{proposal}`
-- `/public/research/{proposal}/file`
+- Product overview, architecture, and repository structure are documented here.
+- App operations (setup, routes, API endpoints, security scripts, and runtime commands) are documented in [Backend/cris-backend/README.md](Backend/cris-backend/README.md).
 
-### Authenticated
+## Quick Start
 
-- `/dashboard`
-- `/profile`
-- `/research`
-- `/history`
-- `/history/export`
-
-### Role-Specific
-
-- `/hei/dashboard`
-- `/ched/dashboard`
-- `/ched/decisions`
-- `/admin/dashboard`
-- `/admin/users`
-- `/admin/institutions`
-- `/admin/keywords`
-
-## Default Seeded Accounts
-
-These accounts are created by the database seeder for local development.
-
-| Role           | Email                    | Password   |
-| -------------- | ------------------------ | ---------- |
-| Super Admin    | `superadmin@cris.gov.ph` | `password` |
-| CHED Reviewer  | `ched@cris.gov.ph`       | `password` |
-| HEI Researcher | `hei@edu.ph`             | `password` |
-
-## Prerequisites
-
-Before running the system locally, install:
-
-- PHP 8.2+
-- Composer
-- Node.js 18+
-- npm
-- MySQL or MariaDB
-
-## Local Setup
-
-All commands below are for the main integrated app in [Backend/cris-backend](Backend/cris-backend).
-
-### 1. Install Backend Dependencies
-
-```bash
-cd Backend/cris-backend
-composer install
-```
-
-### 2. Install Frontend Dependencies
-
-```bash
-npm install
-```
-
-### 3. Configure Environment
-
-Create the environment file:
-
-```bash
-copy .env.example .env
-```
-
-Then update database settings in `.env`.
-
-Example:
-
-```env
-APP_NAME=CRIS
-APP_URL=http://127.0.0.1:8001
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=cris_db
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-### 4. Generate App Key
-
-```bash
-php artisan key:generate
-```
-
-### 5. Run Migrations and Seeders
-
-```bash
-php artisan migrate --seed
-```
-
-### 6. Start the App
-
-Run the Laravel server in one terminal:
-
-```bash
-php artisan serve --host=127.0.0.1 --port=8001
-```
-
-Run Vite in another terminal:
-
-```bash
-npm run dev
-```
-
-Open the app at:
-
-```text
-http://127.0.0.1:8001
-```
-
-## Production Build
-
-To build the frontend assets:
-
-```bash
-npm run build
-```
-
-This also runs the asset sanitizer used to prevent scanner false positives such as Unix timestamp disclosure warnings in generated bundles.
-
-## API Summary
-
-The application also exposes API endpoints under `/api`.
-
-### Authentication
-
-- `POST /api/auth/login`
-- `GET /api/auth/me`
-- `POST /api/auth/logout`
-
-### Research Proposals
-
-- `GET /api/proposals`
-- `POST /api/proposals`
-- `GET /api/proposals/{proposal}`
-- `PUT /api/proposals/{proposal}`
-- `DELETE /api/proposals/{proposal}`
-- `POST /api/proposals/{proposal}/review`
-
-### Institutions
-
-- `GET /api/institutions`
-- `POST /api/institutions`
-- `GET /api/institutions/{institution}`
-- `PUT /api/institutions/{institution}`
-- `DELETE /api/institutions/{institution}`
-
-## Security Notes
-
-The app includes a hardening layer intended to reduce common web risks and support security scanning.
-
-- Content Security Policy with nonce support
-- `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, and `Permissions-Policy`
-- API JSON fallback for unknown routes
-- Reduced information leakage in redirects and exception responses
-- Scanner-friendly asset sanitizing for built JavaScript files
-- Optional ZAP scan proxy workflow for consistent local scanning behavior
-
-## ZAP / Scan Mode
-
-The repository includes helper scripts for local security scanning.
-
-### Backend Scripts
-
-- `composer serve:zap-backend`
-- `composer serve:zap`
-- `composer serve:secure`
-
-### Frontend / Proxy Scripts
-
-- `npm run build:zap`
-- `npm run zap:proxy`
-
-These are primarily intended for local scan verification and are not the standard development workflow.
-
-## Testing
-
-Run the Laravel test suite:
-
-```bash
-php artisan test
-```
-
-There is also a hardening-focused test script:
-
-```bash
-composer test:hardening
-```
+For local installation and day-to-day commands, go directly to [Backend/cris-backend/README.md](Backend/cris-backend/README.md).
 
 ## Development Notes
 
