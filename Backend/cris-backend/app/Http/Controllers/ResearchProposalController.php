@@ -281,7 +281,8 @@ class ResearchProposalController extends Controller
         $requestUser = $request->user();
         SimpleNotificationService::notify(
             $requestUser?->faculty_id,
-            "New submission '{$proposal->title}' is waiting for your review."
+            "New submission '{$proposal->title}' is waiting for your review.",
+            route('research.show', $proposal->id)
         );
 
         $this->syncKeywords($proposal, $normalizedKeywords);
@@ -386,6 +387,10 @@ class ResearchProposalController extends Controller
             'canDelete'           => $user?->can('delete', $proposal) ?? false,
             'editPermission'      => $editPermission,
             'pendingEditRequests' => $pendingEditRequests,
+            'breadcrumbs'         => [
+                ['label' => 'My Research', 'href' => route('research.index', ['tab' => 'mine'])],
+                ['label' => $proposal->title],
+            ],
         ]);
     }
 
@@ -428,6 +433,11 @@ class ResearchProposalController extends Controller
             'keywordOptions' => Keyword::query()->orderBy('name')->pluck('name'),
             'disciplineOptions' => $this->disciplineOptions(),
             'researchCategoryGroups' => $this->researchCategoryGroups(),
+            'breadcrumbs' => [
+                ['label' => 'My Research', 'href' => route('research.index', ['tab' => 'mine'])],
+                ['label' => $proposal->title, 'href' => route('research.show', $proposal->id)],
+                ['label' => 'Edit'],
+            ],
         ]);
     }
 
@@ -646,23 +656,27 @@ class ResearchProposalController extends Controller
             if ($nextStatus === ResearchProposal::STATUS_UNDER_REVIEW_HEI) {
                 SimpleNotificationService::notify(
                     $submitter?->hei_id,
-                    "Submission '{$proposal->title}' is now awaiting HEI review."
+                    "Submission '{$proposal->title}' is now awaiting HEI review.",
+                    route('research.show', $proposal->id)
                 );
             } elseif ($nextStatus === ResearchProposal::STATUS_UNDER_REVIEW_CHED) {
                 SimpleNotificationService::notify(
                     $submitter?->ched_id,
-                    "Submission '{$proposal->title}' is now awaiting CHED review."
+                    "Submission '{$proposal->title}' is now awaiting CHED review.",
+                    route('research.show', $proposal->id)
                 );
             } elseif ($nextStatus === ResearchProposal::STATUS_APPROVED) {
                 SimpleNotificationService::notify(
                     $submitter?->id,
-                    "Your submission '{$proposal->title}' was approved."
+                    "Your submission '{$proposal->title}' was approved.",
+                    route('research.show', $proposal->id)
                 );
             }
         } else {
             SimpleNotificationService::notify(
                 $submitter?->id,
-                "Your submission '{$proposal->title}' was rejected."
+                "Your submission '{$proposal->title}' was rejected.",
+                route('research.show', $proposal->id)
             );
         }
 
@@ -715,7 +729,7 @@ class ResearchProposalController extends Controller
             ->get(['code', 'name'])
             ->map(fn (Discipline $discipline) => [
                 'value' => $discipline->code,
-                'label' => $discipline->code . ' - ' . $discipline->name,
+                'label' => $discipline->name,
             ])
             ->all();
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\SimpleNotification;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -39,6 +40,15 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'notifications' => fn () => $request->user()
+                ? SimpleNotification::query()
+                    ->where('user_id', $request->user()->id)
+                    ->where('is_read', false)
+                    ->latest()
+                    ->limit(8)
+                    ->get(['id', 'message', 'link_url', 'created_at'])
+                    ->toArray()
+                : [],
         ];
     }
 }

@@ -2,13 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* === Base page backgrounds === */
 body {
 	background:
-		radial-gradient(circle at top left, rgba(0, 51, 160, 0.06), transparent 28%),
-		radial-gradient(circle at top right, rgba(245, 158, 11, 0.10), transparent 26%),
+		radial-gradient(circle at top left, rgba(0, 51, 160, 0.05), transparent 28%),
+		radial-gradient(circle at top right, rgba(245, 158, 11, 0.07), transparent 26%),
 		linear-gradient(180deg, #f8fafc 0%, #eef4f9 100%);
+	min-height: 100vh;
 }
 
+html.dark body {
+	background: #0a0f1e;
+}
+
+/* === Focus ring === */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
@@ -24,14 +31,23 @@ textarea:focus-visible,
 	border-radius: 6px;
 }
 
+/* =========================================================
+   ADMIN CARD SHELL — clean solid card, consistent in both modes
+   ========================================================= */
 .admin-dashboard-shell {
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.72));
-	backdrop-filter: blur(10px);
-	border: 1px solid rgba(148, 163, 184, 0.18);
+	background: #ffffff;
+	border: 1px solid rgba(226, 232, 240, 0.9);
 	border-radius: 14px;
-	box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.03);
 }
 
+html.dark .admin-dashboard-shell {
+	background: #111827;
+	border-color: #1e2d47;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* === Hero banner (gradient, stays as-is) === */
 .admin-dashboard-hero {
 	background:
 		radial-gradient(circle at 15% 10%, rgba(0, 71, 212, 0.25), transparent 24%),
@@ -42,20 +58,30 @@ textarea:focus-visible,
 	box-shadow: 0 12px 26px rgba(0, 31, 102, 0.18);
 }
 
+/* === Card anatomy === */
 .admin-dashboard-shell .ant-card-head {
 	min-height: 50px;
-	padding-inline: 16px;
-	border-bottom-color: rgba(148, 163, 184, 0.22);
+	padding-inline: 20px;
+	border-bottom-color: rgba(226, 232, 240, 0.7);
+}
+
+html.dark .admin-dashboard-shell .ant-card-head {
+	border-bottom-color: #1e2d47;
 }
 
 .admin-dashboard-shell .ant-card-head-title {
 	font-weight: 700;
 	font-size: 14px;
 	color: #0f172a;
+	letter-spacing: -0.01em;
+}
+
+html.dark .admin-dashboard-shell .ant-card-head-title {
+	color: #e2e8f0;
 }
 
 .admin-dashboard-shell .ant-card-body {
-	padding: 14px;
+	padding: 16px 20px;
 }
 
 .admin-dashboard-shell .ant-btn {
@@ -63,33 +89,94 @@ textarea:focus-visible,
 	font-weight: 600;
 }
 
+/* === Table inside shell === */
 .admin-dashboard-shell .ant-table-wrapper .ant-table {
-	border-radius: 12px;
+	border-radius: 10px;
 	overflow: hidden;
+	background: transparent;
 }
 
 .admin-dashboard-shell .ant-table-thead > tr > th {
-	font-size: 12px;
-	letter-spacing: 0.03em;
+	font-size: 11px;
+	letter-spacing: 0.05em;
 	text-transform: uppercase;
-	color: #475569;
-	background: rgba(248, 250, 252, 0.88);
-	border-bottom-color: rgba(148, 163, 184, 0.18);
+	font-weight: 700;
+	color: #64748b;
+	background: #f8fafc;
+	border-bottom-color: rgba(226, 232, 240, 0.7);
+}
+
+html.dark .admin-dashboard-shell .ant-table-thead > tr > th {
+	color: #64748b;
+	background: rgba(15, 23, 42, 0.6);
+	border-bottom-color: #1e2d47;
 }
 
 .admin-dashboard-shell .ant-table-tbody > tr > td {
-	padding-top: 10px;
-	padding-bottom: 10px;
-	border-bottom-color: rgba(148, 163, 184, 0.16);
+	padding-top: 11px;
+	padding-bottom: 11px;
+	border-bottom-color: rgba(226, 232, 240, 0.5);
+}
+
+html.dark .admin-dashboard-shell .ant-table-tbody > tr > td {
+	border-bottom-color: rgba(30, 45, 71, 0.5);
 }
 
 .admin-dashboard-shell .ant-table-tbody > tr:hover > td {
-	background: rgba(240, 253, 250, 0.65) !important;
+	background: rgba(243, 248, 255, 0.8) !important;
+}
+
+html.dark .admin-dashboard-shell .ant-table-tbody > tr:hover > td {
+	background: rgba(26, 37, 64, 0.8) !important;
 }
 
 .admin-dashboard-shell .ant-empty-description {
-	color: #64748b;
+	color: #94a3b8;
 	font-size: 13px;
+}
+
+/* =========================================================
+   GLOBAL DARK MODE — text readability overrides
+   ========================================================= */
+
+/* Statistic numbers that have inline valueStyle */
+html.dark .ant-statistic-content-value,
+html.dark .ant-statistic-content-value-int,
+html.dark .ant-statistic-content-value-decimal,
+html.dark .ant-statistic-content-suffix {
+	color: #e2e8f0 !important;
+}
+
+html.dark .ant-statistic-title {
+	color: #94a3b8 !important;
+}
+
+/* Table cell body text */
+html.dark .ant-table-tbody .ant-table-cell {
+	color: #e2e8f0;
+}
+
+/* Ant Design divider in dark mode */
+html.dark .ant-divider {
+	border-color: #1e2d47;
+}
+
+/* Descriptions component in dark mode */
+html.dark .ant-descriptions-item-label {
+	color: #94a3b8 !important;
+}
+
+html.dark .ant-descriptions-item-content {
+	color: #e2e8f0 !important;
+}
+
+/* Timeline in dark mode */
+html.dark .ant-timeline-item-label {
+	color: #64748b;
+}
+
+html.dark .ant-timeline-item-content {
+	color: #e2e8f0;
 }
 
 @media (prefers-reduced-motion: reduce) {

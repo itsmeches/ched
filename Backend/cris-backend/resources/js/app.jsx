@@ -2,7 +2,7 @@ import '../css/app.css';
 import 'antd/dist/reset.css';
 import './bootstrap';
 
-import { ConfigProvider } from 'antd';
+import { ThemeProvider } from '@/utils/ThemeContext';
 import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
@@ -37,31 +37,9 @@ createInertiaApp({
         });
 
         root.render(
-            <ConfigProvider
-                csp={cspNonce ? { nonce: cspNonce } : undefined}
-                theme={{
-                    token: {
-                        colorPrimary: '#0033a0',
-                        colorInfo: '#0033a0',
-                        borderRadius: 14,
-                        fontFamily: 'Segoe UI, Helvetica Neue, Arial, sans-serif',
-                    },
-                    components: {
-                        Card: {
-                            borderRadiusLG: 22,
-                        },
-                        Button: {
-                            borderRadius: 12,
-                        },
-                        Table: {
-                            headerBg: '#f8fafc',
-                            headerColor: '#475569',
-                        },
-                    },
-                }}
-            >
+            <ThemeProvider cspNonce={cspNonce}>
                 <App {...props} />
-            </ConfigProvider>,
+            </ThemeProvider>,
         );
     },
     progress: {

@@ -2,10 +2,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminFilterCard from '@/Components/Admin/AdminFilterCard';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import AdminTableCard from '@/Components/Admin/AdminTableCard';
+import EmptyState from '@/Components/EmptyState';
+import { confirmAction } from '@/utils/confirmAction';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Col, Input, Modal, Row, Space, Table, Tag, message } from 'antd';
-import { BankOutlined, ExclamationCircleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Alert, Button, Col, Input, Row, Space, Table, Tag, message } from 'antd';
+import { BankOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 
 const acronymStopWords = new Set(['of', 'and', 'the', 'for', 'at', 'in', 'on']);
 
@@ -61,12 +63,13 @@ export default function InstitutionsIndex({ institutions, filters }) {
                 </Tag>
             ),
         },
-        { title: 'Address', dataIndex: 'address', key: 'address', render: (value) => value || '—' },
-        { title: 'Users', dataIndex: 'users_count', key: 'users_count' },
+        { title: 'Address', dataIndex: 'address', key: 'address', responsive: ['sm'], render: (value) => value || '—' },
+        { title: 'Users', dataIndex: 'users_count', key: 'users_count', responsive: ['md'] },
         {
             title: 'Action',
             key: 'action',
-            align: 'right',
+            align: 'center',
+            onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, institution) => (
                 <Space>
                     <Button type="link" onClick={() => router.visit(route('admin.institutions.edit', institution.id))}>Edit</Button>
@@ -81,12 +84,11 @@ export default function InstitutionsIndex({ institutions, filters }) {
     }
 
     function deleteInstitution(id) {
-        Modal.confirm({
+        confirmAction({
             title: 'Delete this institution?',
-            icon: <ExclamationCircleOutlined />,
             content: 'This action cannot be undone.',
             okText: 'Delete',
-            okButtonProps: { danger: true },
+            danger: true,
             onOk: () => {
                 const previous = tableData;
                 setTableData((current) => current.filter((item) => item.id !== id));
@@ -153,7 +155,7 @@ export default function InstitutionsIndex({ institutions, filters }) {
                     />
 
                     <AdminTableCard summary={`${institutions.total} institution${institutions.total === 1 ? '' : 's'} found`}>
-                        <Table rowKey="id" columns={columns} dataSource={tableData} pagination={{ current: institutions.current_page, pageSize: institutions.per_page, total: institutions.total, onChange: (page) => router.get(route('admin.institutions.index'), { search, page }, { preserveState: true, replace: true }) }} scroll={{ x: 860 }} locale={{ emptyText: 'No institutions matched your search.' }} />
+                        <Table rowKey="id" size="middle" columns={columns} dataSource={tableData} pagination={{ current: institutions.current_page, pageSize: institutions.per_page, total: institutions.total, onChange: (page) => router.get(route('admin.institutions.index'), { search, page }, { preserveState: true, replace: true }) }} scroll={{ x: 860 }} locale={{ emptyText: <EmptyState title="No institutions found" description="Try a different keyword or add a new institution." /> }} />
                     </AdminTableCard>
             </div>
         </AuthenticatedLayout>

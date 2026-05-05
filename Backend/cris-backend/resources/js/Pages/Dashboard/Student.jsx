@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
+import { Head, Link } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, FileAddOutlined, FileTextOutlined, StopOutlined } from '@ant-design/icons';
@@ -12,7 +13,7 @@ const statItems = [
     { key: 'rejected', label: 'Rejected', color: '#dc2626', icon: <StopOutlined /> },
 ];
 
-export default function StudentDashboard({ stats, stageCounts = {}, recentUploads, pendingQueue, notifications = [] }) {
+export default function StudentDashboard({ stats, stageCounts = {}, recentUploads, pendingQueue }) {
     const recentColumns = [
         {
             title: 'Title',
@@ -58,7 +59,7 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
     ];
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Student Dashboard</h2>}>
+        <AuthenticatedLayout header={<AdminPageHeader title="Student Dashboard" />}>
             <Head title="Student Dashboard" />
 
             <div className="space-y-8">
@@ -151,26 +152,7 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
                     </Col>
                 </Row>
 
-                <Card title="Unread Notifications" className="admin-dashboard-shell">
-                    <div style={{ marginBottom: 12 }}>
-                        <Button size="small" onClick={() => router.post(route('notifications.read-all'))}>Mark all as read</Button>
-                    </div>
-                    {notifications.length === 0 ? (
-                        <Alert type="info" showIcon message="No new notifications." />
-                    ) : (
-                        <Space direction="vertical" size={10} style={{ width: '100%' }}>
-                            {notifications.map((item) => (
-                                <Alert
-                                    key={item.id}
-                                    type="info"
-                                    showIcon
-                                    message={item.message}
-                                    description={formatDate(item.created_at)}
-                                />
-                            ))}
-                        </Space>
-                    )}
-                </Card>
+
 
                 <Card title="Recent Uploads" className="admin-dashboard-shell">
                     {recentUploads.length === 0 ? (

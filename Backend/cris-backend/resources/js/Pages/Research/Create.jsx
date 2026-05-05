@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { Alert, Card, message, Typography } from 'antd';
 import { useEffect } from 'react';
@@ -28,7 +29,7 @@ export default function ResearchCreate({ keywordOptions = [], disciplineOptions 
     }, [flash?.success, flash?.error]);
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Submit Research Paper</h2>}>
+        <AuthenticatedLayout header={<AdminPageHeader title="Submit Research Paper" />}>
             <Head title="Submit Research Paper" />
             <div className="space-y-4">
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}

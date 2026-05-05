@@ -1,4 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
+import EmptyState from '@/Components/EmptyState';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
@@ -13,7 +15,7 @@ const statItems = [
     { key: 'total', label: 'Total Papers', color: '#0033a0', icon: <InboxOutlined /> },
 ];
 
-export default function CHEDDashboard({ stats, stageCounts = {}, forReview, editRequests, notifications = [] }) {
+export default function CHEDDashboard({ stats, stageCounts = {}, forReview, editRequests }) {
     const DEFAULT_REJECT_REMARK = 'CHED final review: Please revise and resubmit with required corrections.';
 
     const [rejectModal, setRejectModal] = useState({
@@ -123,7 +125,7 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
     ];
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">CHED Review Dashboard</h2>}>
+        <AuthenticatedLayout header={<AdminPageHeader title="CHED Review Dashboard" />}>
             <Head title="CHED Dashboard" />
 
             <div className="space-y-8">
@@ -232,31 +234,12 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                                 dataSource={forReview}
                                 pagination={false}
                                 scroll={{ x: 820 }}
-                                locale={{ emptyText: 'No papers are currently waiting for review.' }}
+                                locale={{ emptyText: <EmptyState title="Review queue is clear" description="No papers are currently waiting for CHED final review." /> }}
                             />
                         )}
                     </Card>
 
-                    <Card title="Unread Notifications" className="admin-dashboard-shell">
-                        <div style={{ marginBottom: 12 }}>
-                            <Button size="small" onClick={() => router.post(route('notifications.read-all'))}>Mark all as read</Button>
-                        </div>
-                        {notifications.length === 0 ? (
-                            <Alert type="info" showIcon message="No new notifications." />
-                        ) : (
-                            <Space direction="vertical" size={10} style={{ width: '100%' }}>
-                                {notifications.map((item) => (
-                                    <Alert
-                                        key={item.id}
-                                        type="info"
-                                        showIcon
-                                        message={item.message}
-                                        description={formatDate(item.created_at)}
-                                    />
-                                ))}
-                            </Space>
-                        )}
-                    </Card>
+
 
                     {editRequests?.length > 0 && (
                         <Card

@@ -1,10 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import AdminTableCard from '@/Components/Admin/AdminTableCard';
+import EmptyState from '@/Components/EmptyState';
+import { confirmAction } from '@/utils/confirmAction';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useMemo, useState, useEffect } from 'react';
 import { Alert, Button, Col, Input, InputNumber, Modal, Row, Select, Space, Switch, Table, Tag, Typography, message } from 'antd';
-import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 
 function escapeRegExp(value) {
     return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -66,13 +68,13 @@ export default function CategoriesIndex({ categories = [], categoryTypes = [] })
 
     const columns = useMemo(() => [
         { title: 'Group', dataIndex: 'type', key: 'type', render: (v) => highlightMatch(categoryTypeLabel[v] || v, search) },
-        { title: 'Stored Value', dataIndex: 'value', key: 'value', render: (v) => <Tag color="blue">{highlightMatch(v, search)}</Tag> },
+        { title: 'Stored Value', dataIndex: 'value', key: 'value', responsive: ['sm'], render: (v) => <Tag color="blue">{highlightMatch(v, search)}</Tag> },
         { title: 'Label', dataIndex: 'label', key: 'label', render: (v) => highlightMatch(v, search) },
-        { title: 'Order', dataIndex: 'sort_order', key: 'sort_order', width: 90 },
-        { title: 'Status', dataIndex: 'is_active', key: 'is_active', width: 110, render: (a) => a ? <Tag color="green">Active</Tag> : <Tag>Inactive</Tag> },
-        { title: 'Used', dataIndex: 'proposals_count', key: 'proposals_count', width: 90 },
+        { title: 'Order', dataIndex: 'sort_order', key: 'sort_order', width: 90, responsive: ['md'] },
+        { title: 'Status', dataIndex: 'is_active', key: 'is_active', width: 110, responsive: ['sm'], render: (a) => a ? <Tag color="green">Active</Tag> : <Tag>Inactive</Tag> },
+        { title: 'Used', dataIndex: 'proposals_count', key: 'proposals_count', width: 90, responsive: ['md'] },
         {
-            title: 'Action', key: 'action', align: 'right',
+            title: 'Action', key: 'action', align: 'center', onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, row) => (
                 <Space>
                     <Button type="link" onClick={() => openEdit(row)}>Edit</Button>
@@ -151,12 +153,11 @@ export default function CategoriesIndex({ categories = [], categoryTypes = [] })
             message.warning('This category is currently used by submissions and cannot be deleted.');
             return;
         }
-        Modal.confirm({
+        confirmAction({
             title: 'Delete this research category?',
-            icon: <ExclamationCircleOutlined />,
             content: 'This action cannot be undone.',
             okText: 'Delete',
-            okButtonProps: { danger: true },
+            danger: true,
             onOk: () => router.delete(route('admin.taxonomy.categories.destroy', category.id), { preserveScroll: true }),
         });
     }
@@ -214,7 +215,7 @@ export default function CategoriesIndex({ categories = [], categoryTypes = [] })
                             />
                         </Col>
                     </Row>
-                    <Table rowKey="id" columns={columns} dataSource={filtered} pagination={{ pageSize: 10 }} scroll={{ x: 860 }} />
+                    <Table rowKey="id" columns={columns} dataSource={filtered} pagination={{ pageSize: 10 }} scroll={{ x: 860 }} locale={{ emptyText: <EmptyState title="No categories found" description="Adjust filters or create a new research category." /> }} />
                 </AdminTableCard>
             </div>
 

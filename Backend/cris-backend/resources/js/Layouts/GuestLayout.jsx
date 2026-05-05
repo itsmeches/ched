@@ -1,11 +1,15 @@
 import { Link } from '@inertiajs/react';
+import { MoonOutlined, SunOutlined } from '@ant-design/icons';
+import { useTheme } from '@/utils/ThemeContext';
 
 export default function GuestLayout({ children }) {
+    const { dark, toggleDark } = useTheme();
+
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen transition-colors duration-300">
             <a
                 href="#guest-main-content"
-                className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-900"
+                className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-white dark:focus:bg-[#111827] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-900 dark:focus:text-white"
             >
                 Skip to main content
             </a>
@@ -24,8 +28,6 @@ export default function GuestLayout({ children }) {
                     <p className="mt-4 text-base max-w-sm leading-relaxed" style={{ color: 'rgba(179, 217, 255, 0.8)' }}>
                         A unified platform for research submission, institutional review, and public discovery across the CALABARZON region.
                     </p>
-
-                   
                 </div>
 
                 <p className="text-xs" style={{ color: 'rgba(179, 217, 255, 0.6)' }}>
@@ -34,13 +36,23 @@ export default function GuestLayout({ children }) {
             </div>
 
             {/* Right form panel */}
-            <div className="flex w-full lg:w-1/2 flex-col items-center justify-center bg-slate-50 px-6 py-10">
+            <div className="flex w-full lg:w-1/2 flex-col items-center justify-center bg-slate-50 dark:bg-[#0a0f1e] px-6 py-10 relative transition-colors duration-300">
+                {/* Dark mode toggle — top right */}
+                <button
+                    type="button"
+                    onClick={toggleDark}
+                    aria-label="Toggle theme"
+                    className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-lg transition-colors bg-slate-100 dark:bg-[#1a2540] text-slate-600 dark:text-yellow-300 hover:bg-slate-200 dark:hover:bg-[#243054]"
+                >
+                    {dark ? <SunOutlined /> : <MoonOutlined />}
+                </button>
+
                 {/* Mobile logo */}
                 <div className="mb-8 lg:hidden flex items-center gap-3">
                     <img src="/cris-mark.svg" alt="CRIS" className="h-10 w-10" />
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#0033a0' }}>CRIS</p>
-                        <p className="text-sm font-semibold text-slate-900">Calabarzon Research Information System</p>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">Calabarzon Research Information System</p>
                     </div>
                 </div>
 

@@ -1,6 +1,7 @@
 import { Avatar, Button, Card, Col, Row, Space, Table, Tag } from 'antd';
 import { router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
+import EmptyState from '@/Components/EmptyState';
 
 function getInstitutionDisplayLabel(institution) {
     if (!institution) {
@@ -21,7 +22,7 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
                 <Space>
                     <Avatar style={{ backgroundColor: '#0033a0' }}>{user.name?.charAt(0)?.toUpperCase() ?? 'U'}</Avatar>
                     <div>
-                        <div style={{ fontWeight: 600, color: '#0f172a' }}>{user.name}</div>
+                        <div style={{ fontWeight: 600 }}>{user.name}</div>
                         <div style={{ fontSize: 12, color: '#64748b' }}>{user.email}</div>
                     </div>
                 </Space>
@@ -119,17 +120,17 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
         <Row gutter={[16, 16]}>
             <Col xs={24}>
                 <Card title="Recently Added Users" extra={<Button type="link" onClick={() => router.visit(route('admin.users.index'))}>View all</Button>} className="admin-dashboard-shell">
-                    <Table columns={userColumns} dataSource={recentUsers} rowKey="id" pagination={false} scroll={{ x: 760 }} locale={{ emptyText: 'No recent users to display.' }} />
+                    <Table columns={userColumns} dataSource={recentUsers} rowKey="id" pagination={false} scroll={{ x: 760 }} locale={{ emptyText: <EmptyState title="No recent users" description="Newly added users will appear here." /> }} />
                 </Card>
             </Col>
             <Col xs={24} xl={12}>
                 <Card title="Recent Research Activity" extra={<Button type="link" onClick={() => router.visit(route('research.index'))}>Open research</Button>} className="admin-dashboard-shell">
-                    <Table columns={proposalColumns} dataSource={recentProposals} rowKey="id" pagination={false} scroll={{ x: 760 }} size="small" locale={{ emptyText: 'No research activity yet.' }} />
+                    <Table columns={proposalColumns} dataSource={recentProposals} rowKey="id" pagination={false} scroll={{ x: 760 }} size="small" locale={{ emptyText: <EmptyState title="No research activity yet" description="Recent proposal submissions and updates will appear here." /> }} />
                 </Card>
             </Col>
             <Col xs={24} xl={12}>
                 <Card title="Institution Performance" extra={<Button type="link" onClick={() => router.visit(route('admin.institutions.index'))}>View institutions</Button>} className="admin-dashboard-shell">
-                    <Table columns={institutionColumns} dataSource={institutionOverview} rowKey="id" pagination={false} scroll={{ x: 760 }} size="small" locale={{ emptyText: 'No institution performance data yet.' }} />
+                    <Table columns={institutionColumns} dataSource={institutionOverview} rowKey="id" pagination={false} scroll={{ x: 760 }} size="small" locale={{ emptyText: <EmptyState title="No institution performance data" description="Institution metrics will populate after submissions are processed." /> }} />
                 </Card>
             </Col>
         </Row>

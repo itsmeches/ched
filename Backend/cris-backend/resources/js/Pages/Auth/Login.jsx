@@ -26,12 +26,12 @@ export default function Login({ status, canResetPassword }) {
             <Head title="Sign In" />
 
             <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900">Welcome back</h2>
-                <p className="mt-1 text-sm text-slate-500">Sign in to your account to continue</p>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome back</h2>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign in to your account to continue</p>
             </div>
 
             {status && (
-                <div className="mb-5 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm font-medium text-blue-900" style={{ borderColor: '#b3d9ff', backgroundColor: '#e6f2ff', color: '#0033a0' }}>
+                <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
                     {status}
                 </div>
             )}
@@ -59,9 +59,7 @@ export default function Login({ status, canResetPassword }) {
                         {canResetPassword && (
                             <Link
                                 href={route('password.request')}
-                                className="text-xs font-medium transition-colors" style={{ color: '#0033a0' }}
-                                onMouseEnter={(e) => e.target.style.color = '#001f66'}
-                                onMouseLeave={(e) => e.target.style.color = '#0033a0'}
+                                className="text-xs font-medium text-[#0033a0] transition-colors hover:text-[#001f66] dark:text-blue-300 dark:hover:text-blue-200"
                             >
                                 Forgot password?
                             </Link>
@@ -87,7 +85,7 @@ export default function Login({ status, canResetPassword }) {
                             checked={data.remember}
                             onChange={(e) => setData('remember', e.target.checked)}
                         />
-                        <span className="text-sm text-slate-600">Remember me</span>
+                        <span className="text-sm text-slate-600 dark:text-slate-300">Remember me</span>
                     </label>
                 </div>
 
@@ -96,11 +94,9 @@ export default function Login({ status, canResetPassword }) {
                 </PrimaryButton>
             </form>
 
-            <p className="mt-6 text-center text-sm text-slate-500">
+            <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 Don't have an account?{' '}
-                <Link href={route('register')} className="font-medium transition-colors" style={{ color: '#0033a0' }}
-                    onMouseEnter={(e) => e.target.style.color = '#001f66'}
-                    onMouseLeave={(e) => e.target.style.color = '#0033a0'}>
+                <Link href={route('register')} className="font-medium text-[#0033a0] transition-colors hover:text-[#001f66] dark:text-blue-300 dark:hover:text-blue-200">
                     Register here
                 </Link>
             </p>

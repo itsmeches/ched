@@ -1,4 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
+import EmptyState from '@/Components/EmptyState';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Card, Col, Input, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
@@ -34,9 +36,10 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
             title: 'Authors',
             dataIndex: 'authors',
             key: 'authors',
-            render: (value) => <span style={{ color: '#475569' }}>{value}</span>,
+            responsive: ['sm'],
+            render: (value) => <span className="text-slate-500 dark:text-slate-400">{value}</span>,
         },
-        { title: 'Year', dataIndex: 'year', key: 'year', width: 100 },
+        { title: 'Year', dataIndex: 'year', key: 'year', width: 100, responsive: ['sm'] },
         {
             title: 'Status',
             dataIndex: 'status',
@@ -46,6 +49,7 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
         {
             title: 'Editability',
             key: 'editability',
+            responsive: ['md'],
             render: (_, row) => {
                 const isLocked = row.status !== 'rejected';
 
@@ -70,6 +74,7 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
         {
             title: 'Institution',
             key: 'institution',
+            responsive: ['md'],
             render: (_, row) => row.institution?.name ?? '—',
         },
         {
@@ -85,7 +90,7 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
     }
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Research Papers</h2>}>
+        <AuthenticatedLayout header={<AdminPageHeader title="Research Papers" />}>
             <Head title="Research Papers" />
 
             <div className="space-y-4">
@@ -165,17 +170,17 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
                                             onPressEnter={applyFilters}
                                         />
                                     </Col>
-                                    <Col xs={12} md={3}>
+                                    <Col xs={24} md={3}>
                                         <Button size="large" block type="primary" onClick={applyFilters}>Search</Button>
                                     </Col>
-                                    <Col xs={12} md={3}>
+                                    <Col xs={24} md={3}>
                                         <Button size="large" block onClick={() => {
                                             setSearch(''); setStatus(''); setEditability(''); setYear(''); setSchool('');
                                             router.get(route('research.index'), { tab }, { replace: true });
                                         }}>Clear</Button>
                                     </Col>
                                     {canCreate && (
-                                        <Col xs={12} md={3}>
+                                        <Col xs={24} md={3}>
                                             <Link href={route('research.create')}>
                                                 <Button size="large" block icon={<PlusOutlined />}>New</Button>
                                             </Link>
@@ -188,6 +193,7 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
 
                     <Card className="admin-dashboard-shell" bordered={false}>
                         <Table
+                            size="middle"
                             rowKey="id"
                             columns={columns}
                             dataSource={proposals.data}
@@ -198,7 +204,7 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
                                 onChange: (page) => router.get(route('research.index'), { search, status, editability, year, school, tab, page }, { preserveState: true }),
                             }}
                             scroll={{ x: 920 }}
-                            locale={{ emptyText: 'No research papers found for the selected filters.' }}
+                            locale={{ emptyText: <EmptyState title="No research papers found" description="Try broadening your status or keyword filters." /> }}
                         />
                     </Card>
             </div>

@@ -6,7 +6,7 @@ use App\Models\SimpleNotification;
 
 class SimpleNotificationService
 {
-    public static function notify(?int $userId, string $message): void
+    public static function notify(?int $userId, string $message, ?string $url = null): void
     {
         if (! $userId || trim($message) === '') {
             return;
@@ -15,6 +15,7 @@ class SimpleNotificationService
         SimpleNotification::query()->create([
             'user_id' => $userId,
             'message' => $message,
+            'link_url' => $url,
             'is_read' => false,
         ]);
     }

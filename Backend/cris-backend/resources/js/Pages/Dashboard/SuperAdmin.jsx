@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import {
     Alert,
     Button,
@@ -6,7 +7,7 @@ import {
     Skeleton,
     Space,
 } from 'antd';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { lazy, Suspense } from 'react';
 
 const SuperAdminHero = lazy(() => import('./Partials/SuperAdminHero'));
@@ -14,7 +15,7 @@ const SuperAdminStats = lazy(() => import('./Partials/SuperAdminStats'));
 const SuperAdminAccountPanel = lazy(() => import('./Partials/SuperAdminAccountPanel'));
 const SuperAdminUsersTable = lazy(() => import('./Partials/SuperAdminUsersTable'));
 
-export default function SuperAdminDashboard({ stats, recentUsers, recentProposals, institutionOverview, institutions, roles, notifications = [] }) {
+export default function SuperAdminDashboard({ stats, recentUsers, recentProposals, institutionOverview, institutions, roles }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -37,7 +38,7 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
     const sectionFallback = <Skeleton active paragraph={{ rows: 4 }} />;
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-900">Super Admin Dashboard</h2>}>
+        <AuthenticatedLayout header={<AdminPageHeader title="Super Admin Dashboard" />}>
             <Head title="Super Admin Dashboard" />
 
             <div className="space-y-5">
@@ -68,26 +69,6 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
                             </Link>
                             
                         </Space>
-                    </Card>
-
-                    <Card title="Unread Notifications" className="admin-dashboard-shell">
-                        <div style={{ marginBottom: 12 }}>
-                            <Button size="small" onClick={() => router.post(route('notifications.read-all'))}>Mark all as read</Button>
-                        </div>
-                        {notifications.length === 0 ? (
-                            <Alert type="info" showIcon message="No new notifications." />
-                        ) : (
-                            <Space direction="vertical" size={10} style={{ width: '100%' }}>
-                                {notifications.map((item) => (
-                                    <Alert
-                                        key={item.id}
-                                        type="info"
-                                        showIcon
-                                        message={item.message}
-                                    />
-                                ))}
-                            </Space>
-                        )}
                     </Card>
 
                     <Suspense fallback={sectionFallback}>

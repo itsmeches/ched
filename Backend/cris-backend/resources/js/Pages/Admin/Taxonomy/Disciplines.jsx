@@ -1,10 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import AdminTableCard from '@/Components/Admin/AdminTableCard';
+import EmptyState from '@/Components/EmptyState';
+import { confirmAction } from '@/utils/confirmAction';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useMemo, useState, useEffect } from 'react';
 import { Alert, Button, Col, Input, InputNumber, Modal, Row, Select, Space, Switch, Table, Tag, Typography, message } from 'antd';
-import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 
 function escapeRegExp(value) {
     return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -58,11 +60,11 @@ export default function DisciplinesIndex({ disciplines = [] }) {
     const columns = useMemo(() => [
         { title: 'Code', dataIndex: 'code', key: 'code', width: 90, render: (v) => <Tag color="purple">{highlightMatch(v, search)}</Tag> },
         { title: 'Discipline', dataIndex: 'name', key: 'name', render: (v) => highlightMatch(v, search) },
-        { title: 'Order', dataIndex: 'sort_order', key: 'sort_order', width: 90 },
+        { title: 'Order', dataIndex: 'sort_order', key: 'sort_order', width: 90, responsive: ['sm'] },
         { title: 'Status', dataIndex: 'is_active', key: 'is_active', width: 110, render: (a) => a ? <Tag color="green">Active</Tag> : <Tag>Inactive</Tag> },
-        { title: 'Used', dataIndex: 'proposals_count', key: 'proposals_count', width: 90 },
+        { title: 'Used', dataIndex: 'proposals_count', key: 'proposals_count', width: 90, responsive: ['sm'] },
         {
-            title: 'Action', key: 'action', align: 'right',
+            title: 'Action', key: 'action', align: 'center', onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, row) => (
                 <Space>
                     <Button type="link" onClick={() => openEdit(row)}>Edit</Button>
@@ -140,12 +142,11 @@ export default function DisciplinesIndex({ disciplines = [] }) {
             message.warning('This discipline is currently used by submissions and cannot be deleted.');
             return;
         }
-        Modal.confirm({
+        confirmAction({
             title: 'Delete this discipline?',
-            icon: <ExclamationCircleOutlined />,
             content: 'This action cannot be undone.',
             okText: 'Delete',
-            okButtonProps: { danger: true },
+            danger: true,
             onOk: () => router.delete(route('admin.taxonomy.disciplines.destroy', discipline.id), { preserveScroll: true }),
         });
     }
@@ -194,7 +195,7 @@ export default function DisciplinesIndex({ disciplines = [] }) {
                             />
                         </Col>
                     </Row>
-                    <Table rowKey="id" columns={columns} dataSource={filtered} pagination={{ pageSize: 10 }} scroll={{ x: 780 }} />
+                    <Table rowKey="id" columns={columns} dataSource={filtered} pagination={{ pageSize: 10 }} scroll={{ x: 780 }} locale={{ emptyText: <EmptyState title="No disciplines found" description="Try changing the status filter or add a new discipline." /> }} />
                 </AdminTableCard>
             </div>
 

@@ -26,8 +26,8 @@ export default function ResetPassword({ token, email }) {
             <Head title="Reset Password" />
 
             <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900">Reset password</h2>
-                <p className="mt-1 text-sm text-slate-500">Create a new password for your account</p>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Reset password</h2>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Create a new password for your account</p>
             </div>
 
             <form onSubmit={submit} className="space-y-5">
@@ -93,11 +93,9 @@ export default function ResetPassword({ token, email }) {
                 </PrimaryButton>
             </form>
 
-            <p className="mt-6 text-center text-sm text-slate-500">
+            <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 Return to{' '}
-                <Link href={route('login')} className="font-medium transition-colors" style={{ color: '#0033a0' }}
-                    onMouseEnter={(e) => e.target.style.color = '#001f66'}
-                    onMouseLeave={(e) => e.target.style.color = '#0033a0'}>
+                <Link href={route('login')} className="font-medium text-[#0033a0] transition-colors hover:text-[#001f66] dark:text-blue-300 dark:hover:text-blue-200">
                     sign in
                 </Link>
             </p>
