@@ -65,7 +65,7 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
                                 <Button>Keywords</Button>
                             </Link>
                             <Link href={route('admin.taxonomy.index')}>
-                                <Button>Research Taxonomy</Button>
+                                <Button>Research Category</Button>
                             </Link>
                             
                         </Space>
