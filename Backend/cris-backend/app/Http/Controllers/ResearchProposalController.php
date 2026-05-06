@@ -170,9 +170,13 @@ class ResearchProposalController extends Controller
 
         return Inertia::render('Research/Index', [
             'proposals'  => $query->paginate(15)->withQueryString(),
-            'filters'    => $request->only(['search', 'status', 'year', 'school', 'editability', 'tab']),
+            'filters'    => $request->only(['search', 'status', 'year', 'school', 'editability', 'tab', 'discipline_code', 'hei_id']),
             'tab'        => $tab,
             'canCreate'  => $user->isStudent(),
+            'disciplines' => Discipline::query()->where('is_active', true)->orderBy('code')->get(['code', 'name']),
+            'institutions' => $user->isSuperAdmin() || $user->isCHED()
+                ? Institution::query()->orderBy('name')->get(['id', 'name'])
+                : Institution::query()->where('id', $user->institution_id)->get(['id', 'name']),
         ]);
     }
 
@@ -215,6 +219,8 @@ class ResearchProposalController extends Controller
 
         $query->when($request->filled('school'), fn ($q) => $q->where('school', 'like', '%' . trim((string) $request->input('school')) . '%'));
         $query->when($request->filled('institution_id'), fn ($q) => $q->where('institution_id', (int) $request->input('institution_id')));
+        $query->when($request->filled('hei_id'), fn ($q) => $q->where('institution_id', (int) $request->input('hei_id')));
+        $query->when($request->filled('discipline_code'), fn ($q) => $q->where('discipline_code', trim((string) $request->input('discipline_code'))));
 
         if (! $includeStatus) {
             $query->when($request->filled('category'), function ($q) use ($request) {
@@ -227,12 +233,19 @@ class ResearchProposalController extends Controller
                     });
                 }
             });
-
-            $query->when($request->filled('discipline_code'), fn ($q) => $q->where('discipline_code', trim((string) $request->input('discipline_code'))));
         }
 
         if ($includeStatus) {
-            $query->when($request->filled('status'), fn ($q) => $q->where('status', (string) $request->input('status')));
+            $query->when($request->filled('status'), function ($q) use ($request) {
+                $status = (string) $request->input('status');
+
+                if ($status === 'pending') {
+                    $q->whereIn('status', ResearchProposal::PENDING_STATUSES);
+                    return;
+                }
+
+                $q->where('status', $status);
+            });
         }
     }
 

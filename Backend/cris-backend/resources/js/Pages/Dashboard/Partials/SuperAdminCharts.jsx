@@ -1,5 +1,6 @@
 import { Card, Col, Grid, Row } from 'antd';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { router } from '@inertiajs/react';
 import { useTheme } from '@/utils/ThemeContext';
 
 export default function SuperAdminCharts({
@@ -31,6 +32,33 @@ export default function SuperAdminCharts({
         { name: 'Pending', value: stats.pending || 0, fill: '#d97706' },
         { name: 'Rejected', value: stats.rejected || 0, fill: '#dc2626' },
     ];
+
+    function openResearch(params = {}) {
+        router.visit(route('research.index', params));
+    }
+
+    function onStatusClick(entry) {
+        const statusMap = {
+            Approved: 'approved',
+            Pending: 'pending',
+            Rejected: 'rejected',
+        };
+
+        const status = statusMap[entry?.name || ''];
+        if (status) {
+            openResearch({ status });
+        }
+    }
+
+    function onMonthClick(point) {
+        const monthLabel = point?.payload?.month;
+        if (!monthLabel) {
+            return;
+        }
+
+        const match = String(monthLabel).match(/\b(\d{4})\b/);
+        openResearch(match ? { year: match[1] } : {});
+    }
 
     return (
         <div className="space-y-4">
@@ -65,6 +93,7 @@ export default function SuperAdminCharts({
                                     fillOpacity={1}
                                     fill="url(#colorSubmissions)"
                                     name="Total Submissions"
+                                    onClick={onMonthClick}
                                 />
                                 <Area
                                     type="monotone"
@@ -73,6 +102,7 @@ export default function SuperAdminCharts({
                                     fillOpacity={1}
                                     fill="url(#colorApproved)"
                                     name="Approved"
+                                    onClick={onMonthClick}
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
@@ -87,17 +117,20 @@ export default function SuperAdminCharts({
                                     data={statusBreakdownData}
                                     cx="50%"
                                     cy="50%"
-                                    labelLine={false}
-                                    label={({ name, value }) => `${name}: ${value}`}
+                                    labelLine={(props) => props.value > 0}
+                                    label={({ name, value }) => value > 0 ? `${name}: ${value}` : null}
                                     outerRadius={100}
                                     fill="#8884d8"
                                     dataKey="value"
+                                    onClick={onStatusClick}
+                                    minAngle={0}
                                 >
                                     {statusBreakdownData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.fill} />
                                     ))}
                                 </Pie>
-                                <Tooltip />
+                                <Tooltip formatter={(value, name) => [value, name]} />
+                                <Legend />
                             </PieChart>
                         </ResponsiveContainer>
                     </Card>
@@ -117,7 +150,18 @@ export default function SuperAdminCharts({
                                     cursor={{ fill: 'rgba(0, 51, 160, 0.1)' }}
                                 />
                                 <Legend />
-                                <Bar dataKey="submissions" fill="#0033a0" name="Submissions" radius={[8, 8, 0, 0]} />
+                                <Bar
+                                    dataKey="submissions"
+                                    fill="#0033a0"
+                                    name="Submissions"
+                                    radius={[8, 8, 0, 0]}
+                                    onClick={(event) => {
+                                        const heiId = event?.payload?.institution_id;
+                                        if (heiId) {
+                                            openResearch({ hei_id: heiId });
+                                        }
+                                    }}
+                                />
                                 <Bar dataKey="approved" fill="#16a34a" name="Approved" radius={[8, 8, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
@@ -132,7 +176,28 @@ export default function SuperAdminCharts({
                                 <XAxis dataKey="role" stroke={axisColor} angle={-20} textAnchor="end" height={70} interval={0} />
                                 <YAxis stroke={axisColor} allowDecimals={false} />
                                 <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
-                                <Bar dataKey="count" fill="#0033a0" name="Users" radius={[8, 8, 0, 0]} />
+                                <Bar
+                                    dataKey="count"
+                                    fill="#0033a0"
+                                    name="Users"
+                                    radius={[8, 8, 0, 0]}
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={(event) => {
+                                        const labelToRole = {
+                                            'FACULTY': 'faculty',
+                                            'STUDENT': 'student',
+                                            'HEI': 'hei',
+                                            'SUPER ADMIN': 'super_admin',
+                                            'CHED': 'ched',
+                                            'PENDING': 'pending',
+                                        };
+                                        const label = event?.payload?.role;
+                                        const roleSlug = label ? (labelToRole[label.toUpperCase()] ?? label.toLowerCase().replace(/\s+/g, '_')) : null;
+                                        if (roleSlug) {
+                                            router.visit(route('admin.users.index', { role: roleSlug }));
+                                        }
+                                    }}
+                                />
                             </BarChart>
                         </ResponsiveContainer>
                     </Card>
@@ -159,7 +224,18 @@ export default function SuperAdminCharts({
                                     contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }}
                                     labelFormatter={(label) => label}
                                 />
-                                <Bar dataKey="submissions" fill="#d97706" name="Submissions" radius={[8, 8, 0, 0]} />
+                                <Bar
+                                    dataKey="submissions"
+                                    fill="#d97706"
+                                    name="Submissions"
+                                    radius={[8, 8, 0, 0]}
+                                    onClick={(event) => {
+                                        const disciplineCode = event?.payload?.discipline_code;
+                                        if (disciplineCode) {
+                                            openResearch({ discipline_code: disciplineCode });
+                                        }
+                                    }}
+                                />
                             </BarChart>
                         </ResponsiveContainer>
                     </Card>
