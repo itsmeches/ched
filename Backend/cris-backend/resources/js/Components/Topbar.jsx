@@ -123,7 +123,7 @@ export default function Topbar({ title, sidebarCollapsed = false, onToggleSideba
                                         {notifications.length > 0 && (
                                             <button
                                                 type="button"
-                                                className="text-xs font-medium text-[#0033a0] hover:underline"
+                                                className="text-xs font-medium text-[#0033a0] hover:underline dark:text-blue-300"
                                                 onClick={() => {
                                                     router.post(route('notifications.read-all'), {}, {
                                                         preserveScroll: true,
@@ -158,12 +158,12 @@ export default function Topbar({ title, sidebarCollapsed = false, onToggleSideba
                                                         }}
                                                     >
                                                         <p className="text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
-                                                        <p className="mt-1 text-xs text-[#0033a0]">{formatNotifDate(item.created_at)}</p>
+                                                        <p className="mt-1 text-xs text-[#0033a0] dark:text-blue-300">{formatNotifDate(item.created_at)}</p>
                                                     </button>
                                                 ) : (
                                                     <div key={item.id} className="px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-[#1a2540]">
                                                         <p className="text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
-                                                        <p className="mt-1 text-xs text-slate-400">{formatNotifDate(item.created_at)}</p>
+                                                        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{formatNotifDate(item.created_at)}</p>
                                                     </div>
                                                 )
                                             ))

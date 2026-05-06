@@ -1,5 +1,6 @@
 import { Card, Col, Grid, Row } from 'antd';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useTheme } from '@/utils/ThemeContext';
 
 export default function SuperAdminCharts({
     stats = {},
@@ -8,9 +9,14 @@ export default function SuperAdminCharts({
     disciplineBreakdown = [],
     institutionPerformance = [],
 }) {
+    const { dark } = useTheme();
     const { useBreakpoint } = Grid;
     const screens = useBreakpoint();
     const disciplineTickLimit = screens.xxl ? 40 : screens.xl ? 34 : screens.lg ? 28 : screens.md ? 22 : 16;
+    const axisColor = dark ? '#94a3b8' : '#64748b';
+    const gridColor = dark ? '#334155' : '#e2e8f0';
+    const tooltipBgColor = dark ? '#0f172a' : '#f8fafc';
+    const tooltipBorderColor = dark ? '#334155' : '#e2e8f0';
 
     const formatDisciplineTick = (value) => {
         if (!value) {
@@ -44,11 +50,11 @@ export default function SuperAdminCharts({
                                         <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                <XAxis dataKey="month" stroke="#64748b" />
-                                <YAxis stroke="#64748b" />
+                                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                                <XAxis dataKey="month" stroke={axisColor} />
+                                <YAxis stroke={axisColor} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6 }}
+                                    contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }}
                                     cursor={{ fill: 'rgba(0, 51, 160, 0.1)' }}
                                 />
                                 <Legend />
@@ -103,11 +109,11 @@ export default function SuperAdminCharts({
                     <Card title="Institution Performance (Submissions vs Approvals)" className="admin-dashboard-shell" bordered={false}>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={institutionPerformance}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                <XAxis dataKey="institution" stroke="#64748b" />
-                                <YAxis stroke="#64748b" />
+                                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                                <XAxis dataKey="institution" stroke={axisColor} />
+                                <YAxis stroke={axisColor} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6 }}
+                                    contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }}
                                     cursor={{ fill: 'rgba(0, 51, 160, 0.1)' }}
                                 />
                                 <Legend />
@@ -122,10 +128,10 @@ export default function SuperAdminCharts({
                     <Card title="User Role Distribution" className="admin-dashboard-shell" bordered={false}>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={roleDistribution}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                <XAxis dataKey="role" stroke="#64748b" angle={-20} textAnchor="end" height={70} interval={0} />
-                                <YAxis stroke="#64748b" allowDecimals={false} />
-                                <Tooltip contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6 }} />
+                                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                                <XAxis dataKey="role" stroke={axisColor} angle={-20} textAnchor="end" height={70} interval={0} />
+                                <YAxis stroke={axisColor} allowDecimals={false} />
+                                <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
                                 <Bar dataKey="count" fill="#0033a0" name="Users" radius={[8, 8, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
@@ -138,19 +144,19 @@ export default function SuperAdminCharts({
                     <Card title="Top Disciplines by Submission" className="admin-dashboard-shell" bordered={false}>
                         <ResponsiveContainer width="100%" height={340}>
                             <BarChart data={disciplineBreakdown} margin={{ top: 8, right: 16, left: 0, bottom: 70 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                                 <XAxis
                                     dataKey="discipline"
-                                    stroke="#64748b"
+                                    stroke={axisColor}
                                     angle={-35}
                                     textAnchor="end"
                                     height={92}
                                     interval={0}
                                     tickFormatter={formatDisciplineTick}
                                 />
-                                <YAxis stroke="#64748b" allowDecimals={false} />
+                                <YAxis stroke={axisColor} allowDecimals={false} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6 }}
+                                    contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }}
                                     labelFormatter={(label) => label}
                                 />
                                 <Bar dataKey="submissions" fill="#d97706" name="Submissions" radius={[8, 8, 0, 0]} />

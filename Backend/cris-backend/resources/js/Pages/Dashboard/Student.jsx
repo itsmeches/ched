@@ -11,6 +11,7 @@ import StudentCharts from './Partials/StudentCharts';
 export default function StudentDashboard({ stats, stageCounts = {}, recentUploads, pendingQueue, monthlyActivity = [] }) {
     const { dark } = useTheme();
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
     const statItems = [
         { key: 'total', label: 'Total Papers', color: accentPrimary, icon: <FileTextOutlined /> },
         { key: 'pending', label: 'Pending', color: '#d97706', icon: <ClockCircleOutlined /> },
@@ -103,7 +104,7 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
                     {statItems.map((item) => (
                         <Col xs={24} sm={12} xl={24 / statItems.length} key={item.key}>
                             <Card className="admin-dashboard-shell" hoverable>
-                                <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: '#0f172a' }} />
+                                <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: metricTextColor }} />
                             </Card>
                         </Col>
                     ))}

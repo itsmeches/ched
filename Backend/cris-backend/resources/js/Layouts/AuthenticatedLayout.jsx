@@ -1,10 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Sidebar from '@/Components/Sidebar';
 import Topbar from '@/Components/Topbar';
 
+const SIDEBAR_STORAGE_KEY = 'cris_sidebar_collapsed';
+
 export default function AuthenticatedLayout({ header, children, showHeader = true }) {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+        try {
+            return localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
+        } catch {
+            return false;
+        }
+    });
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(SIDEBAR_STORAGE_KEY, sidebarCollapsed ? 'true' : 'false');
+        } catch {
+            // localStorage unavailable — silently ignore
+        }
+    }, [sidebarCollapsed]);
 
     return (
         <div className="h-screen overflow-hidden bg-slate-100 dark:bg-[#0a0f1e] transition-colors duration-300">

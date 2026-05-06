@@ -13,6 +13,7 @@ import CHEDCharts from './Partials/CHEDCharts';
 export default function CHEDDashboard({ stats, stageCounts = {}, forReview, editRequests, monthlyTrends = [], disciplineBreakdown = [], approvalFunnel = [] }) {
     const { dark } = useTheme();
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
     const statItems = [
         { key: 'pending', label: 'Pending Review', color: '#d97706', icon: <ClockCircleOutlined /> },
         { key: 'approved', label: 'Approved', color: accentPrimary, icon: <CheckCircleOutlined /> },
@@ -174,7 +175,7 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                         {statItems.map((item) => (
                             <Col xs={24} sm={12} xl={6} key={item.key}>
                                 <Card className="admin-dashboard-shell" hoverable>
-                                    <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: '#0f172a' }} />
+                                    <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: metricTextColor }} />
                                 </Card>
                             </Col>
                         ))}

@@ -49,7 +49,7 @@ export default function InstitutionsIndex({ institutions, filters }) {
             render: (_, institution) => (
                 <div>
                     <div style={{ fontWeight: 600 }}>{institution.name}</div>
-                    <div style={{ fontSize: 12, color: '#64748b' }}>{institution.contact_email ?? 'No email provided'}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">{institution.contact_email ?? 'No email provided'}</div>
                 </div>
             ),
         },

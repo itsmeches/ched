@@ -76,7 +76,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
                     <Avatar style={{ backgroundColor: accentPrimary }}>{user.name?.charAt(0)?.toUpperCase() ?? 'U'}</Avatar>
                     <div>
                         <div style={{ fontWeight: 600 }}>{user.name}</div>
-                        <div style={{ fontSize: 12, color: '#64748b' }}>{user.email}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{user.email}</div>
                     </div>
                 </Space>
             ),

@@ -6,7 +6,7 @@ use App\Models\SimpleNotification;
 
 class SimpleNotificationService
 {
-    public static function notify(?int $userId, string $message, ?string $url = null): void
+    public static function notify(?int $userId, string $message, ?string $url = null, ?string $type = null): void
     {
         if (! $userId || trim($message) === '') {
             return;
@@ -16,6 +16,7 @@ class SimpleNotificationService
             'user_id' => $userId,
             'message' => $message,
             'link_url' => $url,
+            'type' => $type,
             'is_read' => false,
         ]);
     }

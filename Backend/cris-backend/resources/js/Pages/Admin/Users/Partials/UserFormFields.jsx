@@ -51,7 +51,7 @@ export default function UserFormFields({ data, setData, errors, roles, instituti
 
             {includePasswordHint && (
                 <Form.Item>
-                    <div style={{ color: '#475569', fontSize: 13 }}>
+                    <div className="text-[13px] text-slate-600 dark:text-slate-400">
                         Leave the password fields blank to keep the current password unchanged.
                     </div>
                 </Form.Item>

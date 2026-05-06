@@ -8,6 +8,7 @@ export default function SuperAdminStats({ stats }) {
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     const accentSecondary = dark ? '#60a5fa' : '#0047d4';
     const accentDark = dark ? '#3b82f6' : '#001f66';
+    const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
 
     const statCards = [
         { key: 'users', label: 'Total Users', icon: <TeamOutlined />, routeName: 'admin.users.index', color: accentPrimary },
@@ -42,7 +43,7 @@ export default function SuperAdminStats({ stats }) {
                         onClick={() => openRoute(item)}
                         onKeyDown={(event) => onCardKeyDown(event, item)}
                     >
-                        <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: '#0f172a' }} />
+                        <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: metricTextColor }} />
                     </Card>
                 </Col>
             ))}

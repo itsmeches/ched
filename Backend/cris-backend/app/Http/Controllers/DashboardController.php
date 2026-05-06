@@ -545,10 +545,51 @@ class DashboardController extends Controller
             ->where('user_id', $request->user()->id)
             ->update(['is_read' => true]);
 
-        $url = $request->input('redirect');
+        $url = $this->sanitizeInternalRedirect($request->input('redirect'), $request);
 
         return $url
             ? redirect($url)
             : back();
+    }
+
+    private function sanitizeInternalRedirect(mixed $url, Request $request): ?string
+    {
+        if (! is_string($url)) {
+            return null;
+        }
+
+        $url = trim($url);
+        if ($url === '') {
+            return null;
+        }
+
+        $parts = parse_url($url);
+        if ($parts === false) {
+            return null;
+        }
+
+        // Accept absolute URLs only when they point to this app host.
+        if (isset($parts['scheme']) || isset($parts['host'])) {
+            $requestHost = parse_url($request->root(), PHP_URL_HOST);
+            $urlHost = $parts['host'] ?? null;
+
+            if (! $urlHost || ! $requestHost || ! hash_equals((string) $requestHost, (string) $urlHost)) {
+                return null;
+            }
+
+            $normalized = $parts['path'] ?? '/';
+
+            if (isset($parts['query'])) {
+                $normalized .= '?' . $parts['query'];
+            }
+
+            if (isset($parts['fragment'])) {
+                $normalized .= '#' . $parts['fragment'];
+            }
+
+            return $normalized;
+        }
+
+        return str_starts_with($url, '/') ? $url : null;
     }
 }

@@ -24,8 +24,13 @@ class UpdateResearchProposalRequest extends FormRequest
             return false;
         }
 
+        $hasApprovedPermission = $proposal->editPermissionRequests()
+            ->where('requested_by', $user->id)
+            ->where('status', 'approved')
+            ->exists();
+
         return $proposal->submitted_by === $user->id
-            && $proposal->isEditable();
+            && ($proposal->isEditable() || $hasApprovedPermission);
     }
 
     public function rules(): array
