@@ -11,8 +11,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Alert, Avatar, Button, Col, DatePicker, Input, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
 import { PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useTheme } from '@/utils/ThemeContext';
 
-const roleColorMap = { pending: 'orange', super_admin: 'purple', ched: '#0033a0', hei: '#0047d4', faculty: 'cyan', student: 'geekblue' };
 const roleLabelMap = {
     all: 'All Users',
     pending: 'Pending Approval',
@@ -25,6 +25,16 @@ const roleLabelMap = {
 
 export default function UsersIndex({ users, filters, roleCounts, institutions }) {
     const { flash } = usePage().props;
+    const { dark } = useTheme();
+    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const roleColorMap = {
+        pending: 'orange',
+        super_admin: 'purple',
+        ched: dark ? '#60a5fa' : '#0033a0',
+        hei: dark ? '#60a5fa' : '#0047d4',
+        faculty: 'cyan',
+        student: 'geekblue',
+    };
     const [search, setSearch] = useState(filters.search ?? '');
     const [role, setRole] = useState(filters.role ?? '');
     const [institutionId, setInstitutionId] = useState(filters.institution_id ?? '');
@@ -35,14 +45,14 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
     const [tableData, setTableData] = useState(users.data ?? []);
 
     const categoryItems = useMemo(() => [
-        { key: 'all', label: roleLabelMap.all, count: roleCounts?.all ?? 0, color: '#0033a0' },
+        { key: 'all', label: roleLabelMap.all, count: roleCounts?.all ?? 0, color: accentPrimary },
         { key: 'pending', label: roleLabelMap.pending, count: roleCounts?.pending ?? 0, color: '#d97706' },
         { key: 'super_admin', label: roleLabelMap.super_admin, count: roleCounts?.super_admin ?? 0, color: '#7c3aed' },
-        { key: 'ched', label: roleLabelMap.ched, count: roleCounts?.ched ?? 0, color: '#0033a0' },
-        { key: 'hei', label: roleLabelMap.hei, count: roleCounts?.hei ?? 0, color: '#0047d4' },
+        { key: 'ched', label: roleLabelMap.ched, count: roleCounts?.ched ?? 0, color: dark ? '#60a5fa' : '#0033a0' },
+        { key: 'hei', label: roleLabelMap.hei, count: roleCounts?.hei ?? 0, color: dark ? '#60a5fa' : '#0047d4' },
         { key: 'faculty', label: roleLabelMap.faculty, count: roleCounts?.faculty ?? 0, color: '#0891b2' },
         { key: 'student', label: roleLabelMap.student, count: roleCounts?.student ?? 0, color: '#1d4ed8' },
-    ], [roleCounts]);
+    ], [roleCounts, dark, accentPrimary]);
 
     useEffect(() => {
         setTableData(users.data ?? []);
@@ -63,7 +73,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
             key: 'user',
             render: (_, user) => (
                 <Space>
-                    <Avatar style={{ backgroundColor: '#0033a0' }}>{user.name?.charAt(0)?.toUpperCase() ?? 'U'}</Avatar>
+                    <Avatar style={{ backgroundColor: accentPrimary }}>{user.name?.charAt(0)?.toUpperCase() ?? 'U'}</Avatar>
                     <div>
                         <div style={{ fontWeight: 600 }}>{user.name}</div>
                         <div style={{ fontSize: 12, color: '#64748b' }}>{user.email}</div>

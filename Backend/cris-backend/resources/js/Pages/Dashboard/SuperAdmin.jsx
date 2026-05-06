@@ -12,10 +12,22 @@ import { lazy, Suspense } from 'react';
 
 const SuperAdminHero = lazy(() => import('./Partials/SuperAdminHero'));
 const SuperAdminStats = lazy(() => import('./Partials/SuperAdminStats'));
+const SuperAdminCharts = lazy(() => import('./Partials/SuperAdminCharts'));
 const SuperAdminAccountPanel = lazy(() => import('./Partials/SuperAdminAccountPanel'));
 const SuperAdminUsersTable = lazy(() => import('./Partials/SuperAdminUsersTable'));
 
-export default function SuperAdminDashboard({ stats, recentUsers, recentProposals, institutionOverview, institutions, roles }) {
+export default function SuperAdminDashboard({
+    stats,
+    recentUsers,
+    recentProposals,
+    institutionOverview,
+    monthlyTrends = [],
+    roleDistribution = [],
+    disciplineBreakdown = [],
+    institutionPerformance = [],
+    institutions,
+    roles,
+}) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -37,6 +49,25 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
 
     const sectionFallback = <Skeleton active paragraph={{ rows: 4 }} />;
 
+    const renderAdminShortcuts = () => (
+        <Card title="Admin Shortcuts" className="admin-dashboard-shell" bordered={false}>
+            <Space wrap className="quick-action-cluster">
+                <Link href={route('admin.users.index')}>
+                    <Button className="quick-action-primary">Open User Management</Button>
+                </Link>
+                <Link href={route('admin.institutions.index')}>
+                    <Button className="quick-action-secondary">Institutions</Button>
+                </Link>
+                <Link href={route('admin.keywords.index')}>
+                    <Button className="quick-action-secondary">Keywords</Button>
+                </Link>
+                <Link href={route('admin.taxonomy.index')}>
+                    <Button className="quick-action-secondary">Research Category</Button>
+                </Link>
+            </Space>
+        </Card>
+    );
+
     return (
         <AuthenticatedLayout header={<AdminPageHeader title="Super Admin Dashboard" />}>
             <Head title="Super Admin Dashboard" />
@@ -49,34 +80,34 @@ export default function SuperAdminDashboard({ stats, recentUsers, recentProposal
                     {flash?.success && <Alert message={flash.success} type="success" showIcon />}
                     {flash?.error && <Alert message={flash.error} type="error" showIcon />}
 
+                    <div className="sm:hidden">
+                        {renderAdminShortcuts()}
+                    </div>
+
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminStats stats={stats} />
                     </Suspense>
 
-                    <Card title="Admin Shortcuts" className="admin-dashboard-shell">
-                        <Space wrap>
-                            <Link href={route('admin.users.index')}>
-                                <Button>User Management</Button>
-                            </Link>
-                            <Link href={route('admin.institutions.index')}>
-                                <Button>Institutions</Button>
-                            </Link>
-                            <Link href={route('admin.keywords.index')}>
-                                <Button>Keywords</Button>
-                            </Link>
-                            <Link href={route('admin.taxonomy.index')}>
-                                <Button>Research Category</Button>
-                            </Link>
-                            
-                        </Space>
-                    </Card>
-
-                    <Suspense fallback={sectionFallback}>
-                        <SuperAdminAccountPanel data={data} setData={setData} postSubmit={submit} processing={processing} errors={errors} institutions={institutions} roles={roles} />
-                    </Suspense>
+                    <div className="hidden sm:block">
+                        {renderAdminShortcuts()}
+                    </div>
 
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminUsersTable recentUsers={recentUsers} recentProposals={recentProposals} institutionOverview={institutionOverview} />
+                    </Suspense>
+
+                    <Suspense fallback={sectionFallback}>
+                        <SuperAdminCharts
+                            stats={stats}
+                            monthlyTrends={monthlyTrends}
+                            roleDistribution={roleDistribution}
+                            disciplineBreakdown={disciplineBreakdown}
+                            institutionPerformance={institutionPerformance}
+                        />
+                    </Suspense>
+
+                    <Suspense fallback={sectionFallback}>
+                        <SuperAdminAccountPanel data={data} setData={setData} postSubmit={submit} processing={processing} errors={errors} institutions={institutions} roles={roles} />
                     </Suspense>
             </div>
         </AuthenticatedLayout>

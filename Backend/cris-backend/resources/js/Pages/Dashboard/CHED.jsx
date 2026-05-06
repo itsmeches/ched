@@ -7,15 +7,19 @@ import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Progress, Row, Spac
 import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, InboxOutlined, KeyOutlined, StopOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { useState } from 'react';
+import { useTheme } from '@/utils/ThemeContext';
+import CHEDCharts from './Partials/CHEDCharts';
 
-const statItems = [
-    { key: 'pending', label: 'Pending Review', color: '#d97706', icon: <ClockCircleOutlined /> },
-    { key: 'approved', label: 'Approved', color: '#0033a0', icon: <CheckCircleOutlined /> },
-    { key: 'rejected', label: 'Rejected', color: '#dc2626', icon: <StopOutlined /> },
-    { key: 'total', label: 'Total Papers', color: '#0033a0', icon: <InboxOutlined /> },
-];
+export default function CHEDDashboard({ stats, stageCounts = {}, forReview, editRequests, monthlyTrends = [], disciplineBreakdown = [], approvalFunnel = [] }) {
+    const { dark } = useTheme();
+    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const statItems = [
+        { key: 'pending', label: 'Pending Review', color: '#d97706', icon: <ClockCircleOutlined /> },
+        { key: 'approved', label: 'Approved', color: accentPrimary, icon: <CheckCircleOutlined /> },
+        { key: 'rejected', label: 'Rejected', color: '#dc2626', icon: <StopOutlined /> },
+        { key: 'total', label: 'Total Papers', color: accentPrimary, icon: <InboxOutlined /> },
+    ];
 
-export default function CHEDDashboard({ stats, stageCounts = {}, forReview, editRequests }) {
     const DEFAULT_REJECT_REMARK = 'CHED final review: Please revise and resubmit with required corrections.';
 
     const [rejectModal, setRejectModal] = useState({
@@ -128,12 +132,12 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
         <AuthenticatedLayout header={<AdminPageHeader title="CHED Review Dashboard" />}>
             <Head title="CHED Dashboard" />
 
-            <div className="space-y-8">
+            <div className="space-y-6">
                     <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                         <Row gutter={[24, 24]} align="middle">
                             <Col xs={24} lg={16}>
                                 <Space direction="vertical" size={10}>
-                                    <Tag style={{ alignSelf: 'flex-start', borderRadius: 999, paddingInline: 12, paddingBlock: 4, backgroundColor: '#0033a0', color: '#fff', border: 'none' }}>
+                                    <Tag style={{ alignSelf: 'flex-start', borderRadius: 999, paddingInline: 12, paddingBlock: 4, backgroundColor: accentPrimary, color: '#fff', border: 'none' }}>
                                         CHED Review Desk
                                     </Tag>
                                     <Typography.Title level={2} style={{ margin: 0, color: '#ffffff' }}>
@@ -147,17 +151,17 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                             <Col xs={24} lg={8}>
                                 <Space direction="vertical" style={{ width: '100%' }} size={12}>
                                     <Link href={route('research.index', { status: 'under_review_ched' })}>
-                                        <Button type="primary" size="large" block icon={<FileSearchOutlined />}>
+                                        <Button type="primary" size="large" block icon={<FileSearchOutlined />} className="quick-action-primary">
                                             Open Review Queue
                                         </Button>
                                     </Link>
                                     <Link href={route('ched.decisions')}>
-                                        <Button size="large" block>
+                                        <Button size="large" block className="quick-action-secondary">
                                             Open My Decisions
                                         </Button>
                                     </Link>
                                     <Link href={route('research.index')}>
-                                        <Button size="large" block>
+                                        <Button size="large" block className="quick-action-secondary">
                                             View All Research
                                         </Button>
                                     </Link>
@@ -176,55 +180,7 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                         ))}
                     </Row>
 
-                    <Card className="admin-dashboard-shell" bordered={false} title="Quick Filters">
-                        <Space wrap>
-                            <Link href={route('research.index', { status: 'under_review_ched' })}>
-                                <Button>CHED Final Queue</Button>
-                            </Link>
-                            <Link href={route('research.index', { status: 'approved' })}>
-                                <Button>Approved</Button>
-                            </Link>
-                            <Link href={route('research.index', { status: 'rejected' })}>
-                                <Button>Rejected</Button>
-                            </Link>
-                        </Space>
-                    </Card>
-
-                    <Card className="admin-dashboard-shell" bordered={false} title="Stage Counters">
-                        <Space wrap>
-                            <Tag color="gold">Faculty: {stageCounts.under_review_faculty ?? 0}</Tag>
-                            <Tag color="blue">HEI: {stageCounts.under_review_hei ?? 0}</Tag>
-                            <Tag color="cyan">CHED: {stageCounts.under_review_ched ?? 0}</Tag>
-                            <Tag color="green">Approved: {stageCounts.approved ?? 0}</Tag>
-                            <Tag color="red">Rejected: {stageCounts.rejected ?? 0}</Tag>
-                        </Space>
-                    </Card>
-
-                    <Row gutter={[16, 16]}>
-                        <Col xs={24} xl={12}>
-                            <Card className="admin-dashboard-shell" title="Review Performance" bordered={false}>
-                                <Space direction="vertical" style={{ width: '100%' }} size={14}>
-                                    <Statistic title="Reviewed Today" value={stats.reviewedToday} />
-                                    <div>
-                                        <Typography.Text type="secondary">Approval Rate</Typography.Text>
-                                        <Progress percent={Number(stats.approvalRate)} strokeColor="#0033a0" />
-                                    </div>
-                                </Space>
-                            </Card>
-                        </Col>
-                        <Col xs={24} xl={12}>
-                            <Card className="admin-dashboard-shell" title="Queue Snapshot" bordered={false}>
-                                <Space direction="vertical" style={{ width: '100%' }} size={14}>
-                                    <Statistic title="Papers awaiting review" value={stats.pending} prefix={<ClockCircleOutlined style={{ color: '#d97706' }} />} />
-                                    <Link href={route('research.index', { status: 'under_review_ched' })}>
-                                        <Button type="primary" block icon={<FileSearchOutlined />}>Open Review Queue</Button>
-                                    </Link>
-                                </Space>
-                            </Card>
-                        </Col>
-                    </Row>
-
-                    <Card title="Needs Your Final Approval" extra={<Link href={route('research.index', { status: 'under_review_ched' })}>View all</Link>} className="admin-dashboard-shell">
+                    <Card title="Review Queue" extra={<Link href={route('research.index', { status: 'under_review_ched' })}>View all</Link>} className="admin-dashboard-shell" bordered={false}>
                         {forReview.length === 0 ? (
                             <Alert type="success" showIcon message="No papers pending review. The current queue is clear." />
                         ) : (
@@ -261,7 +217,7 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                                     >
                                         <div className="min-w-0">
                                             <Link href={route('research.show', req.proposal?.id)}>
-                                                <Typography.Text strong style={{ color: '#0033a0' }}>
+                                                <Typography.Text strong style={{ color: accentPrimary }}>
                                                     {req.proposal?.title ?? 'Unknown proposal'}
                                                 </Typography.Text>
                                             </Link>
@@ -312,6 +268,8 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                             </Space>
                         </Card>
                     )}
+
+                    <CHEDCharts stats={stats} monthlyTrends={monthlyTrends} disciplineBreakdown={disciplineBreakdown} approvalFunnel={approvalFunnel} />
 
                     <Modal
                         title="Reject Submission"

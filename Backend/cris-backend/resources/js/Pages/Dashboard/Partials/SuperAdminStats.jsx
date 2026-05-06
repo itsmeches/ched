@@ -1,18 +1,23 @@
 import { Card, Col, Row, Statistic } from 'antd';
 import { router } from '@inertiajs/react';
 import { BankOutlined, CrownOutlined, FileTextOutlined, SafetyCertificateOutlined, TeamOutlined } from '@ant-design/icons';
-
-const statCards = [
-    { key: 'users', label: 'Total Users', icon: <TeamOutlined />, routeName: 'admin.users.index', color: '#0033a0' },
-    { key: 'heiUsers', label: 'HEI Accounts', icon: <BankOutlined />, routeName: 'admin.users.index', params: { role: 'hei' }, color: '#0047d4' },
-    { key: 'chedUsers', label: 'CHED Accounts', icon: <SafetyCertificateOutlined />, routeName: 'admin.users.index', params: { role: 'ched' }, color: '#0033a0' },
-    { key: 'admins', label: 'Super Admins', icon: <CrownOutlined />, routeName: 'admin.users.index', params: { role: 'super_admin' }, color: '#001f66' },
-    { key: 'institutions', label: 'Institutions', icon: <BankOutlined />, routeName: 'admin.institutions.index', color: '#d97706' },
-    { key: 'proposals', label: 'Research Records', icon: <FileTextOutlined />, routeName: 'research.index', color: '#0033a0' },
-    { key: 'rejected', label: 'Rejected Papers', icon: <FileTextOutlined />, routeName: 'research.index', params: { status: 'rejected' }, color: '#dc2626' },
-];
+import { useTheme } from '@/utils/ThemeContext';
 
 export default function SuperAdminStats({ stats }) {
+    const { dark } = useTheme();
+    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const accentSecondary = dark ? '#60a5fa' : '#0047d4';
+    const accentDark = dark ? '#3b82f6' : '#001f66';
+
+    const statCards = [
+        { key: 'users', label: 'Total Users', icon: <TeamOutlined />, routeName: 'admin.users.index', color: accentPrimary },
+        { key: 'heiUsers', label: 'HEI Accounts', icon: <BankOutlined />, routeName: 'admin.users.index', params: { role: 'hei' }, color: accentSecondary },
+        { key: 'chedUsers', label: 'CHED Accounts', icon: <SafetyCertificateOutlined />, routeName: 'admin.users.index', params: { role: 'ched' }, color: accentPrimary },
+        { key: 'admins', label: 'Super Admins', icon: <CrownOutlined />, routeName: 'admin.users.index', params: { role: 'super_admin' }, color: accentDark },
+        { key: 'institutions', label: 'Institutions', icon: <BankOutlined />, routeName: 'admin.institutions.index', color: '#d97706' },
+        { key: 'proposals', label: 'Research Records', icon: <FileTextOutlined />, routeName: 'research.index', color: accentPrimary },
+        { key: 'rejected', label: 'Rejected Papers', icon: <FileTextOutlined />, routeName: 'research.index', params: { status: 'rejected' }, color: '#dc2626' },
+    ];
     const openRoute = (item) => {
         router.visit(route(item.routeName, item.params ?? {}));
     };

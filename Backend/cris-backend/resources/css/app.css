@@ -32,19 +32,31 @@ textarea:focus-visible,
 }
 
 /* =========================================================
-   ADMIN CARD SHELL — clean solid card, consistent in both modes
+   ADMIN CARD SHELL - clean solid card, consistent in both modes
    ========================================================= */
 .admin-dashboard-shell {
 	background: #ffffff;
 	border: 1px solid rgba(226, 232, 240, 0.9);
-	border-radius: 14px;
-	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.03);
+	border-radius: 16px;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 12px 28px rgba(15, 23, 42, 0.06);
+	transition: box-shadow 220ms ease, border-color 220ms ease, transform 220ms ease;
 }
 
 html.dark .admin-dashboard-shell {
 	background: #111827;
 	border-color: #1e2d47;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.32), 0 14px 26px rgba(0, 0, 0, 0.24);
+}
+
+.admin-dashboard-shell.ant-card-hoverable:hover {
+	border-color: rgba(148, 163, 184, 0.55);
+	box-shadow: 0 4px 16px rgba(15, 23, 42, 0.09), 0 18px 34px rgba(15, 23, 42, 0.08);
+	transform: translateY(-1px);
+}
+
+html.dark .admin-dashboard-shell.ant-card-hoverable:hover {
+	border-color: rgba(96, 165, 250, 0.3);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38), 0 20px 36px rgba(2, 132, 199, 0.08);
 }
 
 /* === Hero banner (gradient, stays as-is) === */
@@ -89,6 +101,68 @@ html.dark .admin-dashboard-shell .ant-card-head-title {
 	font-weight: 600;
 }
 
+.quick-action-cluster {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.quick-action-primary,
+.quick-action-secondary {
+	min-height: 38px;
+	border-radius: 10px;
+	font-weight: 600;
+	padding-inline: 14px;
+	transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.quick-action-primary:hover,
+.quick-action-secondary:hover {
+	transform: translateY(-1px);
+}
+
+.quick-action-primary {
+	background: linear-gradient(135deg, #0033a0 0%, #0b56d8 100%);
+	border-color: transparent;
+	color: #fff;
+	box-shadow: 0 8px 18px rgba(0, 51, 160, 0.22);
+}
+
+.quick-action-primary:hover,
+.quick-action-primary:focus {
+	background: linear-gradient(135deg, #003cbb 0%, #1d63df 100%) !important;
+	color: #fff !important;
+	box-shadow: 0 10px 24px rgba(0, 51, 160, 0.3);
+}
+
+.quick-action-secondary {
+	background: #f8fafc;
+	border: 1px solid #dbe3ef;
+	color: #334155;
+}
+
+.quick-action-secondary:hover,
+.quick-action-secondary:focus {
+	background: #f1f5f9 !important;
+	border-color: #c7d2e3 !important;
+	color: #0f172a !important;
+	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.09);
+}
+
+html.dark .quick-action-secondary {
+	background: #0f172a;
+	border-color: #30415f;
+	color: #dbe4ef;
+}
+
+html.dark .quick-action-secondary:hover,
+html.dark .quick-action-secondary:focus {
+	background: #162034 !important;
+	border-color: #3c5279 !important;
+	color: #eff6ff !important;
+	box-shadow: 0 10px 22px rgba(0, 0, 0, 0.34);
+}
+
 /* === Table inside shell === */
 .admin-dashboard-shell .ant-table-wrapper .ant-table {
 	border-radius: 10px;
@@ -130,13 +204,164 @@ html.dark .admin-dashboard-shell .ant-table-tbody > tr:hover > td {
 	background: rgba(26, 37, 64, 0.8) !important;
 }
 
+/* === Small-screen admin layout improvements === */
+.admin-page-header .ant-typography {
+	max-width: 100%;
+}
+
+.admin-page-header .ant-typography h4,
+.admin-page-header .ant-typography h5 {
+	margin-bottom: 0;
+	word-break: break-word;
+}
+
+.admin-page-header-actions .ant-btn,
+.admin-page-header-actions a,
+.admin-page-header-actions .ant-space,
+.admin-page-header-actions .ant-space-item {
+	width: 100%;
+}
+
+@media (min-width: 640px) {
+	.admin-page-header-actions .ant-btn,
+	.admin-page-header-actions a,
+	.admin-page-header-actions .ant-space,
+	.admin-page-header-actions .ant-space-item {
+		width: auto;
+	}
+}
+
+@media (max-width: 640px) {
+	.admin-dashboard-shell .ant-card-head {
+		padding-inline: 14px;
+	}
+
+	.admin-dashboard-shell .ant-card-body {
+		padding: 14px;
+	}
+
+	.admin-dashboard-shell .ant-table-thead > tr > th,
+	.admin-dashboard-shell .ant-table-tbody > tr > td {
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+}
+
+/* === Themed scrollbars (sidebar + main content) === */
+.themed-scroll,
+.sidebar-scroll,
+.main-scroll {
+	--scrollbar-width: 9px;
+	--scrollbar-track-bg: transparent;
+	--scrollbar-thumb-bg: transparent;
+	--scrollbar-thumb-border: transparent;
+	--scrollbar-thumb-opacity: 0;
+	--scrollbar-firefox-thumb: transparent;
+	--scrollbar-firefox-track: transparent;
+
+	scrollbar-width: thin;
+	scrollbar-color: var(--scrollbar-firefox-thumb) var(--scrollbar-firefox-track);
+}
+
+.themed-scroll::-webkit-scrollbar,
+.sidebar-scroll::-webkit-scrollbar,
+.main-scroll::-webkit-scrollbar {
+	width: var(--scrollbar-width);
+}
+
+.themed-scroll::-webkit-scrollbar-track,
+.sidebar-scroll::-webkit-scrollbar-track,
+.main-scroll::-webkit-scrollbar-track {
+	background: var(--scrollbar-track-bg);
+	border-radius: 999px;
+	margin: 10px 0;
+	transition: background-color 200ms ease;
+}
+
+.themed-scroll::-webkit-scrollbar-thumb,
+.sidebar-scroll::-webkit-scrollbar-thumb,
+.main-scroll::-webkit-scrollbar-thumb {
+	background: var(--scrollbar-thumb-bg);
+	border-radius: 999px;
+	border: 2px solid var(--scrollbar-thumb-border);
+	background-clip: padding-box;
+	opacity: var(--scrollbar-thumb-opacity);
+	transition: background 180ms ease, border-color 180ms ease, opacity 180ms ease;
+}
+
+/* Sidebar values */
+.sidebar-shell:hover .sidebar-scroll,
+.sidebar-shell:focus-within .sidebar-scroll {
+	--scrollbar-track-bg: rgba(2, 27, 78, 0.2);
+	--scrollbar-thumb-bg: linear-gradient(
+		180deg,
+		rgba(147, 197, 253, 0) 0%,
+		rgba(147, 197, 253, 0.58) 12%,
+		rgba(56, 189, 248, 0.54) 88%,
+		rgba(56, 189, 248, 0) 100%
+	);
+	--scrollbar-thumb-border: rgba(2, 27, 78, 0.32);
+	--scrollbar-thumb-opacity: 1;
+	--scrollbar-firefox-thumb: rgba(147, 197, 253, 0.58);
+	--scrollbar-firefox-track: rgba(2, 27, 78, 0.2);
+}
+
+html.dark .sidebar-shell:hover .sidebar-scroll,
+html.dark .sidebar-shell:focus-within .sidebar-scroll {
+	--scrollbar-track-bg: rgba(2, 17, 47, 0.35);
+	--scrollbar-thumb-bg: linear-gradient(
+		180deg,
+		rgba(103, 232, 249, 0) 0%,
+		rgba(103, 232, 249, 0.6) 12%,
+		rgba(96, 165, 250, 0.56) 88%,
+		rgba(96, 165, 250, 0) 100%
+	);
+	--scrollbar-thumb-border: rgba(2, 17, 47, 0.35);
+	--scrollbar-thumb-opacity: 1;
+	--scrollbar-firefox-thumb: rgba(96, 165, 250, 0.6);
+	--scrollbar-firefox-track: rgba(2, 17, 47, 0.35);
+}
+
+/* Main content values */
+.main-scroll:hover,
+.main-scroll:focus-within {
+	--scrollbar-track-bg: rgba(15, 23, 42, 0.14);
+	--scrollbar-thumb-bg: linear-gradient(
+		180deg,
+		rgba(148, 163, 184, 0) 0%,
+		rgba(148, 163, 184, 0.55) 12%,
+		rgba(71, 85, 105, 0.5) 88%,
+		rgba(71, 85, 105, 0) 100%
+	);
+	--scrollbar-thumb-border: rgba(15, 23, 42, 0.24);
+	--scrollbar-thumb-opacity: 1;
+	--scrollbar-firefox-thumb: rgba(148, 163, 184, 0.55);
+	--scrollbar-firefox-track: rgba(15, 23, 42, 0.14);
+}
+
+html.dark .main-scroll:hover,
+html.dark .main-scroll:focus-within {
+	--scrollbar-track-bg: rgba(15, 23, 42, 0.34);
+	--scrollbar-thumb-bg: linear-gradient(
+		180deg,
+		rgba(148, 163, 184, 0) 0%,
+		rgba(148, 163, 184, 0.5) 12%,
+		rgba(100, 116, 139, 0.45) 88%,
+		rgba(100, 116, 139, 0) 100%
+	);
+	--scrollbar-thumb-border: rgba(15, 23, 42, 0.45);
+	--scrollbar-thumb-opacity: 1;
+	--scrollbar-firefox-thumb: rgba(148, 163, 184, 0.5);
+	--scrollbar-firefox-track: rgba(15, 23, 42, 0.34);
+}
+
 .admin-dashboard-shell .ant-empty-description {
 	color: #94a3b8;
 	font-size: 13px;
 }
 
 /* =========================================================
-   GLOBAL DARK MODE — text readability overrides
+   GLOBAL DARK MODE - text readability overrides
    ========================================================= */
 
 /* Statistic numbers that have inline valueStyle */

@@ -91,6 +91,8 @@ export default function HistoryIndex({ history, filters, role, stats }) {
     const { dark } = useTheme();
     
     // Theme-aware colors
+    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const accentApproved = dark ? '#60a5fa' : '#0033a0';
     const textMuted = dark ? '#94a3b8' : '#64748b';
     const textSecondary = dark ? '#cbd5e1' : '#334155';
     const textTertiary = dark ? '#64748b' : '#475569';
@@ -167,10 +169,10 @@ export default function HistoryIndex({ history, filters, role, stats }) {
     }
 
     const statItems = [
-        { key: 'total', label: 'Total Entries', value: stats?.total ?? 0, color: '#0033a0' },
+        { key: 'total', label: 'Total Entries', value: stats?.total ?? 0, color: accentPrimary },
         { key: 'created', label: 'Submitted', value: stats?.created ?? 0, color: '#16a34a' },
         { key: 'updated', label: 'Updated', value: stats?.updated ?? 0, color: '#2563eb' },
-        { key: 'approved', label: 'Approved', value: stats?.approved ?? 0, color: '#0033a0' },
+        { key: 'approved', label: 'Approved', value: stats?.approved ?? 0, color: accentApproved },
         { key: 'rejected', label: 'Rejected', value: stats?.rejected ?? 0, color: '#d97706' },
         { key: 'deleted', label: 'Deleted', value: stats?.deleted ?? 0, color: '#dc2626' },
     ];
@@ -203,7 +205,10 @@ export default function HistoryIndex({ history, filters, role, stats }) {
     // Build Collapse items — one panel per paper
     const collapseItems = useMemo(() => paperGroups.map((group) => {
         const lastEntry = group.entries[0];
-        const lastCfg = ACTION_CONFIG[lastEntry?.action] ?? { color: '#64748b', label: lastEntry?.action ?? '—' };
+        const lastCfgBase = ACTION_CONFIG[lastEntry?.action] ?? { color: '#64748b', label: lastEntry?.action ?? '—' };
+        const lastCfg = lastEntry?.action === 'approved'
+            ? { ...lastCfgBase, color: accentApproved }
+            : lastCfgBase;
 
         // Group entries inside the panel by date
         const byDate = group.entries.reduce((acc, entry) => {
@@ -217,7 +222,10 @@ export default function HistoryIndex({ history, filters, role, stats }) {
         const timelineByDate = dateKeys.map((dk) => ({
             dateKey: dk,
             items: byDate[dk].map((entry) => {
-                const cfg = ACTION_CONFIG[entry.action] ?? { color: '#64748b', icon: <HistoryOutlined />, label: entry.action };
+                const cfgBase = ACTION_CONFIG[entry.action] ?? { color: '#64748b', icon: <HistoryOutlined />, label: entry.action };
+                const cfg = entry.action === 'approved'
+                    ? { ...cfgBase, color: accentApproved }
+                    : cfgBase;
                 return {
                     key: entry.id,
                     color: cfg.color,
@@ -291,13 +299,13 @@ export default function HistoryIndex({ history, filters, role, stats }) {
             key: group.key,
             label: (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', minWidth: 0 }}>
-                    <FileTextOutlined style={{ color: '#0033a0', fontSize: 14, flexShrink: 0 }} />
+                    <FileTextOutlined style={{ color: accentPrimary, fontSize: 14, flexShrink: 0 }} />
                     <span style={{ fontWeight: 600, fontSize: 13, color: textNormal, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {group.proposalId ? (
                             <Link
                                 href={route('research.show', group.proposalId)}
                                 onClick={(e) => e.stopPropagation()}
-                                style={{ color: '#0033a0' }}
+                                style={{ color: accentPrimary }}
                             >
                                 {group.title}
                             </Link>

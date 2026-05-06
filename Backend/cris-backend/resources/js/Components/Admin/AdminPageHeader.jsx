@@ -2,8 +2,8 @@ import { Space, Typography } from 'antd';
 
 export default function AdminPageHeader({ title, subtitle, actions = null }) {
     return (
-        <div className="flex flex-wrap items-center justify-between gap-4">
-            <Space direction="vertical" size={0}>
+        <div className="admin-page-header flex w-full min-w-0 flex-wrap items-start justify-between gap-3 sm:items-center sm:gap-4">
+            <Space direction="vertical" size={0} className="min-w-0">
                 <Typography.Title level={4} style={{ margin: 0 }}>
                     {title}
                 </Typography.Title>
@@ -13,7 +13,7 @@ export default function AdminPageHeader({ title, subtitle, actions = null }) {
                     </Typography.Text>
                 )}
             </Space>
-            {actions}
+            {actions ? <div className="admin-page-header-actions w-full sm:w-auto">{actions}</div> : null}
         </div>
     );
 }

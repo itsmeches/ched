@@ -1,6 +1,9 @@
 import { Card, Col, Progress, Row, Space, Statistic, Tag, Typography } from 'antd';
+import { useTheme } from '@/utils/ThemeContext';
 
 export default function SuperAdminHero({ stats }) {
+    const { dark } = useTheme();
+    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     return (
         <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
             <Row gutter={[24, 24]} align="middle">
@@ -33,7 +36,7 @@ export default function SuperAdminHero({ stats }) {
                             <Card bordered={false} style={{ background: 'rgba(255,255,255,0.14)' }}>
                                 <Space direction="vertical" size={6} style={{ width: '100%' }}>
                                     <Statistic title={<span style={{ color: 'rgba(255,255,255,0.72)' }}>Approval Rate</span>} value={stats.approvalRate} suffix="%" precision={1} valueStyle={{ color: '#fff' }} />
-                                    <Progress percent={Number(stats.approvalRate)} showInfo={false} strokeColor="#0033a0" trailColor="rgba(255,255,255,0.25)" />
+                                    <Progress percent={Number(stats.approvalRate)} showInfo={false} strokeColor={accentPrimary} trailColor="rgba(255,255,255,0.25)" />
                                 </Space>
                             </Card>
                         </Col>
