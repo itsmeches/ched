@@ -45,8 +45,8 @@ class HandleInertiaRequests extends Middleware
                     ->where('user_id', $request->user()->id)
                     ->where('is_read', false)
                     ->latest()
-                    ->limit(8)
-                    ->get(['id', 'message', 'link_url', 'created_at'])
+                    ->limit(20)
+                    ->get(['id', 'message', 'link_url', 'type', 'created_at'])
                     ->toArray()
                 : [],
         ];

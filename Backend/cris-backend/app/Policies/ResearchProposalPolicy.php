@@ -54,9 +54,14 @@ class ResearchProposalPolicy
 
     public function update(User $user, ResearchProposal $proposal): bool
     {
+        $hasApprovedPermission = $proposal->editPermissionRequests()
+            ->where('requested_by', $user->id)
+            ->where('status', 'approved')
+            ->exists();
+
         return $user->isStudent()
             && $proposal->submitted_by === $user->id
-            && $proposal->isEditable();
+            && ($proposal->isEditable() || $hasApprovedPermission);
     }
 
     public function delete(User $user, ResearchProposal $proposal): bool

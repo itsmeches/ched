@@ -25,7 +25,7 @@ function highlightMatch(text, query) {
 
     return parts.map((part, index) => (
         part.toLowerCase() === needle.toLowerCase()
-            ? <mark key={`${source}-${index}`} style={{ backgroundColor: '#fff2a8', padding: 0 }}>{part}</mark>
+            ? <mark key={`${source}-${index}`} className="rounded-sm bg-amber-200/80 px-0 text-slate-900 dark:bg-amber-300 dark:text-slate-900">{part}</mark>
             : <span key={`${source}-${index}`}>{part}</span>
     ));
 }

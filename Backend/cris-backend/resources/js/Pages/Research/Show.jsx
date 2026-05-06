@@ -43,6 +43,24 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
         }
     }, [flash?.success, flash?.error]);
 
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
+        const hash = window.location.hash;
+        if (!hash || hash.length <= 1) {
+            return;
+        }
+
+        const targetId = decodeURIComponent(hash.slice(1));
+
+        setTimeout(() => {
+            const el = document.getElementById(targetId);
+            el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
+    }, [proposal?.id]);
+
     function openRejectModal() {
         const starter = proposal.status === 'under_review_faculty'
             ? 'Faculty review: Please revise and improve the submission based on stage requirements.'
@@ -134,6 +152,13 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
     const isLockedForEditing =
         proposal.status !== 'rejected';
 
+    const role = auth?.user?.role;
+
+    const canEditFromPermission =
+        role === 'student' && editPermission?.status === 'approved';
+
+    const canShowEditButton = canEdit || canEditFromPermission;
+
     const reviewTitle = proposal.status === 'under_review_faculty' || proposal.status === 'submitted'
         ? 'Faculty Review Decision'
         : proposal.status === 'under_review_hei'
@@ -142,7 +167,6 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                 ? 'CHED Final Review Decision'
                 : 'Review Decision';
 
-    const role = auth?.user?.role;
     const showReviewActions = (() => {
         if (role === 'faculty') {
             return ['submitted', 'under_review_faculty'].includes(proposal.status);
@@ -223,11 +247,90 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
             {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
 
             <div className="space-y-4">
-                    <Link href={route('research.index')} className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-[#0033a0] dark:hover:text-blue-300 transition-colors">← Back to Research Papers</Link>
+                    {auth?.user?.role !== 'ched' && (
+                        <Link href={route('research.index')} className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-[#0033a0] dark:hover:text-blue-300 transition-colors">← Back to Research Papers</Link>
+                    )}
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
-                    <Card className="admin-dashboard-shell" bordered={false}>
+                    {/* CHED: pending edit permission requests */}
+                    {pendingEditRequests?.length > 0 && (
+                        <Card
+                            id="edit-permission-requests"
+                            className="admin-dashboard-shell"
+                            bordered={false}
+                            title={
+                                <Space>
+                                    <KeyOutlined style={{ color: '#d97706' }} />
+                                    <span>Edit Permission Requests</span>
+                                    <Tag color="orange">{pendingEditRequests.length}</Tag>
+                                </Space>
+                            }
+                        >
+                            <Space direction="vertical" style={{ width: '100%' }} size={10}>
+                                {pendingEditRequests.map((req) => (
+                                    <div
+                                        key={req.id}
+                                        className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-amber-50/50 px-4 py-3"
+                                    >
+                                        <div className="min-w-0">
+                                            <Typography.Text strong>{req.requester?.name}</Typography.Text>
+                                            {req.reason ? (
+                                                <Typography.Paragraph
+                                                    style={{ margin: '4px 0 0', color: '#64748b', fontSize: 13 }}
+                                                >
+                                                    {req.reason}
+                                                </Typography.Paragraph>
+                                            ) : (
+                                                <Typography.Text
+                                                    type="secondary"
+                                                    style={{ display: 'block', fontSize: 13, marginTop: 2 }}
+                                                >
+                                                    No reason provided
+                                                </Typography.Text>
+                                            )}
+                                        </div>
+                                        <Space>
+                                            <Popconfirm
+                                                title="Approve this edit request?"
+                                                description="The HEI will be able to edit this submission once."
+                                                okText="Approve"
+                                                onConfirm={() =>
+                                                    router.post(
+                                                        route('research.edit-permission.decide', {
+                                                            proposal: proposal.id,
+                                                            editRequest: req.id,
+                                                        }),
+                                                        { decision: 'approved' },
+                                                    )
+                                                }
+                                            >
+                                                <Button type="primary" size="small">Approve</Button>
+                                            </Popconfirm>
+                                            <Popconfirm
+                                                title="Deny this edit request?"
+                                                okText="Deny"
+                                                okButtonProps={{ danger: true }}
+                                                onConfirm={() =>
+                                                    router.post(
+                                                        route('research.edit-permission.decide', {
+                                                            proposal: proposal.id,
+                                                            editRequest: req.id,
+                                                        }),
+                                                        { decision: 'denied' },
+                                                    )
+                                                }
+                                            >
+                                                <Button danger size="small">Deny</Button>
+                                            </Popconfirm>
+                                        </Space>
+                                    </div>
+                                ))}
+                            </Space>
+                        </Card>
+                    )}
+
+                    <Card id="research-actions" className="admin-dashboard-shell" bordered={false}>
                         <div className="space-y-5">
                             <div className="flex flex-wrap items-start justify-between gap-4">
                                 <div className="min-w-0 space-y-2">
@@ -258,7 +361,7 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                                         </a>
                                     )}
 
-                                    {canEdit && (
+                                    {canShowEditButton && (
                                         <Link href={route('research.edit', proposal.id)}>
                                             <Button>Edit</Button>
                                         </Link>
@@ -359,6 +462,7 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                     )}
 
                     <Card
+                        id="research-timeline"
                         className="admin-dashboard-shell"
                         bordered={false}
                         title={<Typography.Title level={5} style={{ margin: 0 }}>Research Timeline</Typography.Title>}
@@ -401,24 +505,27 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                     </Card>
 
                     {proposal.comments && (
-                        <Alert
-                            type="warning"
-                            showIcon
-                            message="Reviewer Comments"
-                            description={
-                                <div>
-                                    <div style={{ whiteSpace: 'pre-line' }}>{proposal.comments}</div>
-                                    {proposal.reviewer && (
-                                        <div style={{ marginTop: 8, color: '#854d0e' }}>- {proposal.reviewer.name}</div>
-                                    )}
-                                </div>
-                            }
-                        />
+                        <div id="reviewer-comments">
+                            <Alert
+                                type="warning"
+                                showIcon
+                                message="Reviewer Comments"
+                                description={
+                                    <div>
+                                        <div style={{ whiteSpace: 'pre-line' }}>{proposal.comments}</div>
+                                        {proposal.reviewer && (
+                                            <div style={{ marginTop: 8, color: '#854d0e' }}>- {proposal.reviewer.name}</div>
+                                        )}
+                                    </div>
+                                }
+                            />
+                        </div>
                     )}
 
                     {/* Student: lock details + revision guidance */}
-                    {!canEdit && isLockedForEditing && (
+                    {role === 'student' && !canEdit && isLockedForEditing && (
                         <Card
+                            id="editing-locked"
                             className="admin-dashboard-shell"
                             bordered={false}
                             title={
@@ -490,7 +597,7 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                                     />
                                 )}
 
-                                {/* Approved — Edit button is already visible above */}
+                                {/* Approved — Edit button is visible above */}
                                 {editPermission?.status === 'approved' && (
                                     <Alert
                                         type="success"
@@ -521,84 +628,8 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                         </Card>
                     )}
 
-                    {/* CHED: pending edit permission requests */}
-                    {pendingEditRequests?.length > 0 && (
-                        <Card
-                            className="admin-dashboard-shell"
-                            bordered={false}
-                            title={
-                                <Space>
-                                    <KeyOutlined style={{ color: '#d97706' }} />
-                                    <span>Edit Permission Requests</span>
-                                    <Tag color="orange">{pendingEditRequests.length}</Tag>
-                                </Space>
-                            }
-                        >
-                            <Space direction="vertical" style={{ width: '100%' }} size={10}>
-                                {pendingEditRequests.map((req) => (
-                                    <div
-                                        key={req.id}
-                                        className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-amber-50/50 px-4 py-3"
-                                    >
-                                        <div className="min-w-0">
-                                            <Typography.Text strong>{req.requester?.name}</Typography.Text>
-                                            {req.reason ? (
-                                                <Typography.Paragraph
-                                                    style={{ margin: '4px 0 0', color: '#64748b', fontSize: 13 }}
-                                                >
-                                                    {req.reason}
-                                                </Typography.Paragraph>
-                                            ) : (
-                                                <Typography.Text
-                                                    type="secondary"
-                                                    style={{ display: 'block', fontSize: 13, marginTop: 2 }}
-                                                >
-                                                    No reason provided
-                                                </Typography.Text>
-                                            )}
-                                        </div>
-                                        <Space>
-                                            <Popconfirm
-                                                title="Approve this edit request?"
-                                                description="The HEI will be able to edit this submission once."
-                                                okText="Approve"
-                                                onConfirm={() =>
-                                                    router.post(
-                                                        route('research.edit-permission.decide', {
-                                                            proposal: proposal.id,
-                                                            editRequest: req.id,
-                                                        }),
-                                                        { decision: 'approved' },
-                                                    )
-                                                }
-                                            >
-                                                <Button type="primary" size="small">Approve</Button>
-                                            </Popconfirm>
-                                            <Popconfirm
-                                                title="Deny this edit request?"
-                                                okText="Deny"
-                                                okButtonProps={{ danger: true }}
-                                                onConfirm={() =>
-                                                    router.post(
-                                                        route('research.edit-permission.decide', {
-                                                            proposal: proposal.id,
-                                                            editRequest: req.id,
-                                                        }),
-                                                        { decision: 'denied' },
-                                                    )
-                                                }
-                                            >
-                                                <Button danger size="small">Deny</Button>
-                                            </Popconfirm>
-                                        </Space>
-                                    </div>
-                                ))}
-                            </Space>
-                        </Card>
-                    )}
-
                     {showReviewActions && (
-                        <Card className="admin-dashboard-shell" bordered={false} title={reviewTitle}>
+                        <Card id="review-decision" className="admin-dashboard-shell" bordered={false} title={reviewTitle}>
                             <Typography.Text type="secondary">
                                 Use the Approve/Reject actions in the header area to review this submission.
                             </Typography.Text>

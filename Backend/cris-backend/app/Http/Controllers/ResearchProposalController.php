@@ -282,7 +282,8 @@ class ResearchProposalController extends Controller
         SimpleNotificationService::notify(
             $requestUser?->faculty_id,
             "New submission '{$proposal->title}' is waiting for your review.",
-            route('research.show', $proposal->id)
+            route('research.show', $proposal->id) . '#review-decision',
+            'review_action_needed'
         );
 
         $this->syncKeywords($proposal, $normalizedKeywords);
@@ -448,6 +449,11 @@ class ResearchProposalController extends Controller
                 ->with('error', 'You are not allowed to update this research paper.');
         }
 
+        $hasApprovedPermission = $proposal->editPermissionRequests()
+            ->where('requested_by', $request->user()->id)
+            ->where('status', 'approved')
+            ->exists();
+
         $data = $request->validated();
         $data['category'] = $data['research_category'];
         $data['category_type'] = $this->resolveCategoryType($data['research_category']) ?? $data['category_type'] ?? null;
@@ -462,6 +468,26 @@ class ResearchProposalController extends Controller
             }
             $data['file_path'] = $request->file('pdf_file')
                 ->store('research_papers', 'public');
+        }
+
+        if ($hasApprovedPermission) {
+            $data = array_merge($data, [
+                'status' => ResearchProposal::STATUS_UNDER_REVIEW_FACULTY,
+                'submitted_at' => now(),
+                'reviewed_by' => null,
+                'reviewed_at' => null,
+                'approved_by' => null,
+                'approved_at' => null,
+                'approved_by_faculty_at' => null,
+                'approved_by_hei_at' => null,
+                'approved_by_ched_at' => null,
+                'rejected_at' => null,
+                'rejected_by' => null,
+                'remarks' => null,
+                'comments' => null,
+                'viewed_by' => null,
+                'viewed_at' => null,
+            ]);
         }
 
         unset($data['pdf_file']);
@@ -482,8 +508,19 @@ class ResearchProposalController extends Controller
             ->where('status', 'approved')
             ->delete();
 
+        if ($hasApprovedPermission) {
+            SimpleNotificationService::notify(
+                $request->user()?->faculty_id,
+                "Updated submission '{$proposal->title}' was resubmitted and is awaiting your Faculty review.",
+                route('research.show', $proposal->id) . '#review-decision',
+                'review_action_needed'
+            );
+        }
+
         return redirect()->route('research.show', ['proposal' => $proposal->id])
-            ->with('success', 'Research paper updated.');
+            ->with('success', $hasApprovedPermission
+                ? 'Research paper updated and routed back to Faculty review.'
+                : 'Research paper updated.');
     }
 
     public function resubmit(ResearchProposal $proposal): RedirectResponse
@@ -657,26 +694,30 @@ class ResearchProposalController extends Controller
                 SimpleNotificationService::notify(
                     $submitter?->hei_id,
                     "Submission '{$proposal->title}' is now awaiting HEI review.",
-                    route('research.show', $proposal->id)
+                    route('research.show', $proposal->id) . '#review-decision',
+                    'review_action_needed'
                 );
             } elseif ($nextStatus === ResearchProposal::STATUS_UNDER_REVIEW_CHED) {
                 SimpleNotificationService::notify(
                     $submitter?->ched_id,
                     "Submission '{$proposal->title}' is now awaiting CHED review.",
-                    route('research.show', $proposal->id)
+                    route('research.show', $proposal->id) . '#review-decision',
+                    'review_action_needed'
                 );
             } elseif ($nextStatus === ResearchProposal::STATUS_APPROVED) {
                 SimpleNotificationService::notify(
                     $submitter?->id,
                     "Your submission '{$proposal->title}' was approved.",
-                    route('research.show', $proposal->id)
+                    route('research.show', $proposal->id) . '#research-actions',
+                    'research_approved'
                 );
             }
         } else {
             SimpleNotificationService::notify(
                 $submitter?->id,
                 "Your submission '{$proposal->title}' was rejected.",
-                route('research.show', $proposal->id)
+                route('research.show', $proposal->id) . '#reviewer-comments',
+                'research_rejected'
             );
         }
 

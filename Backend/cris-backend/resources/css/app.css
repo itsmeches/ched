@@ -204,6 +204,25 @@ html.dark .admin-dashboard-shell .ant-table-tbody > tr:hover > td {
 	background: rgba(26, 37, 64, 0.8) !important;
 }
 
+/* === Super Admin: ensure Recent Research Activity title is readable in dark mode === */
+html.dark .recent-research-activity-card .ant-card-head-title {
+	color: #ffffff;
+}
+
+html.dark .recent-research-title-link,
+html.dark .recent-research-title-link:hover,
+html.dark .recent-research-title-link:focus,
+html.dark .recent-research-title-link:active {
+	color: #ffffff !important;
+}
+
+html.dark .superadmin-card-action-link,
+html.dark .superadmin-card-action-link:hover,
+html.dark .superadmin-card-action-link:focus,
+html.dark .superadmin-card-action-link:active {
+	color: #ffffff !important;
+}
+
 /* === Small-screen admin layout improvements === */
 .admin-page-header .ant-typography {
 	max-width: 100%;

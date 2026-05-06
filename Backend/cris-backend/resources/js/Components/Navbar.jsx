@@ -115,6 +115,7 @@ export default function Navbar() {
     const [settingsOpen, setSettingsOpen] = useState(false);
     const settingsRef = useRef(null);
     const [notifOpen, setNotifOpen] = useState(false);
+    const [notifFilter, setNotifFilter] = useState('all');
     const notifRef = useRef(null);
 
     useEffect(() => {
@@ -142,6 +143,124 @@ export default function Navbar() {
         const d = new Date(dateStr);
         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     };
+
+    const getNotificationMeta = (message, type) => {
+        const normalizedType = (type || '').toLowerCase();
+        const text = (message || '').toLowerCase();
+
+        if (normalizedType === 'edit_permission_request') {
+            return {
+                label: 'Request',
+                filterKey: 'requests',
+                badgeClass: 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200',
+            };
+        }
+
+        if (normalizedType === 'edit_permission_submitted') {
+            return {
+                label: 'Request',
+                filterKey: 'requests',
+                badgeClass: 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200',
+            };
+        }
+
+        if (normalizedType === 'edit_permission_approved' || normalizedType === 'edit_permission_denied') {
+            return {
+                label: 'Decision',
+                filterKey: 'decisions',
+                badgeClass: normalizedType === 'edit_permission_approved'
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200'
+                    : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200',
+            };
+        }
+
+        if (normalizedType === 'review_action_needed') {
+            return {
+                label: 'Action Needed',
+                filterKey: 'action-needed',
+                badgeClass: 'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200',
+            };
+        }
+
+        if (normalizedType === 'research_approved') {
+            return {
+                label: 'Approved',
+                filterKey: 'decisions',
+                badgeClass: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200',
+            };
+        }
+
+        if (normalizedType === 'research_rejected') {
+            return {
+                label: 'Rejected',
+                filterKey: 'decisions',
+                badgeClass: 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200',
+            };
+        }
+
+        if (text.includes('edit permission request')) {
+            return {
+                label: 'Request',
+                filterKey: 'requests',
+                badgeClass: 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200',
+            };
+        }
+
+        if (text.includes('edit permission') && (text.includes('approved') || text.includes('denied'))) {
+            return {
+                label: 'Decision',
+                filterKey: 'decisions',
+                badgeClass: text.includes('approved')
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200'
+                    : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200',
+            };
+        }
+
+        if (text.includes('awaiting your review') || text.includes('waiting for your review')) {
+            return {
+                label: 'Action Needed',
+                filterKey: 'action-needed',
+                badgeClass: 'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200',
+            };
+        }
+
+        if (text.includes('approved')) {
+            return {
+                label: 'Approved',
+                filterKey: 'decisions',
+                badgeClass: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200',
+            };
+        }
+
+        if (text.includes('rejected') || text.includes('denied')) {
+            return {
+                label: 'Rejected',
+                filterKey: 'decisions',
+                badgeClass: 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200',
+            };
+        }
+
+        return {
+            label: 'Update',
+            filterKey: 'all',
+            badgeClass: 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-200',
+        };
+    };
+
+    const notificationFilterTabs = [
+        { key: 'all', label: 'All' },
+        { key: 'action-needed', label: 'Action Needed' },
+        { key: 'decisions', label: 'Decisions' },
+        { key: 'requests', label: 'Requests' },
+    ];
+
+    const filteredNotifications = notifications.filter((item) => {
+        if (notifFilter === 'all') {
+            return true;
+        }
+
+        return getNotificationMeta(item.message, item.type).filterKey === notifFilter;
+    });
 
     const isActive = (item) => {
         if (item.tab && route().current('research.index')) {
@@ -286,8 +405,7 @@ export default function Navbar() {
                                         {notifications.length > 0 && (
                                             <button
                                                 type="button"
-                                                className="text-xs font-medium hover:underline"
-                                                style={{ color: '#0033a0' }}
+                                                className="text-xs font-medium text-[#0033a0] hover:underline dark:text-blue-300"
                                                 onClick={() => {
                                                     router.post(route('notifications.read-all'), {}, {
                                                         onSuccess: () => setNotifOpen(false),
@@ -300,12 +418,35 @@ export default function Navbar() {
                                         )}
                                     </div>
                                     <div className="max-h-80 divide-y divide-slate-100 dark:divide-[#1e2d47] overflow-y-auto">
+                                        <div className="sticky top-0 z-10 border-b border-slate-100 bg-white px-3 py-2 dark:border-[#1e2d47] dark:bg-[#111827]">
+                                            <div className="flex flex-wrap gap-1">
+                                                {notificationFilterTabs.map((tab) => (
+                                                    <button
+                                                        key={tab.key}
+                                                        type="button"
+                                                        onClick={() => setNotifFilter(tab.key)}
+                                                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                                                            notifFilter === tab.key
+                                                                ? 'bg-[#0033a0] text-white'
+                                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-[#1a2540] dark:text-slate-200 dark:hover:bg-[#24365d]'
+                                                        }`}
+                                                    >
+                                                        {tab.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
                                         {notifications.length === 0 ? (
                                             <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
                                                 No new notifications.
                                             </div>
+                                        ) : filteredNotifications.length === 0 ? (
+                                            <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                                                No notifications in this filter.
+                                            </div>
                                         ) : (
-                                            notifications.map((item) => (
+                                            filteredNotifications.map((item) => (
                                                 item.link_url ? (
                                                     <button
                                                         key={item.id}
@@ -316,17 +457,33 @@ export default function Navbar() {
                                                             router.post(
                                                                 route('notifications.read-one', { id: item.id }),
                                                                 { redirect: item.link_url },
-                                                                { preserveScroll: false }
+                                                                { preserveScroll: false },
                                                             );
                                                         }}
                                                     >
-                                                        <p className="text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
-                                                        <p className="mt-1 text-xs" style={{ color: '#0033a0' }}>{formatNotifDate(item.created_at)}</p>
+                                                        {(() => {
+                                                            const meta = getNotificationMeta(item.message, item.type);
+                                                            return (
+                                                                <span className={`mb-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${meta.badgeClass}`}>
+                                                                    {meta.label}
+                                                                </span>
+                                                            );
+                                                        })()}
+                                                        <p className="whitespace-pre-line text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
+                                                        <p className="mt-1 text-xs text-[#0033a0] dark:text-blue-300">{formatNotifDate(item.created_at)}</p>
                                                     </button>
                                                 ) : (
                                                     <div key={item.id} className="px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-[#1a2540]">
-                                                        <p className="text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
-                                                        <p className="mt-1 text-xs text-slate-400">{formatNotifDate(item.created_at)}</p>
+                                                        {(() => {
+                                                            const meta = getNotificationMeta(item.message, item.type);
+                                                            return (
+                                                                <span className={`mb-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${meta.badgeClass}`}>
+                                                                    {meta.label}
+                                                                </span>
+                                                            );
+                                                        })()}
+                                                        <p className="whitespace-pre-line text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
+                                                        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{formatNotifDate(item.created_at)}</p>
                                                     </div>
                                                 )
                                             ))
@@ -358,7 +515,7 @@ export default function Navbar() {
                                 <div className="border-b border-slate-200 dark:border-[#1e2d47] px-4 py-2 text-sm text-slate-700 dark:text-slate-300">
                                     <p className="font-semibold dark:text-white">{user.name}</p>
                                     <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
-                                    <p className="text-xs font-medium" style={{ color: '#0033a0' }}>{getRoleLabel()}</p>
+                                    <p className="text-xs font-medium text-[#0033a0] dark:text-blue-300">{getRoleLabel()}</p>
                                 </div>
                                 <Dropdown.Link href={route('profile.edit')}>
                                     Profile Settings

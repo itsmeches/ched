@@ -15,11 +15,13 @@ class SimpleNotification extends Model
         'user_id',
         'message',
         'link_url',
+        'type',
         'is_read',
     ];
 
     protected $casts = [
         'is_read' => 'boolean',
+        'type' => 'string',
     ];
 
     public function user()

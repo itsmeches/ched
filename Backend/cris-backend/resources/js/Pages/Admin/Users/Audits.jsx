@@ -151,14 +151,14 @@ export default function UserAudits({ audits, filters, actionOptions = [] }) {
 
                         <div>
                             <Typography.Title level={5} style={{ marginBottom: 8 }}>Old Values</Typography.Title>
-                            <pre style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6, padding: 12, maxHeight: 220, overflow: 'auto' }}>
+                            <pre className="max-h-[220px] overflow-auto rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-700 dark:border-[#2a3a5c] dark:bg-[#0f172a] dark:text-slate-200">
                                 {JSON.stringify(selectedAudit.old_values ?? {}, null, 2)}
                             </pre>
                         </div>
 
                         <div>
                             <Typography.Title level={5} style={{ marginBottom: 8 }}>New Values</Typography.Title>
-                            <pre style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6, padding: 12, maxHeight: 220, overflow: 'auto' }}>
+                            <pre className="max-h-[220px] overflow-auto rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-700 dark:border-[#2a3a5c] dark:bg-[#0f172a] dark:text-slate-200">
                                 {JSON.stringify(selectedAudit.new_values ?? {}, null, 2)}
                             </pre>
                         </div>

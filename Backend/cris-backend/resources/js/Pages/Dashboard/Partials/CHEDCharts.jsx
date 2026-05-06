@@ -1,11 +1,20 @@
 import { Card, Col, Grid, Row, Statistic, Tag } from 'antd';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, RadialBarChart, RadialBar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import { ArrowUpOutlined } from '@ant-design/icons';
+import { useTheme } from '@/utils/ThemeContext';
 
 export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [], approvalFunnel = [], stats = {} }) {
+    const { dark } = useTheme();
     const { useBreakpoint } = Grid;
     const screens = useBreakpoint();
     const disciplineTickLimit = screens.xxl ? 40 : screens.xl ? 34 : screens.lg ? 28 : screens.md ? 22 : 16;
+    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
+    const axisColor = dark ? '#94a3b8' : '#64748b';
+    const gridColor = dark ? '#334155' : '#e2e8f0';
+    const tooltipBgColor = dark ? '#0f172a' : '#f8fafc';
+    const tooltipBorderColor = dark ? '#334155' : '#e2e8f0';
+    const emptyTextColor = dark ? '#94a3b8' : '#94a3b8';
 
     const formatDisciplineTick = (value) => {
         if (!value) {
@@ -22,7 +31,7 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
     ];
 
     const gaugeData = [
-        { name: 'Approval Rate', value: stats.approvalRate || 0, fill: '#0033a0' },
+        { name: 'Approval Rate', value: stats.approvalRate || 0, fill: accentPrimary },
     ];
 
     return (
@@ -34,8 +43,8 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                         <Statistic
                             title="Total Papers Reviewed"
                             value={stats.total || 0}
-                            prefix={<span style={{ color: '#0033a0' }}>📊</span>}
-                            valueStyle={{ fontSize: 28, color: '#0f172a' }}
+                            prefix={<span style={{ color: accentPrimary }}>📊</span>}
+                            valueStyle={{ fontSize: 28, color: metricTextColor }}
                         />
                     </Card>
                 </Col>
@@ -46,7 +55,7 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                             value={stats.approvalRate || 0}
                             suffix="%"
                             prefix={<span style={{ color: '#16a34a' }}>✓</span>}
-                            valueStyle={{ fontSize: 28, color: '#0f172a' }}
+                            valueStyle={{ fontSize: 28, color: metricTextColor }}
                         />
                     </Card>
                 </Col>
@@ -56,7 +65,7 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                             title="Reviewed Today"
                             value={stats.reviewedToday || 0}
                             prefix={<ArrowUpOutlined style={{ color: '#d97706' }} />}
-                            valueStyle={{ fontSize: 28, color: '#0f172a' }}
+                            valueStyle={{ fontSize: 28, color: metricTextColor }}
                         />
                     </Card>
                 </Col>
@@ -80,17 +89,17 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                                             <stop offset="95%" stopColor="#d97706" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                    <XAxis dataKey="month" stroke="#64748b" />
-                                    <YAxis stroke="#64748b" />
-                                    <Tooltip contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6 }} />
+                                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                                    <XAxis dataKey="month" stroke={axisColor} />
+                                    <YAxis stroke={axisColor} />
+                                    <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
                                     <Legend />
                                     <Area type="monotone" dataKey="approved" stroke="#16a34a" fillOpacity={1} fill="url(#colorApproved)" name="Approved" />
                                     <Area type="monotone" dataKey="pending" stroke="#d97706" fillOpacity={1} fill="url(#colorPending)" name="Pending" />
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                            <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: emptyTextColor }}>
                                 No data available
                             </div>
                         )}
@@ -128,15 +137,15 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                         {approvalFunnel && approvalFunnel.length > 0 ? (
                             <ResponsiveContainer width="100%" height={280}>
                                 <BarChart layout="vertical" data={approvalFunnel}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                    <XAxis type="number" stroke="#64748b" />
-                                    <YAxis dataKey="stage" type="category" stroke="#64748b" width={100} />
-                                    <Tooltip contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6 }} />
-                                    <Bar dataKey="count" fill="#0033a0" radius={[0, 8, 8, 0]} name="Papers in Stage" />
+                                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                                    <XAxis type="number" stroke={axisColor} />
+                                    <YAxis dataKey="stage" type="category" stroke={axisColor} width={100} />
+                                    <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
+                                    <Bar dataKey="count" fill={accentPrimary} radius={[0, 8, 8, 0]} name="Papers in Stage" />
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                            <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: emptyTextColor }}>
                                 No data available
                             </div>
                         )}
@@ -149,23 +158,23 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                         {disciplineBreakdown && disciplineBreakdown.length > 0 ? (
                             <ResponsiveContainer width="100%" height={320}>
                                 <BarChart data={disciplineBreakdown} margin={{ top: 8, right: 16, left: 0, bottom: 64 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                                     <XAxis
                                         dataKey="discipline"
-                                        stroke="#64748b"
+                                        stroke={axisColor}
                                         angle={-35}
                                         textAnchor="end"
                                         height={92}
                                         interval={0}
                                         tickFormatter={formatDisciplineTick}
                                     />
-                                    <YAxis stroke="#64748b" />
-                                    <Tooltip contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6 }} />
+                                    <YAxis stroke={axisColor} />
+                                    <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
                                     <Bar dataKey="submissions" fill="#d97706" radius={[8, 8, 0, 0]} name="Submissions" />
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                            <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: emptyTextColor }}>
                                 No data available
                             </div>
                         )}
@@ -181,8 +190,8 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                             <RadialBarChart cx="50%" cy="50%" innerRadius="30%" outerRadius="90%" data={gaugeData} startAngle={90} endAngle={0}>
                                 <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} />
                                 <PolarRadiusAxis />
-                                <RadialBar background dataKey="value" fill="#0033a0" angleAxisId={0} />
-                                <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" style={{ fontSize: 32, fontWeight: 'bold', fill: '#0033a0' }}>
+                                <RadialBar background dataKey="value" fill={accentPrimary} angleAxisId={0} />
+                                <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" style={{ fontSize: 32, fontWeight: 'bold', fill: accentPrimary }}>
                                     {stats.approvalRate || 0}%
                                 </text>
                             </RadialBarChart>
@@ -197,25 +206,25 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                             <Col xs={12} sm={6}>
                                 <div style={{ textAlign: 'center', padding: 12 }}>
                                     <div style={{ fontSize: 24, fontWeight: 'bold', color: '#16a34a' }}>{stats.approved || 0}</div>
-                                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Approved</div>
+                                    <div style={{ fontSize: 12, color: axisColor, marginTop: 4 }}>Approved</div>
                                 </div>
                             </Col>
                             <Col xs={12} sm={6}>
                                 <div style={{ textAlign: 'center', padding: 12 }}>
                                     <div style={{ fontSize: 24, fontWeight: 'bold', color: '#d97706' }}>{stats.pending || 0}</div>
-                                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Pending</div>
+                                    <div style={{ fontSize: 12, color: axisColor, marginTop: 4 }}>Pending</div>
                                 </div>
                             </Col>
                             <Col xs={12} sm={6}>
                                 <div style={{ textAlign: 'center', padding: 12 }}>
                                     <div style={{ fontSize: 24, fontWeight: 'bold', color: '#dc2626' }}>{stats.rejected || 0}</div>
-                                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Rejected</div>
+                                    <div style={{ fontSize: 12, color: axisColor, marginTop: 4 }}>Rejected</div>
                                 </div>
                             </Col>
                             <Col xs={12} sm={6}>
                                 <div style={{ textAlign: 'center', padding: 12 }}>
-                                    <div style={{ fontSize: 24, fontWeight: 'bold', color: '#0033a0' }}>{stats.total || 0}</div>
-                                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Total</div>
+                                    <div style={{ fontSize: 24, fontWeight: 'bold', color: accentPrimary }}>{stats.total || 0}</div>
+                                    <div style={{ fontSize: 12, color: axisColor, marginTop: 4 }}>Total</div>
                                 </div>
                             </Col>
                         </Row>

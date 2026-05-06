@@ -7,6 +7,7 @@ use App\Models\ResearchProposal;
 use App\Models\User;
 use App\Notifications\EditPermissionDecided;
 use App\Notifications\EditPermissionRequested;
+use App\Services\SimpleNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -55,7 +56,24 @@ class EditPermissionController extends Controller
         if ($chedUserId) {
             $chedUser = User::find($chedUserId);
             $chedUser?->notify(new EditPermissionRequested($proposal, $editRequest, $user));
+
+            $reason = trim((string) ($editRequest->reason ?? ''));
+            $reasonText = $reason !== '' ? $reason : 'No reason provided.';
+
+            SimpleNotificationService::notify(
+                $chedUserId,
+                "Edit permission request from {$user->name} for '{$proposal->title}'.\nReason: {$reasonText}",
+                route('research.show', $proposal->id) . '#edit-permission-requests',
+                'edit_permission_request'
+            );
         }
+
+        SimpleNotificationService::notify(
+            $user->id,
+            "Your edit permission request for '{$proposal->title}' was submitted to CHED.",
+            route('research.show', $proposal->id) . '#editing-locked',
+            'edit_permission_submitted'
+        );
 
         return back()->with('success', 'Edit permission request submitted. CHED will review it shortly.');
     }
@@ -87,6 +105,18 @@ class EditPermissionController extends Controller
         // Notify the student who requested
         $studentUser = User::find($editRequest->requested_by);
         $studentUser?->notify(new EditPermissionDecided($proposal, $editRequest));
+
+        $decisionMessage = $validated['decision'] === 'approved'
+            ? "Your edit permission request for '{$proposal->title}' was approved. You can edit now, and after saving it will return to Faculty review."
+            : "Your edit permission request for '{$proposal->title}' was denied.";
+
+        SimpleNotificationService::notify(
+            $editRequest->requested_by,
+            $decisionMessage,
+            route('research.show', $proposal->id)
+                . ($validated['decision'] === 'approved' ? '#research-actions' : '#editing-locked'),
+            $validated['decision'] === 'approved' ? 'edit_permission_approved' : 'edit_permission_denied'
+        );
 
         $label = $validated['decision'] === 'approved' ? 'approved' : 'denied';
 
