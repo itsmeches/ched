@@ -13,6 +13,7 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
+import { router } from '@inertiajs/react';
 import { useTheme } from '@/utils/ThemeContext';
 
 function truncateName(value) {
@@ -41,6 +42,41 @@ export default function FacultyCharts({ stats = {}, stageCounts = {}, monthlyTre
         { stage: 'Rejected', count: stageCounts.rejected ?? 0 },
     ];
 
+    const stageToStatus = {
+        Faculty: 'under_review_faculty',
+        HEI: 'under_review_hei',
+        CHED: 'under_review_ched',
+        Approved: 'approved',
+        Rejected: 'rejected',
+    };
+
+    function openResearch(params = {}) {
+        router.visit(route('research.index', params));
+    }
+
+    function onStatusClick(entry) {
+        const statusMap = {
+            Approved: 'approved',
+            Pending: 'pending',
+            Rejected: 'rejected',
+        };
+
+        const status = statusMap[entry?.name || ''];
+        if (status) {
+            openResearch({ status });
+        }
+    }
+
+    function onMonthClick(point) {
+        const monthLabel = point?.payload?.month;
+        if (!monthLabel) {
+            return;
+        }
+
+        const match = String(monthLabel).match(/\b(\d{4})\b/);
+        openResearch(match ? { year: match[1] } : {});
+    }
+
     return (
         <div className="space-y-4">
             <Row gutter={[16, 16]}>
@@ -63,8 +99,8 @@ export default function FacultyCharts({ stats = {}, stageCounts = {}, monthlyTre
                                     <XAxis dataKey="month" stroke={axisColor} />
                                     <YAxis stroke={axisColor} allowDecimals={false} />
                                     <Tooltip contentStyle={{ backgroundColor: surfaceColor, border: `1px solid ${borderColor}`, borderRadius: 8 }} />
-                                    <Area type="monotone" dataKey="submissions" stroke={accentPrimary} strokeWidth={2} fill="url(#facultySubmissions)" name="Submissions" />
-                                    <Area type="monotone" dataKey="approved" stroke="#16a34a" strokeWidth={2} fill="url(#facultyApproved)" name="Approved" />
+                                    <Area type="monotone" dataKey="submissions" stroke={accentPrimary} strokeWidth={2} fill="url(#facultySubmissions)" name="Submissions" onClick={onMonthClick} />
+                                    <Area type="monotone" dataKey="approved" stroke="#16a34a" strokeWidth={2} fill="url(#facultyApproved)" name="Approved" onClick={onMonthClick} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
@@ -79,7 +115,7 @@ export default function FacultyCharts({ stats = {}, stageCounts = {}, monthlyTre
                     <Card className="admin-dashboard-shell" bordered={false} title="Status Distribution">
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
-                                <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3}>
+                                <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} onClick={onStatusClick}>
                                     {statusData.map((entry) => (
                                         <Cell key={entry.name} fill={entry.fill} />
                                     ))}
@@ -107,7 +143,17 @@ export default function FacultyCharts({ stats = {}, stageCounts = {}, monthlyTre
                                 <XAxis dataKey="stage" stroke={axisColor} />
                                 <YAxis stroke={axisColor} allowDecimals={false} />
                                 <Tooltip contentStyle={{ backgroundColor: surfaceColor, border: `1px solid ${borderColor}`, borderRadius: 8 }} />
-                                <Bar dataKey="count" fill={accentPrimary} radius={[8, 8, 0, 0]} />
+                                <Bar
+                                    dataKey="count"
+                                    fill={accentPrimary}
+                                    radius={[8, 8, 0, 0]}
+                                    onClick={(event) => {
+                                        const status = stageToStatus[event?.payload?.stage || ''];
+                                        if (status) {
+                                            openResearch({ status });
+                                        }
+                                    }}
+                                />
                             </BarChart>
                         </ResponsiveContainer>
                     </Card>
@@ -122,7 +168,17 @@ export default function FacultyCharts({ stats = {}, stageCounts = {}, monthlyTre
                                     <XAxis dataKey="student" tickFormatter={truncateName} stroke={axisColor} angle={-25} textAnchor="end" height={80} interval={0} />
                                     <YAxis stroke={axisColor} allowDecimals={false} />
                                     <Tooltip contentStyle={{ backgroundColor: surfaceColor, border: `1px solid ${borderColor}`, borderRadius: 8 }} />
-                                    <Bar dataKey="submissions" fill="#d97706" radius={[8, 8, 0, 0]} />
+                                    <Bar
+                                        dataKey="submissions"
+                                        fill="#d97706"
+                                        radius={[8, 8, 0, 0]}
+                                        onClick={(event) => {
+                                            const studentName = event?.payload?.student;
+                                            if (studentName) {
+                                                openResearch({ search: studentName });
+                                            }
+                                        }}
+                                    />
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (

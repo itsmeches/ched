@@ -6,11 +6,12 @@ import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, InboxOutlined, KeyOutlined, StopOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
+import DashboardFilters from '@/Components/DashboardFilters';
 import { useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
 import CHEDCharts from './Partials/CHEDCharts';
 
-export default function CHEDDashboard({ stats, stageCounts = {}, forReview, editRequests, monthlyTrends = [], disciplineBreakdown = [], approvalFunnel = [] }) {
+export default function CHEDDashboard({ stats, stageCounts = {}, forReview, editRequests, monthlyTrends = [], disciplineBreakdown = [], approvalFunnel = [], filters = {}, filterOptions = {} }) {
     const { dark } = useTheme();
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
@@ -134,6 +135,14 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
             <Head title="CHED Dashboard" />
 
             <div className="space-y-6">
+                    <DashboardFilters
+                        routeName="ched.dashboard"
+                        filters={filters}
+                        years={filterOptions.years ?? []}
+                        institutions={filterOptions.institutions ?? []}
+                        disciplines={filterOptions.disciplines ?? []}
+                    />
+
                     <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                         <Row gutter={[24, 24]} align="middle">
                             <Col xs={24} lg={16}>

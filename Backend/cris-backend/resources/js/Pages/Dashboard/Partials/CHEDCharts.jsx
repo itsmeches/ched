@@ -1,6 +1,7 @@
 import { Card, Col, Grid, Row, Statistic, Tag } from 'antd';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, RadialBarChart, RadialBar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import { ArrowUpOutlined } from '@ant-design/icons';
+import { router } from '@inertiajs/react';
 import { useTheme } from '@/utils/ThemeContext';
 
 export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [], approvalFunnel = [], stats = {} }) {
@@ -33,6 +34,48 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
     const gaugeData = [
         { name: 'Approval Rate', value: stats.approvalRate || 0, fill: accentPrimary },
     ];
+
+    function openResearch(params = {}) {
+        router.visit(route('research.index', params));
+    }
+
+    function onStatusClick(entry) {
+        const statusMap = {
+            Approved: 'approved',
+            Pending: 'pending',
+            Rejected: 'rejected',
+        };
+
+        const status = statusMap[entry?.name || ''];
+        if (status) {
+            openResearch({ status });
+        }
+    }
+
+    function onMonthClick(point) {
+        const monthLabel = point?.payload?.month;
+        if (!monthLabel) {
+            return;
+        }
+
+        const match = String(monthLabel).match(/\b(\d{4})\b/);
+        openResearch(match ? { year: match[1] } : {});
+    }
+
+    function onFunnelClick(event) {
+        const stage = event?.payload?.stage;
+        const map = {
+            'Faculty Review': 'under_review_faculty',
+            'HEI Review': 'under_review_hei',
+            'CHED Review': 'under_review_ched',
+            Approved: 'approved',
+        };
+
+        const status = map[stage || ''];
+        if (status) {
+            openResearch({ status });
+        }
+    }
 
     return (
         <div className="space-y-4">
@@ -94,8 +137,8 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                                     <YAxis stroke={axisColor} />
                                     <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
                                     <Legend />
-                                    <Area type="monotone" dataKey="approved" stroke="#16a34a" fillOpacity={1} fill="url(#colorApproved)" name="Approved" />
-                                    <Area type="monotone" dataKey="pending" stroke="#d97706" fillOpacity={1} fill="url(#colorPending)" name="Pending" />
+                                    <Area type="monotone" dataKey="approved" stroke="#16a34a" fillOpacity={1} fill="url(#colorApproved)" name="Approved" onClick={onMonthClick} />
+                                    <Area type="monotone" dataKey="pending" stroke="#d97706" fillOpacity={1} fill="url(#colorPending)" name="Pending" onClick={onMonthClick} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
@@ -111,7 +154,7 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                     <Card title="Overall Status Distribution" className="admin-dashboard-shell" bordered={false}>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
-                                <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={2} dataKey="value">
+                                <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={2} dataKey="value" onClick={onStatusClick}>
                                     {statusData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.fill} />
                                     ))}
@@ -141,7 +184,7 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                                     <XAxis type="number" stroke={axisColor} />
                                     <YAxis dataKey="stage" type="category" stroke={axisColor} width={100} />
                                     <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
-                                    <Bar dataKey="count" fill={accentPrimary} radius={[0, 8, 8, 0]} name="Papers in Stage" />
+                                    <Bar dataKey="count" fill={accentPrimary} radius={[0, 8, 8, 0]} name="Papers in Stage" onClick={onFunnelClick} />
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
@@ -170,7 +213,18 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                                     />
                                     <YAxis stroke={axisColor} />
                                     <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
-                                    <Bar dataKey="submissions" fill="#d97706" radius={[8, 8, 0, 0]} name="Submissions" />
+                                    <Bar
+                                        dataKey="submissions"
+                                        fill="#d97706"
+                                        radius={[8, 8, 0, 0]}
+                                        name="Submissions"
+                                        onClick={(event) => {
+                                            const disciplineCode = event?.payload?.discipline_code;
+                                            if (disciplineCode) {
+                                                openResearch({ discipline_code: disciplineCode });
+                                            }
+                                        }}
+                                    />
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (

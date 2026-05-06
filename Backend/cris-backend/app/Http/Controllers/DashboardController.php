@@ -8,6 +8,7 @@ use App\Models\EditPermissionRequest;
 use App\Models\Discipline;
 use App\Models\Institution;
 use App\Models\SimpleNotification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,10 @@ class DashboardController extends Controller
     public function student(Request $request): Response
     {
         $user = $request->user();
+        $filters = $this->dashboardFilters($request, $user);
+        $filterOptions = $this->dashboardFilterOptions($user);
         $base = ResearchProposal::where('submitted_by', $user->id);
+        $this->applyDashboardFilters($base, $filters);
         $startOfMonth = now()->startOfMonth();
         $endOfMonth = now()->endOfMonth();
         $monthKeyExpression = $this->monthKeyExpression();
@@ -70,11 +74,13 @@ class DashboardController extends Controller
         ];
 
         $recentUploads = ResearchProposal::where('submitted_by', $user->id)
+            ->tap(fn (Builder $query) => $this->applyDashboardFilters($query, $filters))
             ->orderByDesc('updated_at')
             ->limit(10)
             ->get(['id', 'title', 'status', 'remarks', 'year', 'school', 'updated_at']);
 
         $pendingQueue = ResearchProposal::where('submitted_by', $user->id)
+            ->tap(fn (Builder $query) => $this->applyDashboardFilters($query, $filters))
             ->whereIn('status', ResearchProposal::PENDING_STATUSES)
             ->orderBy('created_at')
             ->limit(5)
@@ -104,12 +110,16 @@ class DashboardController extends Controller
             'recentUploads' => $recentUploads,
             'pendingQueue'  => $pendingQueue,
             'monthlyActivity' => $monthlyActivity,
+            'filters'       => $filters,
+            'filterOptions' => $filterOptions,
         ]);
     }
 
     public function faculty(Request $request): Response
     {
         $user = $request->user();
+        $filters = $this->dashboardFilters($request, $user);
+        $filterOptions = $this->dashboardFilterOptions($user);
         $monthKeyExpression = $this->monthKeyExpression();
 
         $base = ResearchProposal::query()
@@ -119,6 +129,7 @@ class DashboardController extends Controller
                         ->where('action', 'rejected')
                         ->where('user_id', $user->id));
             });
+        $this->applyDashboardFilters($base, $filters);
 
         $stats = [
             'total' => (clone $base)->count(),
@@ -137,6 +148,7 @@ class DashboardController extends Controller
 
         $forReview = ResearchProposal::query()
             ->with(['submitter:id,name', 'institution:id,name'])
+            ->tap(fn (Builder $query) => $this->applyDashboardFilters($query, $filters))
             ->where('status', ResearchProposal::STATUS_UNDER_REVIEW_FACULTY)
             ->where(function ($query) use ($user) {
                 $query->whereHas('submitter', fn ($inner) => $inner->where('faculty_id', $user->id))
@@ -151,6 +163,7 @@ class DashboardController extends Controller
 
         $recentDecisions = ResearchProposal::query()
             ->with(['submitter:id,name', 'institution:id,name'])
+            ->tap(fn (Builder $query) => $this->applyDashboardFilters($query, $filters))
             ->where('reviewed_by', $user->id)
             ->orderByDesc('reviewed_at')
             ->limit(8)
@@ -193,12 +206,16 @@ class DashboardController extends Controller
             'recentDecisions' => $recentDecisions,
             'monthlyTrends' => $monthlyTrends,
             'studentBreakdown' => $studentBreakdown,
+            'filters' => $filters,
+            'filterOptions' => $filterOptions,
         ]);
     }
 
     public function hei(Request $request): Response
     {
         $user = $request->user();
+        $filters = $this->dashboardFilters($request, $user);
+        $filterOptions = $this->dashboardFilterOptions($user);
         $monthKeyExpression = $this->monthKeyExpression();
 
         $base = ResearchProposal::query()
@@ -206,6 +223,7 @@ class DashboardController extends Controller
                 ->where('role', User::ROLE_STUDENT)
                 ->whereHas('faculty', fn ($f) => $f->where('hei_id', $user->id))
             );
+        $this->applyDashboardFilters($base, $filters);
 
         $stats = [
             'total' => (clone $base)->count(),
@@ -224,6 +242,7 @@ class DashboardController extends Controller
 
         $forReview = ResearchProposal::query()
             ->with(['submitter:id,name', 'institution:id,name'])
+            ->tap(fn (Builder $query) => $this->applyDashboardFilters($query, $filters))
             ->where('status', ResearchProposal::STATUS_UNDER_REVIEW_HEI)
             ->whereHas('submitter', fn ($query) => $query
                 ->where('role', User::ROLE_STUDENT)
@@ -236,6 +255,7 @@ class DashboardController extends Controller
 
         $recentDecisions = ResearchProposal::query()
             ->with(['submitter:id,name', 'institution:id,name'])
+            ->tap(fn (Builder $query) => $this->applyDashboardFilters($query, $filters))
             ->where('reviewed_by', $user->id)
             ->orderByDesc('reviewed_at')
             ->limit(8)
@@ -278,34 +298,151 @@ class DashboardController extends Controller
             'recentDecisions' => $recentDecisions,
             'monthlyTrends' => $monthlyTrends,
             'facultyBreakdown' => $facultyBreakdown,
+            'filters' => $filters,
+            'filterOptions' => $filterOptions,
         ]);
+    }
+
+    /**
+     * @return array{year:string, hei_id:string, discipline_code:string, status:string}
+     */
+    private function dashboardFilters(Request $request, User $user): array
+    {
+        $filters = [
+            'year' => trim((string) $request->input('year', '')),
+            'hei_id' => trim((string) $request->input('hei_id', '')),
+            'discipline_code' => trim((string) $request->input('discipline_code', '')),
+            'status' => trim((string) $request->input('status', '')),
+        ];
+
+        if ($user->isHEI()) {
+            $filters['hei_id'] = (string) ($user->institution_id ?? '');
+        }
+
+        if ($user->isFaculty()) {
+            $filters['hei_id'] = (string) ($user->institution_id ?? '');
+        }
+
+        if ($user->isStudent()) {
+            $filters['hei_id'] = '';
+        }
+
+        return $filters;
+    }
+
+    /**
+     * @return array{years: array<int, int>, institutions: array<int, array{id:int,name:string,code:?string}>, disciplines: array<int, array{code:string,name:string}>}
+     */
+    private function dashboardFilterOptions(User $user): array
+    {
+        $yearExpression = DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%Y', created_at) as INTEGER)"
+            : 'YEAR(created_at)';
+
+        $years = ResearchProposal::query()
+            ->selectRaw("{$yearExpression} as year")
+            ->whereNotNull('created_at')
+            ->groupByRaw($yearExpression)
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->filter()
+            ->map(fn ($year) => (int) $year)
+            ->values()
+            ->all();
+
+        $disciplines = Discipline::query()
+            ->where('is_active', true)
+            ->orderBy('code')
+            ->get(['code', 'name'])
+            ->map(fn (Discipline $discipline) => [
+                'code' => $discipline->code,
+                'name' => $discipline->name,
+            ])
+            ->values()
+            ->all();
+
+        $institutions = collect();
+
+        if ($user->isCHED() || $user->isSuperAdmin()) {
+            $institutions = Institution::query()
+                ->orderBy('name')
+                ->get(['id', 'name', 'code']);
+        } elseif ($user->isFaculty() && $user->institution_id) {
+            $institutions = Institution::query()
+                ->where('id', $user->institution_id)
+                ->orderBy('name')
+                ->get(['id', 'name', 'code']);
+        }
+
+        return [
+            'years' => $years,
+            'institutions' => $institutions
+                ->map(fn (Institution $institution) => [
+                    'id' => $institution->id,
+                    'name' => $institution->name,
+                    'code' => $institution->code,
+                ])
+                ->values()
+                ->all(),
+            'disciplines' => $disciplines,
+        ];
+    }
+
+    /**
+     * @param array{year:string, hei_id:string, discipline_code:string, status:string} $filters
+     */
+    private function applyDashboardFilters($query, array $filters): void
+    {
+        $query->when($filters['year'] !== '', fn (Builder $inner) => $inner->whereYear('created_at', (int) $filters['year']));
+
+        $query->when($filters['hei_id'] !== '', fn (Builder $inner) => $inner->where('institution_id', (int) $filters['hei_id']));
+
+        $query->when($filters['discipline_code'] !== '', fn (Builder $inner) => $inner->where('discipline_code', $filters['discipline_code']));
+
+        $query->when($filters['status'] !== '', function (Builder $inner) use ($filters) {
+            if ($filters['status'] === 'pending') {
+                $inner->whereIn('status', ResearchProposal::PENDING_STATUSES);
+                return;
+            }
+
+            $inner->where('status', $filters['status']);
+        });
     }
 
     public function ched(Request $request): Response
     {
+        $user = $request->user();
+        $filters = $this->dashboardFilters($request, $user);
+        $filterOptions = $this->dashboardFilterOptions($user);
         $monthKeyExpression = $this->monthKeyExpression();
         $disciplineNames = $this->disciplineNameByCodeMap();
-        $approvedCount = ResearchProposal::where('status', 'approved')->count();
-        $resolvedCount = ResearchProposal::whereIn('status', ['approved', 'rejected'])->count();
+
+        $base = ResearchProposal::query();
+        $this->applyDashboardFilters($base, $filters);
+
+        $approvedCount = (clone $base)->where('status', ResearchProposal::STATUS_APPROVED)->count();
+        $resolvedCount = (clone $base)->whereIn('status', [ResearchProposal::STATUS_APPROVED, ResearchProposal::STATUS_REJECTED])->count();
 
         $stats = [
-            'pending'       => ResearchProposal::whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
+            'pending'       => (clone $base)->whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
             'approved'      => $approvedCount,
-            'rejected'      => ResearchProposal::where('status', 'rejected')->count(),
-            'total'         => ResearchProposal::count(),
-            'reviewedToday' => ResearchProposal::whereDate('reviewed_at', now()->toDateString())->count(),
+            'rejected'      => (clone $base)->where('status', ResearchProposal::STATUS_REJECTED)->count(),
+            'total'         => (clone $base)->count(),
+            'reviewedToday' => (clone $base)->whereDate('reviewed_at', now()->toDateString())->count(),
             'approvalRate'  => $resolvedCount > 0 ? round(($approvedCount / $resolvedCount) * 100, 1) : 0,
         ];
 
         $stageCounts = [
-            'under_review_faculty' => ResearchProposal::where('status', ResearchProposal::STATUS_UNDER_REVIEW_FACULTY)->count(),
-            'under_review_hei' => ResearchProposal::where('status', ResearchProposal::STATUS_UNDER_REVIEW_HEI)->count(),
-            'under_review_ched' => ResearchProposal::where('status', ResearchProposal::STATUS_UNDER_REVIEW_CHED)->count(),
-            'approved' => ResearchProposal::where('status', ResearchProposal::STATUS_APPROVED)->count(),
-            'rejected' => ResearchProposal::where('status', ResearchProposal::STATUS_REJECTED)->count(),
+            'under_review_faculty' => (clone $base)->where('status', ResearchProposal::STATUS_UNDER_REVIEW_FACULTY)->count(),
+            'under_review_hei' => (clone $base)->where('status', ResearchProposal::STATUS_UNDER_REVIEW_HEI)->count(),
+            'under_review_ched' => (clone $base)->where('status', ResearchProposal::STATUS_UNDER_REVIEW_CHED)->count(),
+            'approved' => (clone $base)->where('status', ResearchProposal::STATUS_APPROVED)->count(),
+            'rejected' => (clone $base)->where('status', ResearchProposal::STATUS_REJECTED)->count(),
         ];
 
-        $forReview = ResearchProposal::with('submitter:id,name', 'institution:id,name')
+        $forReview = ResearchProposal::query()
+            ->with('submitter:id,name', 'institution:id,name')
+            ->tap(fn (Builder $query) => $this->applyDashboardFilters($query, $filters))
             ->where('status', ResearchProposal::STATUS_UNDER_REVIEW_CHED)
             ->orderByDesc('submitted_at')
             ->orderByDesc('updated_at')
@@ -321,7 +458,7 @@ class DashboardController extends Controller
             ->get();
 
         // Chart data: Monthly trends (last 12 months)
-        $monthlyTrends = ResearchProposal::query()
+        $monthlyTrends = (clone $base)
             ->selectRaw("{$monthKeyExpression} as month_key, status, COUNT(*) as count")
             ->where('created_at', '>=', now()->subMonths(12))
             ->groupByRaw("{$monthKeyExpression}, status")
@@ -338,7 +475,7 @@ class DashboardController extends Controller
             ->values();
 
         // Chart data: Discipline breakdown
-        $disciplineBreakdown = ResearchProposal::query()
+        $disciplineBreakdown = (clone $base)
             ->selectRaw('discipline_code, COUNT(*) as count')
             ->groupBy('discipline_code')
             ->orderByDesc('count')
@@ -346,6 +483,7 @@ class DashboardController extends Controller
             ->get()
             ->map(fn ($item) => [
                 'discipline' => $disciplineNames[$item->discipline_code] ?? ($item->discipline_code ?: 'Unspecified'),
+                'discipline_code' => $item->discipline_code,
                 'submissions' => $item->count,
             ])
             ->values();
@@ -366,6 +504,8 @@ class DashboardController extends Controller
             'monthlyTrends'       => $monthlyTrends,
             'disciplineBreakdown' => $disciplineBreakdown,
             'approvalFunnel'      => $approvalFunnel,
+            'filters'             => $filters,
+            'filterOptions'       => $filterOptions,
         ]);
     }
 
@@ -382,20 +522,26 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function admin(): Response
+    public function admin(Request $request): Response
     {
+        $user = $request->user();
+        $filters = $this->dashboardFilters($request, $user);
+        $filterOptions = $this->dashboardFilterOptions($user);
         $monthKeyExpression = $this->monthKeyExpression();
         $disciplineNames = $this->disciplineNameByCodeMap();
-        $proposalTotal = ResearchProposal::count();
-        $approvedTotal = ResearchProposal::where('status', 'approved')->count();
+
+        $base = ResearchProposal::query();
+        $this->applyDashboardFilters($base, $filters);
+        $proposalTotal = (clone $base)->count();
+        $approvedTotal = (clone $base)->where('status', ResearchProposal::STATUS_APPROVED)->count();
 
         $stats = [
             'users'        => User::count(),
             'institutions' => Institution::count(),
             'proposals'    => $proposalTotal,
             'approved'     => $approvedTotal,
-            'pending'      => ResearchProposal::whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
-            'rejected'     => ResearchProposal::where('status', 'rejected')->count(),
+            'pending'      => (clone $base)->whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
+            'rejected'     => (clone $base)->where('status', ResearchProposal::STATUS_REJECTED)->count(),
             'heiUsers'     => User::where('role', 'hei')->count(),
             'facultyUsers' => User::where('role', 'faculty')->count(),
             'studentUsers' => User::where('role', 'student')->count(),
@@ -410,25 +556,30 @@ class DashboardController extends Controller
             ->get(['id', 'name', 'email', 'role', 'institution_id', 'created_at']);
 
         $recentProposals = ResearchProposal::with(['institution:id,name', 'submitter:id,name'])
+            ->tap(fn (Builder $query) => $this->applyDashboardFilters($query, $filters))
             ->orderByDesc('created_at')
             ->limit(10)
             ->get(['id', 'title', 'status', 'institution_id', 'submitted_by', 'created_at']);
 
         $institutionOverview = Institution::query()
             ->withCount([
-                'proposals as proposals_count',
-                'proposals as approved_count' => fn ($query) => $query->where('status', 'approved'),
-                'proposals as pending_count' => fn ($query) => $query->whereIn('status', ResearchProposal::PENDING_STATUSES),
+                'proposals as proposals_count' => fn ($query) => $this->applyDashboardFilters($query, $filters),
+                'proposals as approved_count' => fn ($query) => $query
+                    ->where('status', ResearchProposal::STATUS_APPROVED)
+                    ->tap(fn (Builder $inner) => $this->applyDashboardFilters($inner, $filters)),
+                'proposals as pending_count' => fn ($query) => $query
+                    ->whereIn('status', ResearchProposal::PENDING_STATUSES)
+                    ->tap(fn (Builder $inner) => $this->applyDashboardFilters($inner, $filters)),
                 'users as hei_users_count' => fn ($query) => $query->where('role', 'hei'),
                 'users as faculty_users_count' => fn ($query) => $query->where('role', 'faculty'),
                 'users as student_users_count' => fn ($query) => $query->where('role', 'student'),
             ])
-            ->withMax('proposals', 'created_at')
+            ->withMax(['proposals as proposals_max_created_at' => fn ($query) => $this->applyDashboardFilters($query, $filters)], 'created_at')
             ->orderByDesc('proposals_count')
             ->limit(10)
             ->get(['id', 'name', 'code']);
 
-        $monthlyTrends = ResearchProposal::query()
+        $monthlyTrends = (clone $base)
             ->selectRaw("{$monthKeyExpression} as month_key, status, COUNT(*) as count")
             ->where('created_at', '>=', now()->subMonths(11)->startOfMonth())
             ->groupByRaw("{$monthKeyExpression}, status")
@@ -459,7 +610,7 @@ class DashboardController extends Controller
             })
             ->values();
 
-        $disciplineBreakdown = ResearchProposal::query()
+        $disciplineBreakdown = (clone $base)
             ->selectRaw('discipline_code, COUNT(*) as count')
             ->groupBy('discipline_code')
             ->orderByDesc('count')
@@ -468,6 +619,7 @@ class DashboardController extends Controller
             ->map(function ($item) use ($disciplineNames) {
                 return [
                     'discipline' => $disciplineNames[$item->discipline_code] ?? ($item->discipline_code ?: 'UNSPECIFIED'),
+                    'discipline_code' => $item->discipline_code,
                     'submissions' => $item->count,
                 ];
             })
@@ -477,6 +629,7 @@ class DashboardController extends Controller
             ->take(8)
             ->map(function ($institution) {
                 return [
+                    'institution_id' => $institution->id,
                     'institution' => $institution->code ?: $institution->name,
                     'submissions' => $institution->proposals_count,
                     'approved' => $institution->approved_count,
@@ -501,6 +654,8 @@ class DashboardController extends Controller
                 ['value' => 'ched', 'label' => 'CHED'],
                 ['value' => 'super_admin', 'label' => 'Super Admin'],
             ],
+            'filters'            => $filters,
+            'filterOptions'      => $filterOptions,
         ]);
     }
 

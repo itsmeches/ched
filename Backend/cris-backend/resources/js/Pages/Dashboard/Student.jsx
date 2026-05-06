@@ -5,10 +5,11 @@ import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, FileAddOutlined, FileTextOutlined, StopOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
+import DashboardFilters from '@/Components/DashboardFilters';
 import { useTheme } from '@/utils/ThemeContext';
 import StudentCharts from './Partials/StudentCharts';
 
-export default function StudentDashboard({ stats, stageCounts = {}, recentUploads, pendingQueue, monthlyActivity = [] }) {
+export default function StudentDashboard({ stats, stageCounts = {}, recentUploads, pendingQueue, monthlyActivity = [], filters = {}, filterOptions = {} }) {
     const { dark } = useTheme();
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
@@ -68,6 +69,14 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
             <Head title="Student Dashboard" />
 
             <div className="space-y-6">
+                <DashboardFilters
+                    routeName="student.dashboard"
+                    filters={filters}
+                    years={filterOptions.years ?? []}
+                    institutions={filterOptions.institutions ?? []}
+                    disciplines={filterOptions.disciplines ?? []}
+                />
+
                 <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                     <Row gutter={[24, 24]} align="middle">
                         <Col xs={24} lg={16}>

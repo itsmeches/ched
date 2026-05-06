@@ -5,11 +5,12 @@ import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, StopOutlined, TeamOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
+import DashboardFilters from '@/Components/DashboardFilters';
 import { useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
 import FacultyCharts from './Partials/FacultyCharts';
 
-export default function FacultyDashboard({ stats, stageCounts = {}, forReview, recentDecisions, monthlyTrends = [], studentBreakdown = [] }) {
+export default function FacultyDashboard({ stats, stageCounts = {}, forReview, recentDecisions, monthlyTrends = [], studentBreakdown = [], filters = {}, filterOptions = {} }) {
     const { dark } = useTheme();
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     const statItems = [
@@ -142,6 +143,14 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
             <Head title="Faculty Dashboard" />
 
             <div className="space-y-6">
+                <DashboardFilters
+                    routeName="faculty.dashboard"
+                    filters={filters}
+                    years={filterOptions.years ?? []}
+                    institutions={filterOptions.institutions ?? []}
+                    disciplines={filterOptions.disciplines ?? []}
+                />
+
                 <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                     <Row gutter={[24, 24]} align="middle">
                         <Col xs={24} lg={16}>

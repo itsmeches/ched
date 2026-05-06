@@ -8,13 +8,15 @@ import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { formatDateTime } from '@/utils/date';
 
-export default function ResearchIndex({ proposals, filters, canCreate, tab = '' }) {
+export default function ResearchIndex({ proposals, filters, canCreate, tab = '', disciplines = [], institutions = [] }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
     const [editability, setEditability] = useState(filters.editability ?? '');
     const [year, setYear] = useState(filters.year ?? '');
     const [school, setSchool] = useState(filters.school ?? '');
+    const [disciplineCode, setDisciplineCode] = useState(filters.discipline_code ?? '');
+    const [heiId, setHeiId] = useState(filters.hei_id ?? '');
 
     useEffect(() => {
         if (flash?.success) {
@@ -86,7 +88,7 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
     ], []);
 
     function applyFilters() {
-        router.get(route('research.index'), { search, status, editability, year, school, tab }, { preserveState: true });
+        router.get(route('research.index'), { search, status, editability, year, school, discipline_code: disciplineCode, hei_id: heiId, tab }, { preserveState: true });
     }
 
     return (
@@ -170,12 +172,46 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
                                             onPressEnter={applyFilters}
                                         />
                                     </Col>
+                                    <Col xs={24} md={8}>
+                                        <Select
+                                            size="large"
+                                            aria-label="Filter research by discipline"
+                                            style={{ width: '100%' }}
+                                            value={disciplineCode || undefined}
+                                            placeholder="All disciplines"
+                                            allowClear
+                                            options={disciplines.map((item) => ({
+                                                value: item.code,
+                                                label: `${item.code} - ${item.name}`,
+                                            }))}
+                                            onChange={(value) => setDisciplineCode(value ?? '')}
+                                            showSearch
+                                            optionFilterProp="label"
+                                        />
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <Select
+                                            size="large"
+                                            aria-label="Filter research by institution"
+                                            style={{ width: '100%' }}
+                                            value={heiId || undefined}
+                                            placeholder="All institutions"
+                                            allowClear
+                                            options={institutions.map((item) => ({
+                                                value: String(item.id),
+                                                label: item.name,
+                                            }))}
+                                            onChange={(value) => setHeiId(value ?? '')}
+                                            showSearch
+                                            optionFilterProp="label"
+                                        />
+                                    </Col>
                                     <Col xs={24} md={3}>
                                         <Button size="large" block type="primary" onClick={applyFilters}>Search</Button>
                                     </Col>
                                     <Col xs={24} md={3}>
                                         <Button size="large" block onClick={() => {
-                                            setSearch(''); setStatus(''); setEditability(''); setYear(''); setSchool('');
+                                            setSearch(''); setStatus(''); setEditability(''); setYear(''); setSchool(''); setDisciplineCode(''); setHeiId('');
                                             router.get(route('research.index'), { tab }, { replace: true });
                                         }}>Clear</Button>
                                     </Col>
@@ -201,7 +237,7 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '' 
                                 current: proposals.current_page,
                                 pageSize: proposals.per_page,
                                 total: proposals.total,
-                                onChange: (page) => router.get(route('research.index'), { search, status, editability, year, school, tab, page }, { preserveState: true }),
+                                onChange: (page) => router.get(route('research.index'), { search, status, editability, year, school, discipline_code: disciplineCode, hei_id: heiId, tab, page }, { preserveState: true }),
                             }}
                             scroll={{ x: 920 }}
                             locale={{ emptyText: <EmptyState title="No research papers found" description="Try broadening your status or keyword filters." /> }}

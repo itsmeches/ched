@@ -7,6 +7,7 @@ import {
     Skeleton,
     Space,
 } from 'antd';
+import DashboardFilters from '@/Components/DashboardFilters';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { lazy, Suspense } from 'react';
 
@@ -27,6 +28,8 @@ export default function SuperAdminDashboard({
     institutionPerformance = [],
     institutions,
     roles,
+    filters = {},
+    filterOptions = {},
 }) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -76,6 +79,14 @@ export default function SuperAdminDashboard({
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminHero stats={stats} />
                     </Suspense>
+
+                    <DashboardFilters
+                        routeName="admin.dashboard"
+                        filters={filters}
+                        years={filterOptions.years ?? []}
+                        institutions={filterOptions.institutions ?? []}
+                        disciplines={filterOptions.disciplines ?? []}
+                    />
 
                     {flash?.success && <Alert message={flash.success} type="success" showIcon />}
                     {flash?.error && <Alert message={flash.error} type="error" showIcon />}
