@@ -2,19 +2,23 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
-import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Row, Space, Statistic, Table, Tag } from 'antd';
+import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, StopOutlined, TeamOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { useState } from 'react';
+import { useTheme } from '@/utils/ThemeContext';
+import FacultyCharts from './Partials/FacultyCharts';
 
-const statItems = [
-    { key: 'total', label: 'Total Student Submissions', icon: <TeamOutlined style={{ color: '#0033a0' }} /> },
-    { key: 'pending', label: 'Pending Faculty Review', icon: <ClockCircleOutlined style={{ color: '#d97706' }} /> },
-    { key: 'approved', label: 'Approved', icon: <CheckCircleOutlined style={{ color: '#0033a0' }} /> },
-    { key: 'rejected', label: 'Rejected', icon: <StopOutlined style={{ color: '#dc2626' }} /> },
-];
+export default function FacultyDashboard({ stats, stageCounts = {}, forReview, recentDecisions, monthlyTrends = [], studentBreakdown = [] }) {
+    const { dark } = useTheme();
+    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const statItems = [
+        { key: 'total', label: 'Total Student Submissions', icon: <TeamOutlined style={{ color: accentPrimary }} /> },
+        { key: 'pending', label: 'Pending Faculty Review', icon: <ClockCircleOutlined style={{ color: '#d97706' }} /> },
+        { key: 'approved', label: 'Approved', icon: <CheckCircleOutlined style={{ color: accentPrimary }} /> },
+        { key: 'rejected', label: 'Rejected', icon: <StopOutlined style={{ color: '#dc2626' }} /> },
+    ];
 
-export default function FacultyDashboard({ stats, stageCounts = {}, forReview, recentDecisions }) {
     const DEFAULT_REJECT_REMARK = 'Faculty review: Please revise and improve the submission based on stage requirements.';
 
     const [rejectModal, setRejectModal] = useState({
@@ -137,7 +141,58 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
         <AuthenticatedLayout header={<AdminPageHeader title="Faculty Dashboard" />}>
             <Head title="Faculty Dashboard" />
 
-            <div className="space-y-8">
+            <div className="space-y-6">
+                <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
+                    <Row gutter={[24, 24]} align="middle">
+                        <Col xs={24} lg={16}>
+                            <Space direction="vertical" size={10}>
+                                <Tag style={{ alignSelf: 'flex-start', borderRadius: 999, paddingInline: 12, paddingBlock: 4, backgroundColor: accentPrimary, color: '#fff', border: 'none' }}>
+                                    Faculty Review Desk
+                                </Tag>
+                                <Typography.Title level={2} style={{ margin: 0, color: '#ffffff' }}>
+                                    Review student submissions with clear next actions
+                                </Typography.Title>
+                                <Typography.Paragraph style={{ margin: 0, color: 'rgba(255,255,255,0.82)', fontSize: 16 }}>
+                                    Move pending papers through faculty review, handle rejections, and forward qualified work to HEI.
+                                </Typography.Paragraph>
+                            </Space>
+                        </Col>
+                        <Col xs={24} lg={8}>
+                            <Space direction="vertical" style={{ width: '100%' }} size={12}>
+                                <Link href={route('research.index', { status: 'under_review_faculty' })}>
+                                    <Button className="quick-action-primary" size="large" block>
+                                        Open Faculty Queue
+                                    </Button>
+                                </Link>
+                                <Link href={route('research.index', { status: 'rejected' })}>
+                                    <Button className="quick-action-secondary" size="large" block>
+                                        Rejected Submissions
+                                    </Button>
+                                </Link>
+                                <Link href={route('research.index', { status: 'under_review_hei' })}>
+                                    <Button className="quick-action-secondary" size="large" block>
+                                        Forwarded to HEI
+                                    </Button>
+                                </Link>
+                            </Space>
+                        </Col>
+                    </Row>
+                </Card>
+
+                <Card title="Review Queue" className="admin-dashboard-shell" bordered={false}>
+                    {forReview.length === 0 ? (
+                        <Alert type="success" showIcon message="No submissions waiting for Faculty review." />
+                    ) : (
+                        <Table rowKey="id" columns={queueColumns} dataSource={forReview} pagination={false} scroll={{ x: 980 }} />
+                    )}
+                </Card>
+
+
+
+                <Card title="Recent Decisions" className="admin-dashboard-shell" bordered={false}>
+                    <Table rowKey="id" columns={decisionColumns} dataSource={recentDecisions} pagination={false} scroll={{ x: 840 }} />
+                </Card>
+
                 <Row gutter={[16, 16]}>
                     {statItems.map((item) => (
                         <Col xs={24} sm={12} xl={6} key={item.key}>
@@ -148,43 +203,7 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
                     ))}
                 </Row>
 
-                <Card className="admin-dashboard-shell" bordered={false} title="Quick Filters">
-                    <Space wrap>
-                        <Link href={route('research.index', { status: 'under_review_faculty' })}>
-                            <Button>Faculty Queue</Button>
-                        </Link>
-                        <Link href={route('research.index', { status: 'rejected' })}>
-                            <Button>Rejected Submissions</Button>
-                        </Link>
-                        <Link href={route('research.index', { status: 'under_review_hei' })}>
-                            <Button>Forwarded to HEI</Button>
-                        </Link>
-                    </Space>
-                </Card>
-
-                <Card className="admin-dashboard-shell" bordered={false} title="Stage Counters">
-                    <Space wrap>
-                        <Tag color="gold">Faculty: {stageCounts.under_review_faculty ?? 0}</Tag>
-                        <Tag color="blue">HEI: {stageCounts.under_review_hei ?? 0}</Tag>
-                        <Tag color="cyan">CHED: {stageCounts.under_review_ched ?? 0}</Tag>
-                        <Tag color="green">Approved: {stageCounts.approved ?? 0}</Tag>
-                        <Tag color="red">Rejected: {stageCounts.rejected ?? 0}</Tag>
-                    </Space>
-                </Card>
-
-                <Card title="Faculty Review Queue" className="admin-dashboard-shell">
-                    {forReview.length === 0 ? (
-                        <Alert type="success" showIcon message="No submissions waiting for Faculty review." />
-                    ) : (
-                        <Table rowKey="id" columns={queueColumns} dataSource={forReview} pagination={false} scroll={{ x: 980 }} />
-                    )}
-                </Card>
-
-
-
-                <Card title="Recent Faculty Decisions" className="admin-dashboard-shell">
-                    <Table rowKey="id" columns={decisionColumns} dataSource={recentDecisions} pagination={false} scroll={{ x: 840 }} />
-                </Card>
+                <FacultyCharts stats={stats} stageCounts={stageCounts} monthlyTrends={monthlyTrends} studentBreakdown={studentBreakdown} />
 
                 <Modal
                     title="Reject Submission"

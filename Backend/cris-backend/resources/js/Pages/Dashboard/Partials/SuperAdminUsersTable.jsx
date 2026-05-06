@@ -2,6 +2,7 @@ import { Avatar, Button, Card, Col, Row, Space, Table, Tag } from 'antd';
 import { router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import EmptyState from '@/Components/EmptyState';
+import { useTheme } from '@/utils/ThemeContext';
 
 function getInstitutionDisplayLabel(institution) {
     if (!institution) {
@@ -11,16 +12,22 @@ function getInstitutionDisplayLabel(institution) {
     return institution.code ? `${institution.name} (${institution.code})` : institution.name;
 }
 
-const roleColorMap = { super_admin: 'purple', ched: '#0033a0', hei: '#0047d4' };
-
 export default function SuperAdminUsersTable({ recentUsers, recentProposals, institutionOverview }) {
+    const { dark } = useTheme();
+    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const roleColorMap = {
+        super_admin: 'purple',
+        ched: dark ? '#60a5fa' : '#0033a0',
+        hei: dark ? '#60a5fa' : '#0047d4',
+    };
+
     const userColumns = [
         {
             title: 'User',
             key: 'user',
             render: (_, user) => (
                 <Space>
-                    <Avatar style={{ backgroundColor: '#0033a0' }}>{user.name?.charAt(0)?.toUpperCase() ?? 'U'}</Avatar>
+                    <Avatar style={{ backgroundColor: accentPrimary }}>{user.name?.charAt(0)?.toUpperCase() ?? 'U'}</Avatar>
                     <div>
                         <div style={{ fontWeight: 600 }}>{user.name}</div>
                         <div style={{ fontSize: 12, color: '#64748b' }}>{user.email}</div>
@@ -74,7 +81,7 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (status) => <Tag color={status === 'approved' ? '#0033a0' : status === 'pending' ? 'orange' : 'red'}>{status.toUpperCase()}</Tag>,
+            render: (status) => <Tag color={status === 'approved' ? accentPrimary : status === 'pending' ? 'orange' : 'red'}>{status.toUpperCase()}</Tag>,
         },
     ];
 

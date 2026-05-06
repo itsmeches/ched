@@ -1,17 +1,20 @@
 import { Alert, Button, Card, Col, Divider, Form, Input, Row, Select, Space, Tag, Typography } from 'antd';
-import { Link, router } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { PlusOutlined, UserAddOutlined } from '@ant-design/icons';
+import { useTheme } from '@/utils/ThemeContext';
 
 function getInstitutionOptionLabel(institution) {
     return institution.code ? `${institution.name} (${institution.code})` : institution.name;
 }
 
 export default function SuperAdminAccountPanel({ data, setData, postSubmit, processing, errors, institutions, roles }) {
+    const { dark } = useTheme();
+    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     return (
         <Row gutter={[24, 24]}>
-            <Col xs={24} xl={14}>
-                <Card title={<Space><UserAddOutlined /><span>Create New Account</span></Space>} extra={<Tag style={{ color: '#0033a0', backgroundColor: '#e6f2ff', borderColor: '#0033a0' }}>Writes directly to database</Tag>} className="admin-dashboard-shell">
-                    <Typography.Paragraph type="secondary">
+            <Col xs={24}>
+                <Card title={<Space><UserAddOutlined /><span>Create New Account</span></Space>} extra={<Tag style={{ color: accentPrimary, backgroundColor: dark ? 'rgba(147,197,253,0.15)' : '#e6f2ff', borderColor: accentPrimary }}>Writes directly to database</Tag>} className="admin-dashboard-shell" bordered={false}>
+                    <Typography.Paragraph type="secondary" style={{ maxWidth: 860 }}>
                         Create HEI, Faculty, Student, CHED, or Super Admin users here. New accounts are available immediately after save.
                     </Typography.Paragraph>
 
@@ -84,40 +87,6 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
                         </Space>
                     </Form>
                 </Card>
-            </Col>
-
-            <Col xs={24} xl={10}>
-                <Space direction="vertical" size={24} style={{ width: '100%' }}>
-                    <Card title="Quick Actions" className="admin-dashboard-shell">
-                        <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                            <Button block size="large" onClick={() => router.visit(route('admin.users.index'))} style={{ height: 'auto', paddingBlock: 12 }}>
-                                <div style={{ textAlign: 'left', width: '100%', lineHeight: 1.35 }}>
-                                    <div style={{ fontWeight: 600 }}>Manage all users</div>
-                                    <div style={{ fontSize: 12, color: '#64748b' }}>Edit, filter, and maintain account access.</div>
-                                </div>
-                            </Button>
-                            <Button block size="large" onClick={() => router.visit(route('admin.institutions.create'))} style={{ height: 'auto', paddingBlock: 12 }}>
-                                <div style={{ textAlign: 'left', width: '100%', lineHeight: 1.35 }}>
-                                    <div style={{ fontWeight: 600 }}>Add institution</div>
-                                    <div style={{ fontSize: 12, color: '#64748b' }}>Register a new school before assigning HEI accounts.</div>
-                                </div>
-                            </Button>
-                            <Button block size="large" onClick={() => router.visit(route('research.index'))} style={{ height: 'auto', paddingBlock: 12 }}>
-                                <div style={{ textAlign: 'left', width: '100%', lineHeight: 1.35 }}>
-                                    <div style={{ fontWeight: 600 }}>Open research records</div>
-                                    <div style={{ fontSize: 12, color: '#64748b' }}>Review submitted and approved proposals.</div>
-                                </div>
-                            </Button>
-                        </Space>
-                    </Card>
-
-                    <Card title="Profile Tools" className="admin-dashboard-shell">
-                        <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                            <Link href={route('profile.edit')}><Button size="large" block>Update my profile</Button></Link>
-                            <Link href={route('admin.institutions.index')}><Button size="large" block>Browse institutions</Button></Link>
-                        </Space>
-                    </Card>
-                </Space>
             </Col>
         </Row>
     );

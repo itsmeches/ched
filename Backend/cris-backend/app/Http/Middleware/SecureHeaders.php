@@ -20,10 +20,12 @@ class SecureHeaders
         $isLocal = app()->environment('local');
         $viteOrigins = " http://127.0.0.1:5173 http://localhost:5173";
         $viteConnect = " ws://127.0.0.1:5173 ws://localhost:5173";
-        $localStyleUnsafeInline = $isLocal ? " 'unsafe-inline'" : '';
-
-        $scriptSrc = "'self' 'nonce-{$nonce}'" . ($isLocal ? $viteOrigins : '');
-        $styleSrc = "'self' 'nonce-{$nonce}' https://fonts.bunny.net{$localStyleUnsafeInline}" . ($isLocal ? $viteOrigins : '');
+        $scriptSrc = $isLocal
+            ? "'self' 'unsafe-inline' 'unsafe-eval'{$viteOrigins}"
+            : "'self' 'nonce-{$nonce}'";
+        $styleSrc = $isLocal
+            ? "'self' 'unsafe-inline' https://fonts.bunny.net{$viteOrigins}"
+            : "'self' 'nonce-{$nonce}' https://fonts.bunny.net";
         $connectSrc = "'self'" . ($isLocal ? $viteOrigins . $viteConnect : '');
 
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');

@@ -2,19 +2,23 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
-import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Row, Space, Statistic, Table, Tag } from 'antd';
+import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { BankOutlined, CheckCircleOutlined, ClockCircleOutlined, StopOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { useState } from 'react';
+import { useTheme } from '@/utils/ThemeContext';
+import HEICharts from './Partials/HEICharts';
 
-const statItems = [
-    { key: 'total', label: 'Total Submissions', icon: <BankOutlined style={{ color: '#0033a0' }} /> },
-    { key: 'pending', label: 'Pending HEI Review', icon: <ClockCircleOutlined style={{ color: '#d97706' }} /> },
-    { key: 'approved', label: 'Approved', icon: <CheckCircleOutlined style={{ color: '#0033a0' }} /> },
-    { key: 'rejected', label: 'Rejected', icon: <StopOutlined style={{ color: '#dc2626' }} /> },
-];
+export default function HEIDashboard({ stats, stageCounts = {}, forReview, recentDecisions, monthlyTrends = [], facultyBreakdown = [] }) {
+    const { dark } = useTheme();
+    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const statItems = [
+        { key: 'total', label: 'Total Submissions', icon: <BankOutlined style={{ color: accentPrimary }} /> },
+        { key: 'pending', label: 'Pending HEI Review', icon: <ClockCircleOutlined style={{ color: '#d97706' }} /> },
+        { key: 'approved', label: 'Approved', icon: <CheckCircleOutlined style={{ color: accentPrimary }} /> },
+        { key: 'rejected', label: 'Rejected', icon: <StopOutlined style={{ color: '#dc2626' }} /> },
+    ];
 
-export default function HEIDashboard({ stats, stageCounts = {}, forReview, recentDecisions }) {
     const DEFAULT_REJECT_REMARK = 'HEI review: Please revise and improve the submission based on institutional requirements.';
 
     const [rejectModal, setRejectModal] = useState({
@@ -137,7 +141,58 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
         <AuthenticatedLayout header={<AdminPageHeader title="HEI Dashboard" />}>
             <Head title="HEI Dashboard" />
 
-            <div className="space-y-8">
+            <div className="space-y-6">
+                <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
+                    <Row gutter={[24, 24]} align="middle">
+                        <Col xs={24} lg={16}>
+                            <Space direction="vertical" size={10}>
+                                <Tag style={{ alignSelf: 'flex-start', borderRadius: 999, paddingInline: 12, paddingBlock: 4, backgroundColor: accentPrimary, color: '#fff', border: 'none' }}>
+                                    HEI Review Desk
+                                </Tag>
+                                <Typography.Title level={2} style={{ margin: 0, color: '#ffffff' }}>
+                                    Prioritize institutional reviews and decisions
+                                </Typography.Title>
+                                <Typography.Paragraph style={{ margin: 0, color: 'rgba(255,255,255,0.82)', fontSize: 16 }}>
+                                    Review pending submissions, track forwarded papers, and manage institution-level approval throughput.
+                                </Typography.Paragraph>
+                            </Space>
+                        </Col>
+                        <Col xs={24} lg={8}>
+                            <Space direction="vertical" style={{ width: '100%' }} size={12}>
+                                <Link href={route('research.index', { status: 'under_review_hei' })}>
+                                    <Button className="quick-action-primary" size="large" block>
+                                        Open HEI Queue
+                                    </Button>
+                                </Link>
+                                <Link href={route('accounts.hierarchy')}>
+                                    <Button className="quick-action-secondary" size="large" block>
+                                        Account Hierarchy
+                                    </Button>
+                                </Link>
+                                <Link href={route('research.index', { status: 'under_review_ched' })}>
+                                    <Button className="quick-action-secondary" size="large" block>
+                                        Forwarded to CHED
+                                    </Button>
+                                </Link>
+                            </Space>
+                        </Col>
+                    </Row>
+                </Card>
+
+                <Card title="Review Queue" className="admin-dashboard-shell" bordered={false}>
+                    {forReview.length === 0 ? (
+                        <Alert type="success" showIcon message="No submissions waiting for HEI review." />
+                    ) : (
+                        <Table rowKey="id" columns={queueColumns} dataSource={forReview} pagination={false} scroll={{ x: 980 }} />
+                    )}
+                </Card>
+
+
+
+                <Card title="Recent Decisions" className="admin-dashboard-shell" bordered={false}>
+                    <Table rowKey="id" columns={decisionColumns} dataSource={recentDecisions} pagination={false} scroll={{ x: 840 }} />
+                </Card>
+
                 <Row gutter={[16, 16]}>
                     {statItems.map((item) => (
                         <Col xs={24} sm={12} xl={6} key={item.key}>
@@ -148,46 +203,7 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
                     ))}
                 </Row>
 
-                <Card className="admin-dashboard-shell" bordered={false} title="Quick Filters">
-                    <Space wrap>
-                        <Link href={route('accounts.hierarchy')}>
-                            <Button>Account Hierarchy</Button>
-                        </Link>
-                        <Link href={route('research.index', { status: 'under_review_hei' })}>
-                            <Button>HEI Queue</Button>
-                        </Link>
-                        <Link href={route('research.index', { status: 'rejected' })}>
-                            <Button>Rejected Submissions</Button>
-                        </Link>
-                        <Link href={route('research.index', { status: 'under_review_ched' })}>
-                            <Button>Forwarded to CHED</Button>
-                        </Link>
-                    </Space>
-                </Card>
-
-                <Card className="admin-dashboard-shell" bordered={false} title="Stage Counters">
-                    <Space wrap>
-                        <Tag color="gold">Faculty: {stageCounts.under_review_faculty ?? 0}</Tag>
-                        <Tag color="blue">HEI: {stageCounts.under_review_hei ?? 0}</Tag>
-                        <Tag color="cyan">CHED: {stageCounts.under_review_ched ?? 0}</Tag>
-                        <Tag color="green">Approved: {stageCounts.approved ?? 0}</Tag>
-                        <Tag color="red">Rejected: {stageCounts.rejected ?? 0}</Tag>
-                    </Space>
-                </Card>
-
-                <Card title="HEI Review Queue" className="admin-dashboard-shell">
-                    {forReview.length === 0 ? (
-                        <Alert type="success" showIcon message="No submissions waiting for HEI review." />
-                    ) : (
-                        <Table rowKey="id" columns={queueColumns} dataSource={forReview} pagination={false} scroll={{ x: 980 }} />
-                    )}
-                </Card>
-
-
-
-                <Card title="Recent HEI Decisions" className="admin-dashboard-shell">
-                    <Table rowKey="id" columns={decisionColumns} dataSource={recentDecisions} pagination={false} scroll={{ x: 840 }} />
-                </Card>
+                <HEICharts stats={stats} stageCounts={stageCounts} monthlyTrends={monthlyTrends} facultyBreakdown={facultyBreakdown} />
 
                 <Modal
                     title="Reject Submission"

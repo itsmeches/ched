@@ -123,7 +123,7 @@ export default function PublicResearchIndex({
     // ── theme tokens ──────────────────────────────────────────────────────────
     const D = dark;
     const bg        = D ? 'bg-[#0a0f1e]'      : 'bg-slate-50';
-    const heroBg    = D ? 'bg-[#0d1526]'      : 'bg-white';
+    const heroBg    = D ? 'bg-[#0d1526]'      : 'bg-gradient-to-b from-white via-[#f3f8ff] to-white';
     const cardBg    = D ? 'bg-[#111827]'      : 'bg-white';
     const cardBorder= D ? 'border-[#1e2d47]'  : 'border-slate-200';
     const textPrim  = D ? 'text-white'         : 'text-slate-900';
@@ -193,8 +193,9 @@ export default function PublicResearchIndex({
                 <section className={`${heroBg} relative overflow-hidden pb-16 pt-20 text-center`}>
                     {/* subtle radial glows */}
                     <div className="pointer-events-none absolute inset-0">
-                        <div className="absolute left-1/4 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-blue-500/10 blur-3xl" />
-                        <div className="absolute right-1/4 top-10 h-64 w-64 rounded-full bg-indigo-400/10 blur-3xl" />
+                        <div className={`absolute left-1/4 top-0 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl ${D ? 'bg-blue-500/10' : 'bg-blue-400/20'}`} />
+                        <div className={`absolute right-1/4 top-10 h-64 w-64 rounded-full blur-3xl ${D ? 'bg-indigo-400/10' : 'bg-sky-300/25'}`} />
+                        <div className={`absolute left-1/2 top-20 h-80 w-80 -translate-x-1/2 rounded-full blur-3xl ${D ? 'bg-blue-900/15' : 'bg-cyan-200/30'}`} />
                     </div>
 
                     <div className="relative mx-auto max-w-3xl px-4 sm:px-6">
@@ -225,7 +226,7 @@ export default function PublicResearchIndex({
                                         type="text"
                                         value={search}
                                         placeholder="Search for papers, authors, or topics..."
-                                        className="flex-1 bg-transparent py-2 text-slate-800 placeholder-slate-400 outline-none text-sm"
+                                        className="flex-1 border-0 bg-transparent py-2 text-sm text-slate-800 placeholder-slate-400 outline-none ring-0 focus:border-0 focus:outline-none focus:ring-0"
                                         onChange={(e) => {
                                             isLiveFilterEnabled.current = true;
                                             setSearch(e.target.value);
