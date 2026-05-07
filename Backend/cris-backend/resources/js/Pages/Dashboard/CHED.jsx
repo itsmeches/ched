@@ -135,14 +135,6 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
             <Head title="CHED Dashboard" />
 
             <div className="space-y-6">
-                    <DashboardFilters
-                        routeName="ched.dashboard"
-                        filters={filters}
-                        years={filterOptions.years ?? []}
-                        institutions={filterOptions.institutions ?? []}
-                        disciplines={filterOptions.disciplines ?? []}
-                    />
-
                     <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                         <Row gutter={[24, 24]} align="middle">
                             <Col xs={24} lg={16}>
@@ -179,6 +171,14 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                             </Col>
                         </Row>
                     </Card>
+
+                    <DashboardFilters
+                        routeName="ched.dashboard"
+                        filters={filters}
+                        years={filterOptions.years ?? []}
+                        institutions={filterOptions.institutions ?? []}
+                        disciplines={filterOptions.disciplines ?? []}
+                    />
 
                     <Row gutter={[16, 16]}>
                         {statItems.map((item) => (

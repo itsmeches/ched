@@ -69,14 +69,6 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
             <Head title="Student Dashboard" />
 
             <div className="space-y-6">
-                <DashboardFilters
-                    routeName="student.dashboard"
-                    filters={filters}
-                    years={filterOptions.years ?? []}
-                    institutions={filterOptions.institutions ?? []}
-                    disciplines={filterOptions.disciplines ?? []}
-                />
-
                 <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                     <Row gutter={[24, 24]} align="middle">
                         <Col xs={24} lg={16}>
@@ -108,6 +100,14 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
                         </Col>
                     </Row>
                 </Card>
+
+                <DashboardFilters
+                    routeName="student.dashboard"
+                    filters={filters}
+                    years={filterOptions.years ?? []}
+                    institutions={filterOptions.institutions ?? []}
+                    disciplines={filterOptions.disciplines ?? []}
+                />
 
                 <Row gutter={[16, 16]}>
                     {statItems.map((item) => (

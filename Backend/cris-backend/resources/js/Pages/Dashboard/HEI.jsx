@@ -143,14 +143,6 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
             <Head title="HEI Dashboard" />
 
             <div className="space-y-6">
-                <DashboardFilters
-                    routeName="hei.dashboard"
-                    filters={filters}
-                    years={filterOptions.years ?? []}
-                    institutions={filterOptions.institutions ?? []}
-                    disciplines={filterOptions.disciplines ?? []}
-                />
-
                 <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
                     <Row gutter={[24, 24]} align="middle">
                         <Col xs={24} lg={16}>
@@ -187,6 +179,14 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
                         </Col>
                     </Row>
                 </Card>
+
+                <DashboardFilters
+                    routeName="hei.dashboard"
+                    filters={filters}
+                    years={filterOptions.years ?? []}
+                    institutions={filterOptions.institutions ?? []}
+                    disciplines={filterOptions.disciplines ?? []}
+                />
 
                 <Card title="Review Queue" className="admin-dashboard-shell" bordered={false}>
                     {forReview.length === 0 ? (
