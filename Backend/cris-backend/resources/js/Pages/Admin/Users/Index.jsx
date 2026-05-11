@@ -12,6 +12,7 @@ import { Alert, Avatar, Button, Col, DatePicker, Input, Row, Select, Space, Tabl
 import { PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useTheme } from '@/utils/ThemeContext';
+import { getRoleColor, palette } from '@/utils/designTokens';
 
 const roleLabelMap = {
     all: 'All Users',
@@ -26,14 +27,14 @@ const roleLabelMap = {
 export default function UsersIndex({ users, filters, roleCounts, institutions }) {
     const { flash } = usePage().props;
     const { dark } = useTheme();
-    const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const accentPrimary = dark ? '#93c5fd' : palette.primary;
     const roleColorMap = {
         pending: 'orange',
-        super_admin: 'purple',
-        ched: dark ? '#60a5fa' : '#0033a0',
-        hei: dark ? '#60a5fa' : '#0047d4',
-        faculty: 'cyan',
-        student: 'geekblue',
+        super_admin: getRoleColor('super_admin').antTag,
+        ched: getRoleColor('ched').antTag,
+        hei: getRoleColor('hei').antTag,
+        faculty: getRoleColor('faculty').antTag,
+        student: getRoleColor('student').antTag,
     };
     const [search, setSearch] = useState(filters.search ?? '');
     const [role, setRole] = useState(filters.role ?? '');
