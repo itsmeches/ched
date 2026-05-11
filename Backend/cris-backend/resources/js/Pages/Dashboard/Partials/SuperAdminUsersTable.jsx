@@ -109,12 +109,6 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
             render: (_, row) => getInstitutionDisplayLabel(row),
         },
         {
-            title: 'HEI Users',
-            dataIndex: 'hei_users_count',
-            key: 'hei_users_count',
-            width: 110,
-        },
-        {
             title: 'Proposals',
             dataIndex: 'proposals_count',
             key: 'proposals_count',
@@ -133,6 +127,12 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
             width: 100,
         },
         {
+            title: 'HEI Users',
+            dataIndex: 'hei_users_count',
+            key: 'hei_users_count',
+            width: 110,
+        },
+        {
             title: 'Last Submission',
             dataIndex: 'proposals_max_created_at',
             key: 'proposals_max_created_at',
@@ -143,11 +143,6 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
     return (
         <Row gutter={[16, 16]}>
             <Col xs={24}>
-                <Card title="Recently Added Users" extra={<Button type="link" className={dark ? 'superadmin-card-action-link' : ''} onClick={() => router.visit(route('admin.users.index'))}>View all</Button>} className="admin-dashboard-shell dashboard-table-card">
-                    <Table columns={userColumns} dataSource={recentUsers} rowKey="id" pagination={false} scroll={{ x: 760 }} locale={{ emptyText: <EmptyState title="No recent users" description="Newly added users will appear here." /> }} />
-                </Card>
-            </Col>
-            <Col xs={24} xl={12}>
                 <Card title="Recent Research Activity" extra={<Button type="link" className={dark ? 'superadmin-card-action-link' : ''} onClick={() => router.visit(route('research.index'))}>Open research</Button>} className="admin-dashboard-shell dashboard-table-card recent-research-activity-card">
                     <Table columns={proposalColumns} dataSource={recentProposals} rowKey="id" pagination={false} scroll={{ x: 900, y: balancedTableScrollY }} size="small" tableLayout="fixed" locale={{ emptyText: <EmptyState title="No research activity yet" description="Recent proposal submissions and updates will appear here." /> }} />
                 </Card>
@@ -155,6 +150,11 @@ export default function SuperAdminUsersTable({ recentUsers, recentProposals, ins
             <Col xs={24} xl={12}>
                 <Card title="Institution Performance" extra={<Button type="link" className={dark ? 'superadmin-card-action-link' : ''} onClick={() => router.visit(route('admin.institutions.index'))}>View institutions</Button>} className="admin-dashboard-shell dashboard-table-card">
                     <Table columns={institutionColumns} dataSource={institutionOverview} rowKey="id" pagination={false} scroll={{ x: 760, y: balancedTableScrollY }} size="small" locale={{ emptyText: <EmptyState title="No institution performance data" description="Institution metrics will populate after submissions are processed." /> }} />
+                </Card>
+            </Col>
+            <Col xs={24} xl={12}>
+                <Card title="Recently Added Users" extra={<Button type="link" className={dark ? 'superadmin-card-action-link' : ''} onClick={() => router.visit(route('admin.users.index'))}>View all</Button>} className="admin-dashboard-shell dashboard-table-card">
+                    <Table columns={userColumns} dataSource={recentUsers} rowKey="id" pagination={false} scroll={{ x: 760, y: balancedTableScrollY }} size="small" locale={{ emptyText: <EmptyState title="No recent users" description="Newly added users will appear here." /> }} />
                 </Card>
             </Col>
         </Row>

@@ -1,6 +1,4 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import { Button, Input } from 'antd';
+import { Button, Form, Input } from 'antd';
 import { Transition } from '@headlessui/react';
 import { useForm } from '@inertiajs/react';
 import { useRef } from 'react';
@@ -56,72 +54,52 @@ export default function UpdatePasswordForm({ className = '' }) {
                 </p>
             </header>
 
-            <form onSubmit={updatePassword} className="mt-6 space-y-6">
-                <div>
-                    <InputLabel
-                        htmlFor="current_password"
-                        value="Current Password"
-                    />
+            <form onSubmit={updatePassword} className="mt-6">
+                <Form layout="vertical" component={false}>
+                    <Form.Item
+                        label="Current Password"
+                        validateStatus={errors.current_password ? 'error' : ''}
+                        help={errors.current_password || undefined}
+                    >
+                        <Input.Password
+                            id="current_password"
+                            ref={currentPasswordInput}
+                            value={data.current_password}
+                            onChange={(e) => setData('current_password', e.target.value)}
+                            autoComplete="current-password"
+                        />
+                    </Form.Item>
 
-                    <Input.Password
-                        id="current_password"
-                        ref={currentPasswordInput}
-                        value={data.current_password}
-                        onChange={(e) =>
-                            setData('current_password', e.target.value)
-                        }
-                        className="mt-1.5"
-                        autoComplete="current-password"
-                        status={errors.current_password ? 'error' : ''}
-                    />
+                    <Form.Item
+                        label="New Password"
+                        validateStatus={errors.password ? 'error' : ''}
+                        help={errors.password || undefined}
+                    >
+                        <Input.Password
+                            id="password"
+                            ref={passwordInput}
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            autoComplete="new-password"
+                        />
+                    </Form.Item>
 
-                    <InputError
-                        message={errors.current_password}
-                        className="mt-1.5"
-                    />
-                </div>
-
-                <div>
-                    <InputLabel htmlFor="password" value="New Password" />
-
-                    <Input.Password
-                        id="password"
-                        ref={passwordInput}
-                        value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
-                        className="mt-1.5"
-                        autoComplete="new-password"
-                        status={errors.password ? 'error' : ''}
-                    />
-
-                    <InputError message={errors.password} className="mt-1.5" />
-                </div>
-
-                <div>
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
-                    <Input.Password
-                        id="password_confirmation"
-                        value={data.password_confirmation}
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                        className="mt-1.5"
-                        autoComplete="new-password"
-                        status={errors.password_confirmation ? 'error' : ''}
-                    />
-
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-1.5"
-                    />
-                </div>
+                    <Form.Item
+                        label="Confirm Password"
+                        validateStatus={errors.password_confirmation ? 'error' : ''}
+                        help={errors.password_confirmation || undefined}
+                    >
+                        <Input.Password
+                            id="password_confirmation"
+                            value={data.password_confirmation}
+                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                            autoComplete="new-password"
+                        />
+                    </Form.Item>
+                </Form>
 
                 <div className="flex items-center gap-4">
-                    <Button type="primary" loading={processing} disabled={processing}>Save</Button>
+                    <Button htmlType="submit" type="primary" loading={processing} disabled={processing}>Save</Button>
 
                     <Transition
                         show={recentlySuccessful}

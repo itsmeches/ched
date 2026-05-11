@@ -1,6 +1,4 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import { Button, Input } from 'antd';
+import { Button, Form, Input } from 'antd';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
 
@@ -35,39 +33,37 @@ export default function UpdateProfileInformation({
                 </p>
             </header>
 
-            <form onSubmit={submit} className="mt-6 space-y-6">
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
+            <form onSubmit={submit} className="mt-6">
+                <Form layout="vertical" component={false}>
+                    <Form.Item
+                        label="Name"
+                        validateStatus={errors.name ? 'error' : ''}
+                        help={errors.name || undefined}
+                    >
+                        <Input
+                            id="name"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            required
+                            autoFocus
+                            autoComplete="name"
+                        />
+                    </Form.Item>
 
-                    <Input
-                        id="name"
-                        className="mt-1.5"
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                        required
-                        autoFocus
-                        autoComplete="name"
-                        status={errors.name ? 'error' : ''}
-                    />
-
-                    <InputError className="mt-1.5" message={errors.name} />
-                </div>
-
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <Input
-                        id="email"
-                        className="mt-1.5"
-                        value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
-                        required
-                        autoComplete="username"
-                        status={errors.email ? 'error' : ''}
-                    />
-
-                    <InputError className="mt-1.5" message={errors.email} />
-                </div>
+                    <Form.Item
+                        label="Email"
+                        validateStatus={errors.email ? 'error' : ''}
+                        help={errors.email || undefined}
+                    >
+                        <Input
+                            id="email"
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            required
+                            autoComplete="username"
+                        />
+                    </Form.Item>
+                </Form>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
                     <div>
@@ -93,7 +89,7 @@ export default function UpdateProfileInformation({
                 )}
 
                 <div className="flex items-center gap-4">
-                    <Button type="primary" loading={processing} disabled={processing}>Save</Button>
+                    <Button htmlType="submit" type="primary" loading={processing} disabled={processing}>Save</Button>
 
                     <Transition
                         show={recentlySuccessful}

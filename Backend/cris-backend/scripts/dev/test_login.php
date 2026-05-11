@@ -12,7 +12,7 @@ if (! app()->environment(['local', 'testing'])) {
     exit(1);
 }
 
-$client = new GuzzleHttp\\Client(['base_uri' => 'http://127.0.0.1:8000']);
+$client = new GuzzleHttp\Client(['base_uri' => 'http://127.0.0.1:8000']);
 
 try {
     $response = $client->post('/api/auth/login', [
@@ -24,6 +24,6 @@ try {
 
     echo 'Status: ' . $response->getStatusCode() . PHP_EOL;
     echo 'Body: ' . $response->getBody() . PHP_EOL;
-} catch (GuzzleHttp\\Exception\\GuzzleException $e) {
+} catch (GuzzleHttp\Exception\GuzzleException $e) {
     echo 'Error: ' . $e->getMessage() . PHP_EOL;
 }

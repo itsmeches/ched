@@ -12,7 +12,7 @@ if (! app()->environment(['local', 'testing'])) {
     exit(1);
 }
 
-$user = App\\Models\\User::where('email', 'superadmin@cris.gov.ph')->first();
+$user = App\Models\User::where('email', 'superadmin@cris.gov.ph')->first();
 
 echo "User found: ";
 print_r($user ? $user->toArray() : 'NULL');

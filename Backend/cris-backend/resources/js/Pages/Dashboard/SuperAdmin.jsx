@@ -92,17 +92,9 @@ export default function SuperAdminDashboard({
                     {flash?.success && <Alert message={flash.success} type="success" showIcon />}
                     {flash?.error && <Alert message={flash.error} type="error" showIcon />}
 
-                    <div className="sm:hidden">
-                        {renderAdminShortcuts()}
-                    </div>
-
                     <Suspense fallback={sectionFallback}>
-                        <SuperAdminStats stats={stats} />
+                        <SuperAdminStats stats={stats} filters={filters} />
                     </Suspense>
-
-                    <div className="hidden sm:block">
-                        {renderAdminShortcuts()}
-                    </div>
 
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminUsersTable recentUsers={recentUsers} recentProposals={recentProposals} institutionOverview={institutionOverview} />
@@ -117,6 +109,14 @@ export default function SuperAdminDashboard({
                             institutionPerformance={institutionPerformance}
                         />
                     </Suspense>
+
+                    <div className="sm:hidden">
+                        {renderAdminShortcuts()}
+                    </div>
+
+                    <div className="hidden sm:block">
+                        {renderAdminShortcuts()}
+                    </div>
 
                     <Suspense fallback={sectionFallback}>
                         <SuperAdminAccountPanel data={data} setData={setData} postSubmit={submit} processing={processing} errors={errors} institutions={institutions} roles={roles} />

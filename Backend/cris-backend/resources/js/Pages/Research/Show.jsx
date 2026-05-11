@@ -4,7 +4,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
 import Breadcrumb from '@/Components/Breadcrumb';
 import { formatDateTime } from '@/utils/date';
-import { Alert, Button, Card, Divider, Input, Modal, Popconfirm, Space, Tag, Timeline, Typography, message } from 'antd';
+import { Alert, Button, Card, Divider, Input, Modal, Popconfirm, Space, Steps, Tag, Timeline, Typography, message } from 'antd';
 import { DownloadOutlined, FilePdfOutlined, KeyOutlined, LockOutlined } from '@ant-design/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -247,11 +247,39 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
             {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
 
             <div className="space-y-4">
-                    {auth?.user?.role !== 'ched' && (
-                        <Link href={route('research.index')} className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-[#0033a0] dark:hover:text-blue-300 transition-colors">← Back to Research Papers</Link>
-                    )}
                     {flash?.success && <Alert type="success" showIcon message={flash.success} />}
                     {flash?.error && <Alert type="error" showIcon message={flash.error} />}
+
+                    {/* Workflow Progress */}
+                    {(() => {
+                        const statusStepMap = {
+                            submitted: 0,
+                            under_review_faculty: 1,
+                            under_review_hei: 2,
+                            under_review_ched: 3,
+                            approved: 4,
+                            rejected: -1,
+                            needs_revision: -1,
+                        };
+                        const currentStep = statusStepMap[proposal.status] ?? 0;
+                        const isRejected = proposal.status === 'rejected' || proposal.status === 'needs_revision';
+                        return (
+                            <Card className="admin-dashboard-shell" bordered={false}>
+                                <Steps
+                                    current={isRejected ? currentStep : currentStep}
+                                    status={isRejected ? 'error' : proposal.status === 'approved' ? 'finish' : 'process'}
+                                    size="small"
+                                    items={[
+                                        { title: 'Submitted' },
+                                        { title: 'Faculty Review' },
+                                        { title: 'HEI Review' },
+                                        { title: 'CHED Review' },
+                                        { title: proposal.status === 'rejected' ? 'Rejected' : proposal.status === 'needs_revision' ? 'Needs Revision' : 'Approved' },
+                                    ]}
+                                />
+                            </Card>
+                        );
+                    })()}
 
                     {/* CHED: pending edit permission requests */}
                     {pendingEditRequests?.length > 0 && (
@@ -359,6 +387,17 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                                         <a href={route('research.file', { proposal: proposal.id, download: 1 })}>
                                             <Button icon={<DownloadOutlined />}>Download PDF</Button>
                                         </a>
+                                    )}
+
+                                    {canEdit && proposal.status === 'rejected' && (
+                                        <Popconfirm
+                                            title="Resubmit this revised proposal?"
+                                            description="This will reset approval trail timestamps and route it back to Faculty review."
+                                            okText="Resubmit"
+                                            onConfirm={() => router.post(route('research.resubmit', proposal.id))}
+                                        >
+                                            <Button type="primary">Resubmit to Faculty</Button>
+                                        </Popconfirm>
                                     )}
 
                                     {canShowEditButton && (
@@ -606,24 +645,6 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                                         description="CHED approved your request. Use the Edit button above to make your changes."
                                     />
                                 )}
-                            </Space>
-                        </Card>
-                    )}
-
-                    {canEdit && proposal.status === 'rejected' && (
-                        <Card className="admin-dashboard-shell" bordered={false} title="Revision Loop">
-                            <Space direction="vertical" style={{ width: '100%' }} size={12}>
-                                <Typography.Text type="secondary">
-                                    After finishing your edits, resubmit to restart the review pipeline from Faculty.
-                                </Typography.Text>
-                                <Popconfirm
-                                    title="Resubmit this revised proposal?"
-                                    description="This will reset approval trail timestamps and route it back to Faculty review."
-                                    okText="Resubmit"
-                                    onConfirm={() => router.post(route('research.resubmit', proposal.id))}
-                                >
-                                    <Button type="primary">Resubmit to Faculty</Button>
-                                </Popconfirm>
                             </Space>
                         </Card>
                     )}

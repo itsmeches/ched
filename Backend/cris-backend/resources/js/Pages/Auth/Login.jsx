@@ -1,9 +1,7 @@
 import Checkbox from '@/Components/Checkbox';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Button, Input } from 'antd';
+import { Button, Form, Input } from 'antd';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -35,51 +33,55 @@ export default function Login({ status, canResetPassword }) {
                 </div>
             )}
 
-            <form onSubmit={submit} className="space-y-5">
-                <div>
-                    <InputLabel htmlFor="email" value="Email address" />
-                    <Input
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1.5"
-                        autoComplete="username"
-                        autoFocus
-                        placeholder="you@example.com"
-                        onChange={(e) => setData('email', e.target.value)}
-                        status={errors.email ? 'error' : ''}
-                    />
-                    <InputError message={errors.email} className="mt-1.5" />
-                </div>
+            <form onSubmit={submit}>
+                <Form layout="vertical" component={false}>
+                    <Form.Item
+                        label="Email address"
+                        validateStatus={errors.email ? 'error' : ''}
+                        help={errors.email || undefined}
+                    >
+                        <Input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={data.email}
+                            autoComplete="username"
+                            autoFocus
+                            placeholder="you@example.com"
+                            className="ant-input-uniform"
+                            onChange={(e) => setData('email', e.target.value)}
+                        />
+                    </Form.Item>
 
-                <div>
-                    <div className="flex items-center justify-between">
-                        <InputLabel htmlFor="password" value="Password" />
-                        {canResetPassword && (
-                            <Link
-                                href={route('password.request')}
-                                className="text-xs font-medium text-[#0033a0] transition-colors hover:text-[#001f66] dark:text-blue-300 dark:hover:text-blue-200"
-                            >
-                                Forgot password?
-                            </Link>
-                        )}
-                    </div>
-                    <Input.Password
-                        id="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1.5"
-                        autoComplete="current-password"
-                        placeholder="••••••••"
-                        onChange={(e) => setData('password', e.target.value)}
-                        status={errors.password ? 'error' : ''}
-                    />
-                    <InputError message={errors.password} className="mt-1.5" />
-                </div>
+                    <Form.Item
+                        label="Password"
+                        validateStatus={errors.password ? 'error' : ''}
+                        help={errors.password || undefined}
+                        extra={
+                            canResetPassword && (
+                                <Link
+                                    href={route('password.request')}
+                                    className="text-xs font-medium text-[#0033a0] transition-colors hover:text-[#001f66] dark:text-blue-300 dark:hover:text-blue-200"
+                                >
+                                    Forgot password?
+                                </Link>
+                            )
+                        }
+                    >
+                        <Input.Password
+                            id="password"
+                            name="password"
+                            value={data.password}
+                            autoComplete="current-password"
+                            placeholder="••••••••"
+                            className="ant-input-uniform"
+                            onChange={(e) => setData('password', e.target.value)}
+                        />
+                    </Form.Item>
+                </Form>
 
-                <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                <div className="mb-5 flex items-center justify-between">
+                    <label className="flex cursor-pointer items-center gap-2">
                         <Checkbox
                             name="remember"
                             checked={data.remember}

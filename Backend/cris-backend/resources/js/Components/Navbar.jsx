@@ -1,8 +1,8 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
 import { MoonOutlined, SunOutlined } from '@ant-design/icons';
+import { Dropdown as AntDropdown } from 'antd';
 import { useTheme } from '@/utils/ThemeContext';
-import Dropdown from './Dropdown';
 
 export default function Navbar() {
     const page = usePage();
@@ -112,21 +112,9 @@ export default function Navbar() {
     };
 
     const navItems = getNavItems();
-    const [settingsOpen, setSettingsOpen] = useState(false);
-    const settingsRef = useRef(null);
     const [notifOpen, setNotifOpen] = useState(false);
     const [notifFilter, setNotifFilter] = useState('all');
     const notifRef = useRef(null);
-
-    useEffect(() => {
-        function handleClickOutside(e) {
-            if (settingsRef.current && !settingsRef.current.contains(e.target)) {
-                setSettingsOpen(false);
-            }
-        }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     useEffect(() => {
         function handleClickOutside(e) {
@@ -289,10 +277,33 @@ export default function Navbar() {
                         <div className="hidden md:flex items-center gap-1">
                             {navItems.map((item) =>
                                 item.dropdown ? (
-                                    <div key="settings-dropdown" className="relative" ref={settingsRef}>
+                                    <AntDropdown
+                                        key="settings-dropdown"
+                                        trigger={['click']}
+                                        placement="bottomLeft"
+                                        dropdownRender={() => (
+                                            <div className="min-w-[192px] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-[#1e2d47] dark:bg-[#111827]">
+                                                {item.children.map((child) => {
+                                                    const childActive = child.activePatterns?.some((p) => route().current(p));
+                                                    return (
+                                                        <Link
+                                                            key={child.href}
+                                                            href={child.href}
+                                                            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
+                                                                childActive
+                                                                    ? 'bg-blue-50 text-blue-900 dark:bg-[#1a2540] dark:text-blue-300'
+                                                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-[#1a2540] dark:hover:text-white'
+                                                            }`}
+                                                        >
+                                                            {child.label}
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    >
                                         <button
                                             type="button"
-                                            onClick={() => setSettingsOpen((o) => !o)}
                                             className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                                                 isActive(item)
                                                     ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300 border-b-2'
@@ -301,45 +312,11 @@ export default function Navbar() {
                                             style={isActive(item) ? { borderColor: '#0033a0' } : {}}
                                         >
                                             {item.label}
-                                            <svg
-                                                className={`h-3.5 w-3.5 transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`}
-                                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                            >
+                                            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </button>
-                                        {settingsOpen && (
-                                            <div className="absolute left-0 top-full mt-1 w-48 rounded-xl border border-slate-200 dark:border-[#1e2d47] bg-white dark:bg-[#111827] py-1 shadow-lg z-50">
-                                            {item.children.map((child) => {
-                                                const childActive = child.activePatterns?.some((p) => route().current(p));
-                                                const cls = `flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
-                                                    childActive
-                                                        ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300'
-                                                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-white'
-                                                }`;
-                                                return child.isLink ? (
-                                                    <Link
-                                                        key={child.href}
-                                                        href={child.href}
-                                                        onClick={() => setSettingsOpen(false)}
-                                                        className={cls}
-                                                    >
-                                                        {child.label}
-                                                    </Link>
-                                                ) : (
-                                                    <a
-                                                        key={child.href}
-                                                        href={child.href}
-                                                        onClick={() => setSettingsOpen(false)}
-                                                        className={cls}
-                                                    >
-                                                        {child.label}
-                                                    </a>
-                                                );
-                                            })}
-                                            </div>
-                                        )}
-                                    </div>
+                                    </AntDropdown>
                                 ) : (
                                     <Link
                                         key={item.href}
@@ -498,33 +475,43 @@ export default function Navbar() {
                         </div>
 
                         {/* User Dropdown */}
-                        <Dropdown>
-                            <Dropdown.Trigger>
-                                <button
-                                    type="button"
-                                    aria-label="Open user menu"
-                                    aria-haspopup="menu"
-                                    className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white shadow-sm transition-shadow hover:shadow-md"
-                                    style={{ background: 'linear-gradient(to bottom right, #0047d4, #0033a0)' }}
-                                >
-                                    {user.name.charAt(0).toUpperCase()}
-                                </button>
-                            </Dropdown.Trigger>
-
-                            <Dropdown.Content align="right">
-                                <div className="border-b border-slate-200 dark:border-[#1e2d47] px-4 py-2 text-sm text-slate-700 dark:text-slate-300">
-                                    <p className="font-semibold dark:text-white">{user.name}</p>
-                                    <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
-                                    <p className="text-xs font-medium text-[#0033a0] dark:text-blue-300">{getRoleLabel()}</p>
+                        <AntDropdown
+                            trigger={['click']}
+                            placement="bottomRight"
+                            dropdownRender={() => (
+                                <div className="min-w-[200px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-[#1e2d47] dark:bg-[#111827]">
+                                    <div className="border-b border-slate-200 px-4 py-2 dark:border-[#1e2d47]">
+                                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{user.name}</p>
+                                        <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
+                                        <p className="text-xs font-medium text-[#0033a0] dark:text-blue-300">{getRoleLabel()}</p>
+                                    </div>
+                                    <div className="py-1">
+                                        <Link
+                                            href={route('profile.edit')}
+                                            className="block px-4 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-[#1a2540]"
+                                        >
+                                            Profile Settings
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            className="block w-full px-4 py-2 text-left text-sm text-rose-600 transition-colors hover:bg-slate-50 dark:text-rose-400 dark:hover:bg-[#1a2540]"
+                                            onClick={() => router.post(route('logout'))}
+                                        >
+                                            Sign Out
+                                        </button>
+                                    </div>
                                 </div>
-                                <Dropdown.Link href={route('profile.edit')}>
-                                    Profile Settings
-                                </Dropdown.Link>
-                                <Dropdown.Link href={route('logout')} method="post" as="button">
-                                    Sign Out
-                                </Dropdown.Link>
-                            </Dropdown.Content>
-                        </Dropdown>
+                            )}
+                        >
+                            <button
+                                type="button"
+                                aria-label="Open user menu"
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white shadow-sm transition-shadow hover:shadow-md"
+                                style={{ background: 'linear-gradient(to bottom right, #0047d4, #0033a0)' }}
+                            >
+                                {user.name.charAt(0).toUpperCase()}
+                            </button>
+                        </AntDropdown>
 
                         {/* Mobile Menu Button */}
                         <button
