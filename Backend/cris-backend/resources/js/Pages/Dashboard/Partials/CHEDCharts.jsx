@@ -1,6 +1,6 @@
-import { Card, Col, Grid, Row, Statistic, Tag } from 'antd';
-import { AreaChart, Area, BarChart, Bar, PieChart, Pie, RadialBarChart, RadialBar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
-import { ArrowUpOutlined } from '@ant-design/icons';
+import { Card, Col, Empty, Grid, Progress, Row, Space, Statistic, Tag, Typography } from 'antd';
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, RadialBarChart, RadialBar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
+import { CheckCircleOutlined, ClockCircleOutlined, FileDoneOutlined } from '@ant-design/icons';
 import { router } from '@inertiajs/react';
 import { useTheme } from '@/utils/ThemeContext';
 
@@ -15,7 +15,7 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
     const gridColor = dark ? '#334155' : '#e2e8f0';
     const tooltipBgColor = dark ? '#0f172a' : '#f8fafc';
     const tooltipBorderColor = dark ? '#334155' : '#e2e8f0';
-    const emptyTextColor = dark ? '#94a3b8' : '#94a3b8';
+    const secondaryTextColor = dark ? '#94a3b8' : '#64748b';
 
     const formatDisciplineTick = (value) => {
         if (!value) {
@@ -34,6 +34,40 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
     const gaugeData = [
         { name: 'Approval Rate', value: stats.approvalRate || 0, fill: accentPrimary },
     ];
+
+    const kpiCards = [
+        {
+            key: 'total',
+            title: 'Total Papers Reviewed',
+            value: stats.total || 0,
+            prefix: <FileDoneOutlined style={{ color: accentPrimary }} />,
+            hint: 'All-time reviewed volume',
+        },
+        {
+            key: 'approvalRate',
+            title: 'Approval Rate',
+            value: stats.approvalRate || 0,
+            suffix: '%',
+            prefix: <CheckCircleOutlined style={{ color: '#16a34a' }} />,
+            hint: 'Share of approved submissions',
+        },
+        {
+            key: 'today',
+            title: 'Reviewed Today',
+            value: stats.reviewedToday || 0,
+            prefix: <ClockCircleOutlined style={{ color: '#d97706' }} />,
+            hint: 'Updated daily from latest actions',
+        },
+    ];
+
+    const noData = (
+        <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={<Typography.Text type="secondary">No data available</Typography.Text>}
+            />
+        </div>
+    );
 
     function openResearch(params = {}) {
         router.visit(route('research.index', params));
@@ -81,44 +115,39 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
         <div className="space-y-4">
             {/* KPI Header */}
             <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} xl={8}>
-                    <Card className="admin-dashboard-shell" hoverable>
-                        <Statistic
-                            title="Total Papers Reviewed"
-                            value={stats.total || 0}
-                            prefix={<span style={{ color: accentPrimary }}>📊</span>}
-                            valueStyle={{ fontSize: 28, color: metricTextColor }}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} xl={8}>
-                    <Card className="admin-dashboard-shell" hoverable>
-                        <Statistic
-                            title="Approval Rate"
-                            value={stats.approvalRate || 0}
-                            suffix="%"
-                            prefix={<span style={{ color: '#16a34a' }}>✓</span>}
-                            valueStyle={{ fontSize: 28, color: metricTextColor }}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} xl={8}>
-                    <Card className="admin-dashboard-shell" hoverable>
-                        <Statistic
-                            title="Reviewed Today"
-                            value={stats.reviewedToday || 0}
-                            prefix={<ArrowUpOutlined style={{ color: '#d97706' }} />}
-                            valueStyle={{ fontSize: 28, color: metricTextColor }}
-                        />
-                    </Card>
-                </Col>
+                {kpiCards.map((item, index) => (
+                    <Col xs={24} sm={12} xl={8} key={item.key}>
+                        <Card
+                            className="admin-dashboard-shell dashboard-reveal kpi-stat-card"
+                            hoverable
+                            style={{ animationDelay: `${index * 55}ms` }}
+                        >
+                            <Statistic
+                                title={item.title}
+                                value={item.value}
+                                suffix={item.suffix}
+                                prefix={item.prefix}
+                                valueStyle={{ fontSize: 28, color: metricTextColor }}
+                            />
+                            <Typography.Text type="secondary" style={{ fontSize: 12, color: secondaryTextColor }}>
+                                {item.hint}
+                            </Typography.Text>
+                        </Card>
+                    </Col>
+                ))}
             </Row>
 
             {/* Charts Grid */}
             <Row gutter={[16, 16]}>
                 {/* Monthly Trend */}
                 <Col xs={24} xl={16}>
-                    <Card title="Monthly Approval Trend (Last 12 Months)" className="admin-dashboard-shell" bordered={false}>
+                    <Card
+                        title="Monthly Approval Trend"
+                        extra={<Typography.Text type="secondary">Last 12 months</Typography.Text>}
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        style={{ animationDelay: '100ms' }}
+                    >
                         {monthlyTrends && monthlyTrends.length > 0 ? (
                             <ResponsiveContainer width="100%" height={300}>
                                 <AreaChart data={monthlyTrends}>
@@ -135,23 +164,27 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                                     <XAxis dataKey="month" stroke={axisColor} />
                                     <YAxis stroke={axisColor} />
-                                    <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
+                                    <RechartsTooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
                                     <Legend />
                                     <Area type="monotone" dataKey="approved" stroke="#16a34a" fillOpacity={1} fill="url(#colorApproved)" name="Approved" onClick={onMonthClick} />
                                     <Area type="monotone" dataKey="pending" stroke="#d97706" fillOpacity={1} fill="url(#colorPending)" name="Pending" onClick={onMonthClick} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: emptyTextColor }}>
-                                No data available
-                            </div>
+                            noData
                         )}
                     </Card>
                 </Col>
 
                 {/* Status Distribution */}
                 <Col xs={24} xl={8}>
-                    <Card title="Overall Status Distribution" className="admin-dashboard-shell" bordered={false}>
+                    <Card
+                        title="Overall Status Distribution"
+                        extra={<Typography.Text type="secondary">Click a segment to filter</Typography.Text>}
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        style={{ animationDelay: '145ms' }}
+                    >
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={2} dataKey="value" onClick={onStatusClick}>
@@ -159,7 +192,7 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                                         <Cell key={`cell-${index}`} fill={entry.fill} />
                                     ))}
                                 </Pie>
-                                <Tooltip />
+                                <RechartsTooltip />
                             </PieChart>
                         </ResponsiveContainer>
                         <div style={{ marginTop: 16, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -176,28 +209,38 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
             {/* Approval Funnel */}
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={12}>
-                    <Card title="Approval Funnel by Stage" className="admin-dashboard-shell" bordered={false}>
+                    <Card
+                        title="Approval Funnel by Stage"
+                        extra={<Typography.Text type="secondary">Tap a bar to open filtered records</Typography.Text>}
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        style={{ animationDelay: '190ms' }}
+                    >
                         {approvalFunnel && approvalFunnel.length > 0 ? (
                             <ResponsiveContainer width="100%" height={280}>
                                 <BarChart layout="vertical" data={approvalFunnel}>
                                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                                     <XAxis type="number" stroke={axisColor} />
                                     <YAxis dataKey="stage" type="category" stroke={axisColor} width={100} />
-                                    <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
+                                    <RechartsTooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
                                     <Bar dataKey="count" fill={accentPrimary} radius={[0, 8, 8, 0]} name="Papers in Stage" onClick={onFunnelClick} />
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: emptyTextColor }}>
-                                No data available
-                            </div>
+                            noData
                         )}
                     </Card>
                 </Col>
 
                 {/* Discipline Distribution */}
                 <Col xs={24} xl={12}>
-                    <Card title="Top Research Disciplines" className="admin-dashboard-shell" bordered={false}>
+                    <Card
+                        title="Top Research Disciplines"
+                        extra={<Typography.Text type="secondary">By submission volume</Typography.Text>}
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        style={{ animationDelay: '235ms' }}
+                    >
                         {disciplineBreakdown && disciplineBreakdown.length > 0 ? (
                             <ResponsiveContainer width="100%" height={320}>
                                 <BarChart data={disciplineBreakdown} margin={{ top: 8, right: 16, left: 0, bottom: 64 }}>
@@ -212,7 +255,7 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                                         tickFormatter={formatDisciplineTick}
                                     />
                                     <YAxis stroke={axisColor} />
-                                    <Tooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
+                                    <RechartsTooltip contentStyle={{ backgroundColor: tooltipBgColor, border: `1px solid ${tooltipBorderColor}`, borderRadius: 6 }} />
                                     <Bar
                                         dataKey="submissions"
                                         fill="#d97706"
@@ -228,9 +271,7 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: emptyTextColor }}>
-                                No data available
-                            </div>
+                            noData
                         )}
                     </Card>
                 </Col>
@@ -239,8 +280,25 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
             {/* Approval Rate Gauge */}
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={8}>
-                    <Card title="Approval Rate Gauge" className="admin-dashboard-shell" bordered={false}>
-                        <ResponsiveContainer width="100%" height={250}>
+                    <Card
+                        title="Approval Rate Gauge"
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        style={{ animationDelay: '280ms' }}
+                    >
+                        <Space direction="vertical" size={14} style={{ width: '100%' }}>
+                            <Progress
+                                percent={stats.approvalRate || 0}
+                                size="small"
+                                strokeColor={accentPrimary}
+                                trailColor={dark ? '#1f2937' : '#e2e8f0'}
+                                showInfo={false}
+                            />
+                            <Typography.Text type="secondary" style={{ color: secondaryTextColor }}>
+                                Instant readout for current approval performance.
+                            </Typography.Text>
+                        </Space>
+                        <ResponsiveContainer width="100%" height={230}>
                             <RadialBarChart cx="50%" cy="50%" innerRadius="30%" outerRadius="90%" data={gaugeData} startAngle={90} endAngle={0}>
                                 <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} />
                                 <PolarRadiusAxis />
@@ -255,28 +313,34 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
 
                 {/* Summary Stats */}
                 <Col xs={24} xl={16}>
-                    <Card title="Summary Statistics" className="admin-dashboard-shell" bordered={false}>
+                    <Card
+                        title="Summary Statistics"
+                        extra={<Typography.Text type="secondary">Status totals</Typography.Text>}
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        style={{ animationDelay: '320ms' }}
+                    >
                         <Row gutter={[12, 12]}>
                             <Col xs={12} sm={6}>
-                                <div style={{ textAlign: 'center', padding: 12 }}>
+                                <div className="summary-stat-pill" style={{ textAlign: 'center', padding: 12 }}>
                                     <div style={{ fontSize: 24, fontWeight: 'bold', color: '#16a34a' }}>{stats.approved || 0}</div>
                                     <div style={{ fontSize: 12, color: axisColor, marginTop: 4 }}>Approved</div>
                                 </div>
                             </Col>
                             <Col xs={12} sm={6}>
-                                <div style={{ textAlign: 'center', padding: 12 }}>
+                                <div className="summary-stat-pill" style={{ textAlign: 'center', padding: 12 }}>
                                     <div style={{ fontSize: 24, fontWeight: 'bold', color: '#d97706' }}>{stats.pending || 0}</div>
                                     <div style={{ fontSize: 12, color: axisColor, marginTop: 4 }}>Pending</div>
                                 </div>
                             </Col>
                             <Col xs={12} sm={6}>
-                                <div style={{ textAlign: 'center', padding: 12 }}>
+                                <div className="summary-stat-pill" style={{ textAlign: 'center', padding: 12 }}>
                                     <div style={{ fontSize: 24, fontWeight: 'bold', color: '#dc2626' }}>{stats.rejected || 0}</div>
                                     <div style={{ fontSize: 12, color: axisColor, marginTop: 4 }}>Rejected</div>
                                 </div>
                             </Col>
                             <Col xs={12} sm={6}>
-                                <div style={{ textAlign: 'center', padding: 12 }}>
+                                <div className="summary-stat-pill" style={{ textAlign: 'center', padding: 12 }}>
                                     <div style={{ fontSize: 24, fontWeight: 'bold', color: accentPrimary }}>{stats.total || 0}</div>
                                     <div style={{ fontSize: 12, color: axisColor, marginTop: 4 }}>Total</div>
                                 </div>

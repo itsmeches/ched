@@ -101,6 +101,278 @@ html.dark .admin-dashboard-shell .ant-card-head-title {
 	font-weight: 600;
 }
 
+/* === CHED charts UI polish === */
+.dashboard-reveal {
+	opacity: 0;
+	transform: translateY(10px);
+	animation: dashboard-card-reveal 420ms ease forwards;
+}
+
+@keyframes dashboard-card-reveal {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.kpi-stat-card .ant-statistic-title {
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.01em;
+	margin-bottom: 10px;
+}
+
+.kpi-stat-card .ant-statistic-content {
+	margin-bottom: 8px;
+}
+
+.kpi-stat-card .ant-statistic-content-prefix {
+	margin-right: 10px;
+}
+
+.kpi-stat-card .ant-statistic-content-value {
+	font-weight: 700;
+}
+
+.dashboard-table-card .ant-card-head {
+	min-height: 52px;
+}
+
+.dashboard-table-card .ant-card-head-title {
+	font-size: 15px;
+}
+
+.dashboard-table-card .ant-card-extra {
+	font-size: 13px;
+}
+
+.dashboard-filter-shell,
+.dashboard-filters-shell {
+	border: 1px solid rgba(226, 232, 240, 0.9);
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.88) 100%);
+}
+
+html.dark .dashboard-filter-shell,
+html.dark .dashboard-filters-shell {
+	border-color: rgba(45, 66, 107, 0.9);
+	background: linear-gradient(180deg, rgba(17, 24, 39, 0.94) 0%, rgba(15, 23, 42, 0.88) 100%);
+}
+
+.dashboard-filters-header {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.dashboard-filter-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+}
+
+.dashboard-filter-control {
+	min-width: 140px;
+	flex: 1 1 auto;
+	max-width: 100%;
+}
+
+.dashboard-filter-year {
+	flex-basis: 140px;
+	max-width: 180px;
+}
+
+.dashboard-filter-institution,
+.dashboard-filter-discipline {
+	flex-basis: 260px;
+	max-width: 360px;
+}
+
+.dashboard-filter-status {
+	flex-basis: 170px;
+	max-width: 220px;
+}
+
+.dashboard-filter-reset {
+	min-width: 110px;
+	border-radius: 10px;
+	font-weight: 600;
+}
+
+.dashboard-filter-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding-top: 2px;
+}
+
+.dashboard-filter-chips .ant-tag {
+	padding-inline: 10px;
+	padding-block: 4px;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.2;
+}
+
+.edit-action-btn.ant-btn {
+	font-weight: 600;
+	border-radius: 8px;
+	transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+html.dark .edit-action-btn.ant-btn-link {
+	color: #bfdbfe !important;
+	background-color: rgba(59, 130, 246, 0.18);
+	border: 1px solid rgba(96, 165, 250, 0.44);
+	padding-inline: 10px;
+}
+
+html.dark .edit-action-btn.ant-btn-link:hover,
+html.dark .edit-action-btn.ant-btn-link:focus {
+	color: #eff6ff !important;
+	background-color: rgba(59, 130, 246, 0.32) !important;
+	border-color: rgba(147, 197, 253, 0.72) !important;
+}
+
+html.dark .edit-action-btn.ant-btn-default {
+	color: #dbeafe;
+	background-color: rgba(30, 64, 175, 0.28);
+	border-color: rgba(96, 165, 250, 0.52);
+}
+
+html.dark .edit-action-btn.ant-btn-default:hover,
+html.dark .edit-action-btn.ant-btn-default:focus {
+	color: #eff6ff !important;
+	background-color: rgba(37, 99, 235, 0.38) !important;
+	border-color: rgba(147, 197, 253, 0.82) !important;
+}
+
+html.dark .admin-dashboard-shell .ant-btn-link:not(.ant-btn-dangerous):not(.edit-action-btn):not(.recent-research-title-link):not(.superadmin-card-action-link) {
+	color: #cfe4ff !important;
+	background-color: rgba(37, 99, 235, 0.14);
+	border: 1px solid rgba(96, 165, 250, 0.34);
+	border-radius: 8px;
+	font-weight: 600;
+	padding-inline: 10px;
+}
+
+html.dark .admin-dashboard-shell .ant-btn-link:not(.ant-btn-dangerous):not(.edit-action-btn):not(.recent-research-title-link):not(.superadmin-card-action-link):hover,
+html.dark .admin-dashboard-shell .ant-btn-link:not(.ant-btn-dangerous):not(.edit-action-btn):not(.recent-research-title-link):not(.superadmin-card-action-link):focus {
+	color: #eff6ff !important;
+	background-color: rgba(37, 99, 235, 0.28) !important;
+	border-color: rgba(147, 197, 253, 0.62) !important;
+}
+
+html.dark .main-scroll .ant-btn-link:not(.ant-btn-dangerous):not(.edit-action-btn):not(.recent-research-title-link):not(.superadmin-card-action-link) {
+	color: #bfdbfe !important;
+}
+
+html.dark .main-scroll .ant-btn-link:not(.ant-btn-dangerous):not(.edit-action-btn):not(.recent-research-title-link):not(.superadmin-card-action-link):hover,
+html.dark .main-scroll .ant-btn-link:not(.ant-btn-dangerous):not(.edit-action-btn):not(.recent-research-title-link):not(.superadmin-card-action-link):focus {
+	color: #eff6ff !important;
+}
+
+/* === Dark mode pagination readability === */
+html.dark .ant-pagination .ant-pagination-item {
+	background: rgba(15, 23, 42, 0.86);
+	border-color: rgba(71, 85, 105, 0.75);
+}
+
+html.dark .ant-pagination .ant-pagination-item a {
+	color: #cbd5e1;
+	font-weight: 600;
+}
+
+html.dark .ant-pagination .ant-pagination-item:hover {
+	border-color: rgba(147, 197, 253, 0.62);
+	background: rgba(30, 41, 59, 0.95);
+}
+
+html.dark .ant-pagination .ant-pagination-item:hover a {
+	color: #e2e8f0;
+}
+
+html.dark .ant-pagination .ant-pagination-item-active {
+	background: linear-gradient(135deg, rgba(29, 78, 216, 0.86) 0%, rgba(37, 99, 235, 0.92) 100%);
+	border-color: rgba(147, 197, 253, 0.8);
+	box-shadow: 0 6px 18px rgba(30, 64, 175, 0.32);
+}
+
+html.dark .ant-pagination .ant-pagination-item-active a,
+html.dark .ant-pagination .ant-pagination-item-active:hover a {
+	color: #f8fafc;
+}
+
+html.dark .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+html.dark .ant-pagination .ant-pagination-next .ant-pagination-item-link,
+html.dark .ant-pagination .ant-pagination-jump-prev .ant-pagination-item-link,
+html.dark .ant-pagination .ant-pagination-jump-next .ant-pagination-item-link {
+	background: rgba(15, 23, 42, 0.86);
+	border-color: rgba(71, 85, 105, 0.75);
+	color: #cbd5e1;
+}
+
+html.dark .ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+html.dark .ant-pagination .ant-pagination-next:hover .ant-pagination-item-link,
+html.dark .ant-pagination .ant-pagination-jump-prev:hover .ant-pagination-item-link,
+html.dark .ant-pagination .ant-pagination-jump-next:hover .ant-pagination-item-link {
+	color: #eff6ff;
+	border-color: rgba(147, 197, 253, 0.62);
+	background: rgba(30, 41, 59, 0.95);
+}
+
+html.dark .ant-pagination .ant-pagination-disabled .ant-pagination-item-link,
+html.dark .ant-pagination .ant-pagination-disabled:hover .ant-pagination-item-link {
+	color: #475569;
+	border-color: rgba(51, 65, 85, 0.7);
+	background: rgba(2, 6, 23, 0.46);
+}
+
+html.dark .ant-pagination .ant-pagination-options .ant-select-selector {
+	background: rgba(15, 23, 42, 0.86) !important;
+	border-color: rgba(71, 85, 105, 0.75) !important;
+	color: #cbd5e1 !important;
+}
+
+html.dark .ant-pagination .ant-pagination-options .ant-select-arrow {
+	color: #94a3b8;
+}
+
+.summary-stat-pill {
+	border: 1px solid rgba(226, 232, 240, 0.8);
+	border-radius: 14px;
+	background: linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.82) 100%);
+	transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.summary-stat-pill:hover {
+	transform: translateY(-1px);
+	border-color: rgba(148, 163, 184, 0.55);
+	box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+}
+
+html.dark .summary-stat-pill {
+	border-color: rgba(45, 66, 107, 0.9);
+	background: linear-gradient(180deg, rgba(17, 24, 39, 0.95) 0%, rgba(15, 23, 42, 0.88) 100%);
+}
+
+html.dark .summary-stat-pill:hover {
+	border-color: rgba(96, 165, 250, 0.36);
+	box-shadow: 0 12px 24px rgba(2, 6, 23, 0.46);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dashboard-reveal {
+		opacity: 1;
+		transform: none;
+		animation: none;
+	}
+}
+
 .quick-action-cluster {
 	display: flex;
 	flex-wrap: wrap;
@@ -223,6 +495,14 @@ html.dark .superadmin-card-action-link:active {
 	color: #ffffff !important;
 }
 
+.recent-research-title-btn {
+	display: inline-flex;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 /* === Small-screen admin layout improvements === */
 .admin-page-header .ant-typography {
 	max-width: 100%;
@@ -263,6 +543,16 @@ html.dark .superadmin-card-action-link:active {
 	.admin-dashboard-shell .ant-table-tbody > tr > td {
 		padding-left: 10px;
 		padding-right: 10px;
+	}
+
+	.dashboard-filter-control,
+	.dashboard-filter-year,
+	.dashboard-filter-institution,
+	.dashboard-filter-discipline,
+	.dashboard-filter-status,
+	.dashboard-filter-reset {
+		min-width: 100%;
+		max-width: 100%;
 	}
 }
 

@@ -72,7 +72,7 @@ export default function InstitutionsIndex({ institutions, filters }) {
             onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, institution) => (
                 <Space>
-                    <Button type="link" onClick={() => router.visit(route('admin.institutions.edit', institution.id))}>Edit</Button>
+                    <Button type="link" className="edit-action-btn" onClick={() => router.visit(route('admin.institutions.edit', institution.id))}>Edit</Button>
                     <Button danger type="link" onClick={() => deleteInstitution(institution.id)}>Delete</Button>
                 </Space>
             ),

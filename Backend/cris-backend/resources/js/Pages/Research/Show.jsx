@@ -363,7 +363,7 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
 
                                     {canShowEditButton && (
                                         <Link href={route('research.edit', proposal.id)}>
-                                            <Button>Edit</Button>
+                                            <Button className="edit-action-btn">Edit</Button>
                                         </Link>
                                     )}
 

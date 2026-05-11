@@ -3,7 +3,7 @@ import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, FileAddOutlined, FileTextOutlined, StopOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClockCircleOutlined, FileAddOutlined, FileTextOutlined, StopOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import DashboardFilters from '@/Components/DashboardFilters';
 import { useTheme } from '@/utils/ThemeContext';
@@ -88,12 +88,12 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
                             <Space direction="vertical" style={{ width: '100%' }} size={12}>
                                 <Link href={route('research.create')}>
                                     <Button type="primary" size="large" block icon={<FileAddOutlined />} className="quick-action-primary">
-                                        Upload New Paper
+                                        Open Submission Form
                                     </Button>
                                 </Link>
                                 <Link href={route('research.index')}>
-                                    <Button size="large" block className="quick-action-secondary">
-                                        View My Submissions
+                                    <Button size="large" block icon={<UnorderedListOutlined />} className="quick-action-secondary">
+                                        Open My Submissions
                                     </Button>
                                 </Link>
                             </Space>
@@ -110,16 +110,16 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
                 />
 
                 <Row gutter={[16, 16]}>
-                    {statItems.map((item) => (
+                    {statItems.map((item, index) => (
                         <Col xs={24} sm={12} xl={24 / statItems.length} key={item.key}>
-                            <Card className="admin-dashboard-shell" hoverable>
+                            <Card className="admin-dashboard-shell kpi-stat-card dashboard-reveal" hoverable style={{ animationDelay: `${index * 55}ms` }}>
                                 <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: metricTextColor }} />
                             </Card>
                         </Col>
                     ))}
                 </Row>
 
-                <Card className="admin-dashboard-shell" title="Review Queue" bordered={false}>
+                <Card className="admin-dashboard-shell dashboard-table-card" title="Review Queue" bordered={false}>
                     {pendingQueue.length === 0 ? (
                         <Alert type="success" showIcon message="No submissions currently pending review." />
                     ) : (
@@ -127,9 +127,7 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
                     )}
                 </Card>
 
-
-
-                <Card title="Recent Uploads" className="admin-dashboard-shell">
+                <Card title="Recent Uploads" className="admin-dashboard-shell dashboard-table-card">
                     {recentUploads.length === 0 ? (
                         <Alert type="info" showIcon message="No papers yet. Upload your first research paper." />
                     ) : (

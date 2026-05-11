@@ -69,6 +69,7 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
                         <Space>
                             <Button
                                 type="link"
+                                className="edit-action-btn"
                                 onClick={() => router.get(route('accounts.edit', { user: row.id }))}
                             >
                                 Edit
@@ -92,6 +93,7 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
                     <Space>
                         <Button
                             type="link"
+                            className="edit-action-btn"
                             onClick={() => router.get(route('accounts.edit', { user: row.id }))}
                         >
                             Edit

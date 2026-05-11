@@ -1,4 +1,4 @@
-import { Card, Col, Grid, Row } from 'antd';
+import { Card, Col, Empty, Grid, Row, Typography } from 'antd';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { router } from '@inertiajs/react';
 import { useTheme } from '@/utils/ThemeContext';
@@ -33,6 +33,15 @@ export default function SuperAdminCharts({
         { name: 'Rejected', value: stats.rejected || 0, fill: '#dc2626' },
     ];
 
+    const noData = (
+        <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={<Typography.Text type="secondary">No data available</Typography.Text>}
+            />
+        </div>
+    );
+
     function openResearch(params = {}) {
         router.visit(route('research.index', params));
     }
@@ -65,7 +74,8 @@ export default function SuperAdminCharts({
             {/* Charts Row */}
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={16}>
-                    <Card title="Submission Trend (Last 12 Months)" className="admin-dashboard-shell" bordered={false}>
+                    <Card title="Submission Trend" extra={<Typography.Text type="secondary">Last 12 months</Typography.Text>} className="admin-dashboard-shell dashboard-reveal" bordered={false} style={{ animationDelay: '100ms' }}>
+                        {monthlyTrends.length > 0 ? (
                         <ResponsiveContainer width="100%" height={320}>
                             <AreaChart data={monthlyTrends}>
                                 <defs>
@@ -106,11 +116,13 @@ export default function SuperAdminCharts({
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
+                        ) : noData}
                     </Card>
                 </Col>
 
                 <Col xs={24} xl={8}>
-                    <Card title="Proposal Status Breakdown" className="admin-dashboard-shell" bordered={false}>
+                    <Card title="Proposal Status Breakdown" extra={<Typography.Text type="secondary">Click to filter</Typography.Text>} className="admin-dashboard-shell dashboard-reveal" bordered={false} style={{ animationDelay: '145ms' }}>
+                        {statusBreakdownData.some((item) => item.value > 0) ? (
                         <ResponsiveContainer width="100%" height={320}>
                             <PieChart>
                                 <Pie
@@ -133,13 +145,15 @@ export default function SuperAdminCharts({
                                 <Legend />
                             </PieChart>
                         </ResponsiveContainer>
+                        ) : noData}
                     </Card>
                 </Col>
             </Row>
 
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={12}>
-                    <Card title="Institution Performance (Submissions vs Approvals)" className="admin-dashboard-shell" bordered={false}>
+                    <Card title="Institution Performance" extra={<Typography.Text type="secondary">Submissions vs approvals</Typography.Text>} className="admin-dashboard-shell dashboard-reveal" bordered={false} style={{ animationDelay: '190ms' }}>
+                        {institutionPerformance.length > 0 ? (
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={institutionPerformance}>
                                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
@@ -165,11 +179,13 @@ export default function SuperAdminCharts({
                                 <Bar dataKey="approved" fill="#16a34a" name="Approved" radius={[8, 8, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
+                        ) : noData}
                     </Card>
                 </Col>
 
                 <Col xs={24} xl={12}>
-                    <Card title="User Role Distribution" className="admin-dashboard-shell" bordered={false}>
+                    <Card title="User Role Distribution" extra={<Typography.Text type="secondary">Click bar to open users</Typography.Text>} className="admin-dashboard-shell dashboard-reveal" bordered={false} style={{ animationDelay: '235ms' }}>
+                        {roleDistribution.length > 0 ? (
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={roleDistribution}>
                                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
@@ -200,13 +216,15 @@ export default function SuperAdminCharts({
                                 />
                             </BarChart>
                         </ResponsiveContainer>
+                        ) : noData}
                     </Card>
                 </Col>
             </Row>
 
             <Row gutter={[16, 16]}>
                 <Col xs={24}>
-                    <Card title="Top Disciplines by Submission" className="admin-dashboard-shell" bordered={false}>
+                    <Card title="Top Disciplines by Submission" extra={<Typography.Text type="secondary">Click a bar to filter</Typography.Text>} className="admin-dashboard-shell dashboard-reveal" bordered={false} style={{ animationDelay: '280ms' }}>
+                        {disciplineBreakdown.length > 0 ? (
                         <ResponsiveContainer width="100%" height={340}>
                             <BarChart data={disciplineBreakdown} margin={{ top: 8, right: 16, left: 0, bottom: 70 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
@@ -238,6 +256,7 @@ export default function SuperAdminCharts({
                                 />
                             </BarChart>
                         </ResponsiveContainer>
+                        ) : noData}
                     </Card>
                 </Col>
             </Row>

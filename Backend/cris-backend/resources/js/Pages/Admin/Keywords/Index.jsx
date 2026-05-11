@@ -51,7 +51,7 @@ export default function KeywordsIndex({ keywords, filters }) {
             onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, keyword) => (
                 <Space>
-                    <Button type="link" onClick={() => openEdit(keyword)}>Edit</Button>
+                    <Button type="link" className="edit-action-btn" onClick={() => openEdit(keyword)}>Edit</Button>
                     <Tooltip title={keyword.research_proposals_count > 0 ? 'Cannot delete: keyword is in use' : null}>
                         <span>
                             <Button
