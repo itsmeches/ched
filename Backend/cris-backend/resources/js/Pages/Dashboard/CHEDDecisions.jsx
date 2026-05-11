@@ -46,7 +46,7 @@ export default function CHEDDecisions({ decisions }) {
             <Head title="My Decisions" />
 
             <div className="space-y-4">
-                <Card className="admin-dashboard-shell" bordered={false}>
+                <Card className="admin-dashboard-shell dashboard-table-card" bordered={false}>
                     <Typography.Title level={4} style={{ marginBottom: 6 }}>
                         My Decisions
                     </Typography.Title>
@@ -55,7 +55,7 @@ export default function CHEDDecisions({ decisions }) {
                     </Typography.Paragraph>
                 </Card>
 
-                <Card className="admin-dashboard-shell" title="Recent Review Decisions">
+                <Card className="admin-dashboard-shell dashboard-table-card" title="Recent Review Decisions">
                     {decisions.length === 0 ? (
                         <Alert type="info" showIcon message="No decisions available yet." />
                     ) : (

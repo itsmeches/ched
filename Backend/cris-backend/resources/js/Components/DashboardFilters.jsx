@@ -1,5 +1,5 @@
 import { router, usePage } from '@inertiajs/react';
-import { Button, Select, Tag } from 'antd';
+import { Button, Card, Select, Space, Tag, Typography } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 const STATUS_OPTIONS = [
@@ -150,11 +150,21 @@ export default function DashboardFilters({
     }, [disciplineOptions, institutionOptions, localFilters, showInstitutionFilter]);
 
     return (
-        <div className="rounded-xl border border-slate-200 bg-white/80 p-3 dark:border-[#1e2d47] dark:bg-[#111827]/80">
-            <div className="flex flex-wrap items-center gap-4">
+        <Card className="admin-dashboard-shell dashboard-filters-shell" bordered={false}>
+            <Space direction="vertical" size={14} style={{ width: '100%' }}>
+                <div className="dashboard-filters-header">
+                    <Typography.Title level={5} style={{ margin: 0 }}>
+                        Dashboard Filters
+                    </Typography.Title>
+                    <Typography.Text type="secondary">
+                        Refine charts and tables by year, institution, discipline, and status.
+                    </Typography.Text>
+                </div>
+
+                <div className="dashboard-filter-toolbar">
                 <Select
                     size="middle"
-                    className="min-w-[130px]"
+                    className="dashboard-filter-control dashboard-filter-year"
                     value={localFilters.year || ''}
                     options={yearOptions}
                     onChange={(value) => updateFilter('year', value)}
@@ -164,7 +174,7 @@ export default function DashboardFilters({
                 {showInstitutionFilter && (
                     <Select
                         size="middle"
-                        className="min-w-[220px]"
+                        className="dashboard-filter-control dashboard-filter-institution"
                         value={localFilters.hei_id || ''}
                         options={institutionOptions}
                         onChange={(value) => updateFilter('hei_id', value)}
@@ -176,7 +186,7 @@ export default function DashboardFilters({
 
                 <Select
                     size="middle"
-                    className="min-w-[230px]"
+                    className="dashboard-filter-control dashboard-filter-discipline"
                     value={localFilters.discipline_code || ''}
                     options={disciplineOptions}
                     onChange={(value) => updateFilter('discipline_code', value)}
@@ -187,32 +197,33 @@ export default function DashboardFilters({
 
                 <Select
                     size="middle"
-                    className="min-w-[160px]"
+                    className="dashboard-filter-control dashboard-filter-status"
                     value={localFilters.status || ''}
                     options={STATUS_OPTIONS}
                     onChange={(value) => updateFilter('status', value)}
                     aria-label="Filter dashboard by status"
                 />
 
-                <Button onClick={resetFilters}>Reset</Button>
-            </div>
-
-            {activeFilterChips.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                    {activeFilterChips.map((chip) => (
-                        <Tag
-                            key={chip.key}
-                            closable
-                            onClose={(event) => {
-                                event.preventDefault();
-                                updateFilter(chip.key, '');
-                            }}
-                        >
-                            {chip.label}
-                        </Tag>
-                    ))}
+                    <Button className="dashboard-filter-reset" onClick={resetFilters}>Reset</Button>
                 </div>
-            )}
-        </div>
+
+                {activeFilterChips.length > 0 && (
+                    <div className="dashboard-filter-chips">
+                        {activeFilterChips.map((chip) => (
+                            <Tag
+                                key={chip.key}
+                                closable
+                                onClose={(event) => {
+                                    event.preventDefault();
+                                    updateFilter(chip.key, '');
+                                }}
+                            >
+                                {chip.label}
+                            </Tag>
+                        ))}
+                    </div>
+                )}
+            </Space>
+        </Card>
     );
 }

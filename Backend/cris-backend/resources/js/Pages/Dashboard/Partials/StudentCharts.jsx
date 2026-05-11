@@ -1,4 +1,4 @@
-import { Card, Col, Progress, Row, Tag } from 'antd';
+import { Card, Col, Empty, Progress, Row, Tag, Typography } from 'antd';
 import {
     Area,
     AreaChart,
@@ -46,6 +46,15 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
         Rejected: 'rejected',
     };
 
+    const noData = (
+        <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={<Typography.Text type="secondary">No data available</Typography.Text>}
+            />
+        </div>
+    );
+
     function openResearch(params = {}) {
         router.visit(route('research.index', params));
     }
@@ -77,7 +86,7 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
         <div className="space-y-4">
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={16}>
-                    <Card className="admin-dashboard-shell" bordered={false} title="Monthly Submission Activity">
+                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Monthly Submission Activity" extra={<Typography.Text type="secondary">Last 12 months</Typography.Text>} style={{ animationDelay: '100ms' }}>
                         {monthlyActivity.length > 0 ? (
                             <ResponsiveContainer width="100%" height={300}>
                                 <AreaChart data={monthlyActivity}>
@@ -100,14 +109,12 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: axisColor }}>
-                                No monthly activity yet.
-                            </div>
+                            noData
                         )}
                     </Card>
                 </Col>
                 <Col xs={24} xl={8}>
-                    <Card className="admin-dashboard-shell" bordered={false} title="Status Distribution">
+                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Status Distribution" extra={<Typography.Text type="secondary">Click to filter</Typography.Text>} style={{ animationDelay: '145ms' }}>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie data={statusDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} onClick={onStatusClick}>
@@ -131,7 +138,7 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
 
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={14}>
-                    <Card className="admin-dashboard-shell" bordered={false} title="Review Stage Flow">
+                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Review Stage Flow" extra={<Typography.Text type="secondary">Open by stage</Typography.Text>} style={{ animationDelay: '190ms' }}>
                         <ResponsiveContainer width="100%" height={280}>
                             <BarChart data={stageFlow}>
                                 <CartesianGrid strokeDasharray="3 3" stroke={borderColor} />
@@ -154,7 +161,7 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
                     </Card>
                 </Col>
                 <Col xs={24} xl={10}>
-                    <Card className="admin-dashboard-shell" bordered={false} title="Approval Snapshot">
+                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Approval Snapshot" extra={<Typography.Text type="secondary">Quick health check</Typography.Text>} style={{ animationDelay: '235ms' }}>
                         <div className="space-y-6">
                             <div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: textColor }}>

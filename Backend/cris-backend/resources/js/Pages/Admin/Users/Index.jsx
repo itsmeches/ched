@@ -111,7 +111,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
                         <Button type="link" onClick={() => restoreUser(user.id)}>Restore</Button>
                     ) : (
                         <>
-                            <Button type="link" onClick={() => router.visit(route('admin.users.edit', user.id))}>Edit</Button>
+                            <Button type="link" className="edit-action-btn" onClick={() => router.visit(route('admin.users.edit', user.id))}>Edit</Button>
                             <Button danger type="link" onClick={() => deleteUser(user.id)}>Deactivate</Button>
                         </>
                     )}

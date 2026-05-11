@@ -1,4 +1,4 @@
-import { Card, Col, Row, Tag } from 'antd';
+import { Card, Col, Empty, Row, Tag, Typography } from 'antd';
 import {
     Area,
     AreaChart,
@@ -50,6 +50,15 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
         Rejected: 'rejected',
     };
 
+    const noData = (
+        <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={<Typography.Text type="secondary">No data available</Typography.Text>}
+            />
+        </div>
+    );
+
     function openResearch(params = {}) {
         router.visit(route('research.index', params));
     }
@@ -81,7 +90,7 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
         <div className="space-y-4">
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={16}>
-                    <Card className="admin-dashboard-shell" bordered={false} title="Institution Submission Trend">
+                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Institution Submission Trend" extra={<Typography.Text type="secondary">Last 12 months</Typography.Text>} style={{ animationDelay: '100ms' }}>
                         {monthlyTrends.length > 0 ? (
                             <ResponsiveContainer width="100%" height={300}>
                                 <AreaChart data={monthlyTrends}>
@@ -104,15 +113,13 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: axisColor }}>
-                                No monthly data available.
-                            </div>
+                            noData
                         )}
                     </Card>
                 </Col>
 
                 <Col xs={24} xl={8}>
-                    <Card className="admin-dashboard-shell" bordered={false} title="Status Distribution">
+                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Status Distribution" extra={<Typography.Text type="secondary">Click to filter</Typography.Text>} style={{ animationDelay: '145ms' }}>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} onClick={onStatusClick}>
@@ -136,7 +143,7 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
 
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={12}>
-                    <Card className="admin-dashboard-shell" bordered={false} title="Review Stage Pipeline">
+                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Review Stage Pipeline" extra={<Typography.Text type="secondary">Open by stage</Typography.Text>} style={{ animationDelay: '190ms' }}>
                         <ResponsiveContainer width="100%" height={280}>
                             <BarChart data={stageFlow}>
                                 <CartesianGrid strokeDasharray="3 3" stroke={borderColor} />
@@ -160,7 +167,7 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
                 </Col>
 
                 <Col xs={24} xl={12}>
-                    <Card className="admin-dashboard-shell" bordered={false} title="Faculty Submission Breakdown">
+                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Faculty Submission Breakdown" extra={<Typography.Text type="secondary">By volume</Typography.Text>} style={{ animationDelay: '235ms' }}>
                         {facultyBreakdown.length > 0 ? (
                             <ResponsiveContainer width="100%" height={280}>
                                 <BarChart data={facultyBreakdown}>
@@ -182,9 +189,7 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: axisColor }}>
-                                No faculty submission data available.
-                            </div>
+                            noData
                         )}
                     </Card>
                 </Col>

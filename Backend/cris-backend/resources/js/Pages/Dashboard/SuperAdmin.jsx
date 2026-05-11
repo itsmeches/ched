@@ -7,6 +7,7 @@ import {
     Skeleton,
     Space,
 } from 'antd';
+import { AppstoreOutlined, BankOutlined, BookOutlined, TeamOutlined } from '@ant-design/icons';
 import DashboardFilters from '@/Components/DashboardFilters';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { lazy, Suspense } from 'react';
@@ -53,19 +54,19 @@ export default function SuperAdminDashboard({
     const sectionFallback = <Skeleton active paragraph={{ rows: 4 }} />;
 
     const renderAdminShortcuts = () => (
-        <Card title="Admin Shortcuts" className="admin-dashboard-shell" bordered={false}>
+        <Card title="Admin Shortcuts" className="admin-dashboard-shell dashboard-table-card" bordered={false}>
             <Space wrap className="quick-action-cluster">
                 <Link href={route('admin.users.index')}>
-                    <Button className="quick-action-primary">Open User Management</Button>
+                    <Button className="quick-action-primary" icon={<TeamOutlined />}>Open User Management</Button>
                 </Link>
                 <Link href={route('admin.institutions.index')}>
-                    <Button className="quick-action-secondary">Institutions</Button>
+                    <Button className="quick-action-secondary" icon={<BankOutlined />}>Open Institutions</Button>
                 </Link>
                 <Link href={route('admin.keywords.index')}>
-                    <Button className="quick-action-secondary">Keywords</Button>
+                    <Button className="quick-action-secondary" icon={<BookOutlined />}>Open Keywords</Button>
                 </Link>
                 <Link href={route('admin.taxonomy.index')}>
-                    <Button className="quick-action-secondary">Research Category</Button>
+                    <Button className="quick-action-secondary" icon={<AppstoreOutlined />}>Open Taxonomy</Button>
                 </Link>
             </Space>
         </Card>

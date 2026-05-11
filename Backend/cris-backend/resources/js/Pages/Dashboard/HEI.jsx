@@ -3,7 +3,7 @@ import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
-import { BankOutlined, CheckCircleOutlined, ClockCircleOutlined, StopOutlined } from '@ant-design/icons';
+import { ApartmentOutlined, BankOutlined, CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, SendOutlined, StopOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import DashboardFilters from '@/Components/DashboardFilters';
 import { useState } from 'react';
@@ -13,6 +13,7 @@ import HEICharts from './Partials/HEICharts';
 export default function HEIDashboard({ stats, stageCounts = {}, forReview, recentDecisions, monthlyTrends = [], facultyBreakdown = [], filters = {}, filterOptions = {} }) {
     const { dark } = useTheme();
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
+    const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
     const statItems = [
         { key: 'total', label: 'Total Submissions', icon: <BankOutlined style={{ color: accentPrimary }} /> },
         { key: 'pending', label: 'Pending HEI Review', icon: <ClockCircleOutlined style={{ color: '#d97706' }} /> },
@@ -161,18 +162,18 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
                         <Col xs={24} lg={8}>
                             <Space direction="vertical" style={{ width: '100%' }} size={12}>
                                 <Link href={route('research.index', { status: 'under_review_hei' })}>
-                                    <Button className="quick-action-primary" size="large" block>
+                                    <Button className="quick-action-primary" size="large" block icon={<FileSearchOutlined />}>
                                         Open HEI Queue
                                     </Button>
                                 </Link>
                                 <Link href={route('accounts.hierarchy')}>
-                                    <Button className="quick-action-secondary" size="large" block>
-                                        Account Hierarchy
+                                    <Button className="quick-action-secondary" size="large" block icon={<ApartmentOutlined />}>
+                                        Open Account Hierarchy
                                     </Button>
                                 </Link>
                                 <Link href={route('research.index', { status: 'under_review_ched' })}>
-                                    <Button className="quick-action-secondary" size="large" block>
-                                        Forwarded to CHED
+                                    <Button className="quick-action-secondary" size="large" block icon={<SendOutlined />}>
+                                        View Forwarded to CHED
                                     </Button>
                                 </Link>
                             </Space>
@@ -188,7 +189,7 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
                     disciplines={filterOptions.disciplines ?? []}
                 />
 
-                <Card title="Review Queue" className="admin-dashboard-shell" bordered={false}>
+                <Card title="Review Queue" className="admin-dashboard-shell dashboard-table-card" bordered={false}>
                     {forReview.length === 0 ? (
                         <Alert type="success" showIcon message="No submissions waiting for HEI review." />
                     ) : (
@@ -196,17 +197,15 @@ export default function HEIDashboard({ stats, stageCounts = {}, forReview, recen
                     )}
                 </Card>
 
-
-
-                <Card title="Recent Decisions" className="admin-dashboard-shell" bordered={false}>
+                <Card title="Recent Decisions" className="admin-dashboard-shell dashboard-table-card" bordered={false}>
                     <Table rowKey="id" columns={decisionColumns} dataSource={recentDecisions} pagination={false} scroll={{ x: 840 }} />
                 </Card>
 
                 <Row gutter={[16, 16]}>
-                    {statItems.map((item) => (
+                    {statItems.map((item, index) => (
                         <Col xs={24} sm={12} xl={6} key={item.key}>
-                            <Card className="admin-dashboard-shell" hoverable>
-                                <Statistic title={item.label} value={stats[item.key]} prefix={item.icon} />
+                            <Card className="admin-dashboard-shell kpi-stat-card dashboard-reveal" hoverable style={{ animationDelay: `${index * 55}ms` }}>
+                                <Statistic title={item.label} value={stats[item.key]} prefix={item.icon} valueStyle={{ color: metricTextColor }} />
                             </Card>
                         </Col>
                     ))}

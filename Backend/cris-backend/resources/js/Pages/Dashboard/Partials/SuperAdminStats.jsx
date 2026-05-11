@@ -32,11 +32,12 @@ export default function SuperAdminStats({ stats }) {
 
     return (
         <Row gutter={[16, 16]}>
-            {statCards.map((item) => (
+            {statCards.map((item, index) => (
                 <Col xs={24} sm={12} xl={8} key={item.key}>
                     <Card
                         hoverable
-                        className="admin-dashboard-shell"
+                        className="admin-dashboard-shell kpi-stat-card dashboard-reveal"
+                        style={{ animationDelay: `${index * 55}ms` }}
                         role="button"
                         tabIndex={0}
                         aria-label={`Open ${item.label}`}

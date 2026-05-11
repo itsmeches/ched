@@ -159,7 +159,7 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
             onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, row) => (
                 <Space>
-                    <Button type="link" onClick={() => openCategoryEdit(row)}>Edit</Button>
+                    <Button type="link" className="edit-action-btn" onClick={() => openCategoryEdit(row)}>Edit</Button>
                     <Button danger type="link" onClick={() => deleteCategory(row)}>Delete</Button>
                 </Space>
             ),
@@ -206,7 +206,7 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
             onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, row) => (
                 <Space>
-                    <Button type="link" onClick={() => openDisciplineEdit(row)}>Edit</Button>
+                    <Button type="link" className="edit-action-btn" onClick={() => openDisciplineEdit(row)}>Edit</Button>
                     <Button danger type="link" onClick={() => deleteDiscipline(row)}>Delete</Button>
                 </Space>
             ),

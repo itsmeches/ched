@@ -4,7 +4,7 @@ import EmptyState from '@/Components/EmptyState';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, InboxOutlined, KeyOutlined, StopOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClockCircleOutlined, DatabaseOutlined, FileSearchOutlined, InboxOutlined, KeyOutlined, OrderedListOutlined, StopOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import DashboardFilters from '@/Components/DashboardFilters';
 import { useState } from 'react';
@@ -158,13 +158,13 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                                         </Button>
                                     </Link>
                                     <Link href={route('ched.decisions')}>
-                                        <Button size="large" block className="quick-action-secondary">
-                                            Open My Decisions
+                                        <Button size="large" block icon={<OrderedListOutlined />} className="quick-action-secondary">
+                                            Open Decision History
                                         </Button>
                                     </Link>
                                     <Link href={route('research.index')}>
-                                        <Button size="large" block className="quick-action-secondary">
-                                            View All Research
+                                        <Button size="large" block icon={<DatabaseOutlined />} className="quick-action-secondary">
+                                            Open All Research
                                         </Button>
                                     </Link>
                                 </Space>
@@ -181,16 +181,16 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                     />
 
                     <Row gutter={[16, 16]}>
-                        {statItems.map((item) => (
+                        {statItems.map((item, index) => (
                             <Col xs={24} sm={12} xl={6} key={item.key}>
-                                <Card className="admin-dashboard-shell" hoverable>
+                                <Card className="admin-dashboard-shell kpi-stat-card dashboard-reveal" hoverable style={{ animationDelay: `${index * 55}ms` }}>
                                     <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: metricTextColor }} />
                                 </Card>
                             </Col>
                         ))}
                     </Row>
 
-                    <Card title="Review Queue" extra={<Link href={route('research.index', { status: 'under_review_ched' })}>View all</Link>} className="admin-dashboard-shell" bordered={false}>
+                    <Card title="Review Queue" extra={<Link href={route('research.index', { status: 'under_review_ched' })}>View all</Link>} className="admin-dashboard-shell dashboard-table-card" bordered={false}>
                         {forReview.length === 0 ? (
                             <Alert type="success" showIcon message="No papers pending review. The current queue is clear." />
                         ) : (
@@ -209,7 +209,7 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
 
                     {editRequests?.length > 0 && (
                         <Card
-                            className="admin-dashboard-shell"
+                            className="admin-dashboard-shell dashboard-table-card"
                             bordered={false}
                             title={
                                 <Space>

@@ -77,7 +77,7 @@ export default function CategoriesIndex({ categories = [], categoryTypes = [] })
             title: 'Action', key: 'action', align: 'center', onHeaderCell: () => ({ style: { textAlign: 'center' } }),
             render: (_, row) => (
                 <Space>
-                    <Button type="link" onClick={() => openEdit(row)}>Edit</Button>
+                    <Button type="link" className="edit-action-btn" onClick={() => openEdit(row)}>Edit</Button>
                     <Button danger type="link" onClick={() => deleteCategory(row)}>Delete</Button>
                 </Space>
             ),

@@ -37,7 +37,15 @@ export function ThemeProvider({ children, cspNonce }) {
                     token: {
                         colorPrimary: '#0033a0',
                         colorInfo: '#0033a0',
+                        colorSuccess: '#16a34a',
+                        colorWarning: '#d97706',
+                        colorError: '#dc2626',
                         borderRadius: 14,
+                        borderRadiusLG: 16,
+                        controlHeight: 40,
+                        controlHeightSM: 32,
+                        controlHeightLG: 46,
+                        fontSize: 14,
                         fontFamily: 'Segoe UI, Helvetica Neue, Arial, sans-serif',
                         // navy-based dark surfaces
                         ...(dark ? {
@@ -57,8 +65,23 @@ export function ThemeProvider({ children, cspNonce }) {
                         } : {}),
                     },
                     components: {
-                        Card: { borderRadiusLG: 22 },
-                        Button: { borderRadius: 12 },
+                        Card: {
+                            borderRadiusLG: 22,
+                            headerFontSize: 14,
+                            headerFontSizeSM: 13,
+                            bodyPadding: 18,
+                        },
+                        Button: {
+                            borderRadius: 12,
+                            fontWeight: 600,
+                        },
+                        Statistic: {
+                            titleFontSize: 13,
+                            contentFontSize: 28,
+                        },
+                        Tag: {
+                            borderRadiusSM: 999,
+                        },
                         Table: {
                             headerBg: dark ? 'rgba(30,45,71,0.8)' : '#f8fafc',
                             headerColor: dark ? '#94a3b8' : '#475569',
@@ -66,11 +89,16 @@ export function ThemeProvider({ children, cspNonce }) {
                             borderColor: dark ? '#1e2d47' : undefined,
                         },
                         Select: {
+                            borderRadius: 12,
                             optionSelectedBg: dark ? '#1a2540' : undefined,
                         },
                         Input: {
+                            borderRadius: 12,
                             hoverBorderColor: dark ? '#3b5ba5' : undefined,
                             activeBorderColor: dark ? '#0033a0' : undefined,
+                        },
+                        Modal: {
+                            borderRadiusLG: 18,
                         },
                     },
                 }}
