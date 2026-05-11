@@ -1,9 +1,7 @@
-import DangerButton from '@/Components/DangerButton';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import Modal from '@/Components/Modal';
-import SecondaryButton from '@/Components/SecondaryButton';
-import TextInput from '@/Components/TextInput';
+import { Button, Input } from 'antd';
 import { useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 
@@ -60,9 +58,9 @@ export default function DeleteUserForm({ className = '' }) {
                 </p>
             </header>
 
-            <DangerButton onClick={confirmUserDeletion}>
+            <Button danger type="primary" onClick={confirmUserDeletion}>
                 Delete Account
-            </DangerButton>
+            </Button>
 
             <Modal show={confirmingUserDeletion} onClose={closeModal}>
                 <form onSubmit={deleteUser} className="p-6">
@@ -84,17 +82,17 @@ export default function DeleteUserForm({ className = '' }) {
                             className="sr-only"
                         />
 
-                        <TextInput
+                        <Input.Password
                             id="password"
-                            type="password"
                             name="password"
                             ref={passwordInput}
                             value={data.password}
                             onChange={(e) =>
                                 setData('password', e.target.value)
                             }
-                            className="mt-1.5 block w-full"
-                            isFocused
+                            className="mt-1.5"
+                            autoFocus
+                            status={errors.password ? 'error' : ''}
                             placeholder="Password"
                         />
 
@@ -105,13 +103,13 @@ export default function DeleteUserForm({ className = '' }) {
                     </div>
 
                     <div className="mt-6 flex justify-end">
-                        <SecondaryButton onClick={closeModal}>
+                        <Button onClick={closeModal}>
                             Cancel
-                        </SecondaryButton>
+                        </Button>
 
-                        <DangerButton className="ms-3" disabled={processing}>
+                        <Button danger type="primary" className="ms-3" loading={processing} disabled={processing}>
                             Delete Account
-                        </DangerButton>
+                        </Button>
                     </div>
                 </form>
             </Modal>

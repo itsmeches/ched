@@ -70,7 +70,7 @@ export default function SuperAdminCharts({
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 dashboard-charts-grid">
             {/* Charts Row */}
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={16}>

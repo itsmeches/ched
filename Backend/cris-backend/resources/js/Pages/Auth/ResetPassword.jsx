@@ -1,7 +1,6 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import { Button, Input } from 'antd';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
@@ -34,14 +33,15 @@ export default function ResetPassword({ token, email }) {
                 <div>
                     <InputLabel htmlFor="email" value="Email address" />
 
-                    <TextInput
+                    <Input
                         id="email"
                         type="email"
                         name="email"
                         value={data.email}
-                        className="mt-1.5 block w-full"
+                        className="mt-1.5"
                         autoComplete="username"
                         placeholder="you@example.com"
+                        status={errors.email ? 'error' : ''}
                         onChange={(e) => setData('email', e.target.value)}
                     />
 
@@ -51,15 +51,15 @@ export default function ResetPassword({ token, email }) {
                 <div>
                     <InputLabel htmlFor="password" value="Password" />
 
-                    <TextInput
+                    <Input.Password
                         id="password"
-                        type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1.5 block w-full"
+                        className="mt-1.5"
                         autoComplete="new-password"
-                        isFocused={true}
+                        autoFocus
                         placeholder="Create a strong password"
+                        status={errors.password ? 'error' : ''}
                         onChange={(e) => setData('password', e.target.value)}
                     />
 
@@ -88,9 +88,9 @@ export default function ResetPassword({ token, email }) {
                     />
                 </div>
 
-                <PrimaryButton className="w-full justify-center py-2.5" disabled={processing}>
+                <Button htmlType="submit" type="primary" block size="large" loading={processing} disabled={processing}>
                     {processing ? 'Resetting password…' : 'Reset password'}
-                </PrimaryButton>
+                </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">

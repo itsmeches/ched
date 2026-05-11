@@ -1,7 +1,6 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import { Button, Input } from 'antd';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
 
@@ -33,23 +32,23 @@ export default function ConfirmPassword() {
                 <div>
                     <InputLabel htmlFor="password" value="Password" />
 
-                    <TextInput
+                    <Input.Password
                         id="password"
-                        type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1.5 block w-full"
-                        isFocused={true}
+                        className="mt-1.5"
+                        autoFocus
                         placeholder="Enter your current password"
+                        status={errors.password ? 'error' : ''}
                         onChange={(e) => setData('password', e.target.value)}
                     />
 
                     <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                <PrimaryButton className="w-full justify-center py-2.5" disabled={processing}>
+                <Button htmlType="submit" type="primary" block size="large" loading={processing} disabled={processing}>
                     {processing ? 'Confirming…' : 'Confirm'}
-                </PrimaryButton>
+                </Button>
             </form>
         </GuestLayout>
     );

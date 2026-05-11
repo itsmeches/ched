@@ -1,6 +1,6 @@
 import { Card, Col, Row, Statistic } from 'antd';
 import { router } from '@inertiajs/react';
-import { BankOutlined, CrownOutlined, FileTextOutlined, SafetyCertificateOutlined, TeamOutlined } from '@ant-design/icons';
+import { BankOutlined, CrownOutlined, FileTextOutlined, SafetyCertificateOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 import { useTheme } from '@/utils/ThemeContext';
 
 export default function SuperAdminStats({ stats }) {
@@ -12,10 +12,12 @@ export default function SuperAdminStats({ stats }) {
 
     const statCards = [
         { key: 'users', label: 'Total Users', icon: <TeamOutlined />, routeName: 'admin.users.index', color: accentPrimary },
-        { key: 'heiUsers', label: 'HEI Accounts', icon: <BankOutlined />, routeName: 'admin.users.index', params: { role: 'hei' }, color: accentSecondary },
-        { key: 'chedUsers', label: 'CHED Accounts', icon: <SafetyCertificateOutlined />, routeName: 'admin.users.index', params: { role: 'ched' }, color: accentPrimary },
         { key: 'admins', label: 'Super Admins', icon: <CrownOutlined />, routeName: 'admin.users.index', params: { role: 'super_admin' }, color: accentDark },
-        { key: 'institutions', label: 'Institutions', icon: <BankOutlined />, routeName: 'admin.institutions.index', color: '#d97706' },
+        { key: 'chedUsers', label: 'Ched Accounts', icon: <SafetyCertificateOutlined />, routeName: 'admin.users.index', params: { role: 'ched' }, color: accentPrimary },
+        { key: 'heiUsers', label: 'Hei Accounts', icon: <BankOutlined />, routeName: 'admin.users.index', params: { role: 'hei' }, color: accentSecondary },
+        { key: 'facultyUsers', label: 'Faculty Accounts', icon: <UserOutlined />, routeName: 'admin.users.index', params: { role: 'faculty' }, color: accentDark },
+        { key: 'studentUsers', label: 'Student Accounts', icon: <UserOutlined />, routeName: 'admin.users.index', params: { role: 'student' }, color: accentSecondary },
+        { key: 'institutions', label: 'Institution', icon: <BankOutlined />, routeName: 'admin.institutions.index', color: '#d97706' },
         { key: 'proposals', label: 'Research Records', icon: <FileTextOutlined />, routeName: 'research.index', color: accentPrimary },
         { key: 'rejected', label: 'Rejected Papers', icon: <FileTextOutlined />, routeName: 'research.index', params: { status: 'rejected' }, color: '#dc2626' },
     ];

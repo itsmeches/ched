@@ -83,7 +83,7 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 dashboard-charts-grid">
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={16}>
                     <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Monthly Submission Activity" extra={<Typography.Text type="secondary">Last 12 months</Typography.Text>} style={{ animationDelay: '100ms' }}>
