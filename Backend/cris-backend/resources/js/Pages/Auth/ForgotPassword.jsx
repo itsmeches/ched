@@ -1,6 +1,5 @@
 import InputError from '@/Components/InputError';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import { Button, Input } from 'antd';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
@@ -35,23 +34,24 @@ export default function ForgotPassword({ status }) {
             <form onSubmit={submit} className="space-y-5">
                 <div>
                     <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">Email address</label>
-                <TextInput
+                <Input
                     id="email"
                     type="email"
                     name="email"
                     value={data.email}
-                    className="mt-1.5 block w-full"
-                    isFocused={true}
+                    className="mt-1.5"
+                    autoFocus
                     placeholder="you@example.com"
+                    status={errors.email ? 'error' : ''}
                     onChange={(e) => setData('email', e.target.value)}
                 />
                 </div>
 
                 <InputError message={errors.email} className="mt-1.5" />
 
-                <PrimaryButton className="w-full justify-center py-2.5" disabled={processing}>
+                <Button htmlType="submit" type="primary" block size="large" loading={processing} disabled={processing}>
                     {processing ? 'Sending link…' : 'Send password reset link'}
-                </PrimaryButton>
+                </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">

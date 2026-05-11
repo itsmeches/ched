@@ -195,6 +195,36 @@ html.dark .admin-dashboard-shell .ant-card-head-title {
 	font-weight: 700;
 }
 
+/* Keep dashboard chart cards symmetrical per row and across all dashboards. */
+.dashboard-charts-grid .ant-row {
+	align-items: stretch;
+}
+
+.dashboard-charts-grid .ant-row > .ant-col {
+	display: flex;
+}
+
+.dashboard-charts-grid .ant-row > .ant-col > .admin-dashboard-shell {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	min-height: 360px;
+}
+
+/* Ensure card body expands to fill container and charts expand within body */
+.dashboard-charts-grid .admin-dashboard-shell .ant-card-body {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 300px;
+}
+
+.dashboard-charts-grid .admin-dashboard-shell .recharts-responsive-container {
+	flex: 1 !important;
+	min-height: 280px !important;
+}
+
 .dashboard-table-card .ant-card-head {
 	min-height: 52px;
 }

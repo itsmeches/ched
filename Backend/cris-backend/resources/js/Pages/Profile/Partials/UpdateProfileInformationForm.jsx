@@ -1,7 +1,6 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import { Button, Input } from 'antd';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
 
@@ -40,14 +39,15 @@ export default function UpdateProfileInformation({
                 <div>
                     <InputLabel htmlFor="name" value="Name" />
 
-                    <TextInput
+                    <Input
                         id="name"
-                        className="mt-1.5 block w-full"
+                        className="mt-1.5"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         required
-                        isFocused
+                        autoFocus
                         autoComplete="name"
+                        status={errors.name ? 'error' : ''}
                     />
 
                     <InputError className="mt-1.5" message={errors.name} />
@@ -56,14 +56,14 @@ export default function UpdateProfileInformation({
                 <div>
                     <InputLabel htmlFor="email" value="Email" />
 
-                    <TextInput
+                    <Input
                         id="email"
-                        type="email"
-                        className="mt-1.5 block w-full"
+                        className="mt-1.5"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         required
                         autoComplete="username"
+                        status={errors.email ? 'error' : ''}
                     />
 
                     <InputError className="mt-1.5" message={errors.email} />
@@ -93,7 +93,7 @@ export default function UpdateProfileInformation({
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <Button type="primary" loading={processing} disabled={processing}>Save</Button>
 
                     <Transition
                         show={recentlySuccessful}

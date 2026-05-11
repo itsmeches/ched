@@ -1,6 +1,6 @@
-import PrimaryButton from '@/Components/PrimaryButton';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { Button } from 'antd';
 
 export default function VerifyEmail({ status }) {
     const { post, processing } = useForm({});
@@ -32,9 +32,9 @@ export default function VerifyEmail({ status }) {
 
             <form onSubmit={submit}>
                 <div className="space-y-3">
-                    <PrimaryButton className="w-full justify-center py-2.5" disabled={processing}>
+                    <Button htmlType="submit" type="primary" block size="large" loading={processing} disabled={processing}>
                         {processing ? 'Sending verification…' : 'Resend verification email'}
-                    </PrimaryButton>
+                    </Button>
 
                     <Link
                         href={route('logout')}

@@ -112,7 +112,7 @@ export default function CHEDCharts({ monthlyTrends = [], disciplineBreakdown = [
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 dashboard-charts-grid">
             {/* KPI Header */}
             <Row gutter={[16, 16]}>
                 {kpiCards.map((item, index) => (
