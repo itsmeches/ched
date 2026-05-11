@@ -1,6 +1,4 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import { Button, Input } from 'antd';
+import { Button, Form, Input } from 'antd';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
@@ -29,64 +27,55 @@ export default function ResetPassword({ token, email }) {
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Create a new password for your account</p>
             </div>
 
-            <form onSubmit={submit} className="space-y-5">
-                <div>
-                    <InputLabel htmlFor="email" value="Email address" />
+            <form onSubmit={submit}>
+                <Form layout="vertical" component={false}>
+                    <Form.Item
+                        label="Email address"
+                        validateStatus={errors.email ? 'error' : ''}
+                        help={errors.email || undefined}
+                    >
+                        <Input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={data.email}
+                            autoComplete="username"
+                            placeholder="you@example.com"
+                            onChange={(e) => setData('email', e.target.value)}
+                        />
+                    </Form.Item>
 
-                    <Input
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1.5"
-                        autoComplete="username"
-                        placeholder="you@example.com"
-                        status={errors.email ? 'error' : ''}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
+                    <Form.Item
+                        label="Password"
+                        validateStatus={errors.password ? 'error' : ''}
+                        help={errors.password || undefined}
+                    >
+                        <Input.Password
+                            id="password"
+                            name="password"
+                            value={data.password}
+                            autoComplete="new-password"
+                            autoFocus
+                            placeholder="Create a strong password"
+                            onChange={(e) => setData('password', e.target.value)}
+                        />
+                    </Form.Item>
 
-                    <InputError message={errors.email} className="mt-1.5" />
-                </div>
-
-                <div>
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <Input.Password
-                        id="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1.5"
-                        autoComplete="new-password"
-                        autoFocus
-                        placeholder="Create a strong password"
-                        status={errors.password ? 'error' : ''}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-1.5" />
-                </div>
-
-                <div>
-                    <InputLabel htmlFor="password_confirmation" value="Confirm password" />
-
-                    <TextInput
-                        type="password"
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1.5 block w-full"
-                        autoComplete="new-password"
-                        placeholder="Re-enter your password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                    />
-
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-1.5"
-                    />
-                </div>
+                    <Form.Item
+                        label="Confirm password"
+                        validateStatus={errors.password_confirmation ? 'error' : ''}
+                        help={errors.password_confirmation || undefined}
+                    >
+                        <Input.Password
+                            id="password_confirmation"
+                            name="password_confirmation"
+                            value={data.password_confirmation}
+                            autoComplete="new-password"
+                            placeholder="Re-enter your password"
+                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                        />
+                    </Form.Item>
+                </Form>
 
                 <Button htmlType="submit" type="primary" block size="large" loading={processing} disabled={processing}>
                     {processing ? 'Resetting password…' : 'Reset password'}

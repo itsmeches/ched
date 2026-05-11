@@ -4,6 +4,7 @@ import UserFormFields from './UserFormFields';
 export default function UserFormDrawer({ title, subtitle, open, onClose, onSubmit, processing, data, setData, errors, roles, institutions, includePasswordHint = false, submitText }) {
     return (
         <Drawer
+            className="user-form-drawer"
             title={title}
             placement="right"
             width="min(640px, 100vw)"

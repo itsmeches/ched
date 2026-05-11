@@ -15,8 +15,8 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
     const statItems = [
-        { key: 'total', label: 'Total Student Submissions', icon: <TeamOutlined style={{ color: accentPrimary }} /> },
         { key: 'pending', label: 'Pending Faculty Review', icon: <ClockCircleOutlined style={{ color: '#d97706' }} /> },
+        { key: 'total', label: 'Total Student Submissions', icon: <TeamOutlined style={{ color: accentPrimary }} /> },
         { key: 'approved', label: 'Approved', icon: <CheckCircleOutlined style={{ color: accentPrimary }} /> },
         { key: 'rejected', label: 'Rejected', icon: <StopOutlined style={{ color: '#dc2626' }} /> },
     ];
@@ -197,10 +197,6 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
                     )}
                 </Card>
 
-                <Card title="Recent Decisions" className="admin-dashboard-shell dashboard-table-card" bordered={false}>
-                    <Table rowKey="id" columns={decisionColumns} dataSource={recentDecisions} pagination={false} scroll={{ x: 840 }} />
-                </Card>
-
                 <Row gutter={[16, 16]}>
                     {statItems.map((item, index) => (
                         <Col xs={24} sm={12} xl={6} key={item.key}>
@@ -210,6 +206,10 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
                         </Col>
                     ))}
                 </Row>
+
+                <Card title="Recent Decisions" className="admin-dashboard-shell dashboard-table-card" bordered={false}>
+                    <Table rowKey="id" columns={decisionColumns} dataSource={recentDecisions} pagination={false} scroll={{ x: 840 }} />
+                </Card>
 
                 <FacultyCharts stats={stats} stageCounts={stageCounts} monthlyTrends={monthlyTrends} studentBreakdown={studentBreakdown} />
 

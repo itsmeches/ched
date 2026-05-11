@@ -1,7 +1,7 @@
-import { router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { BellOutlined, MenuFoldOutlined, MenuUnfoldOutlined, MoonOutlined, SunOutlined, UserOutlined } from '@ant-design/icons';
+import { Dropdown } from 'antd';
 import { useTheme } from '@/utils/ThemeContext';
-import Dropdown from '@/Components/Dropdown';
 import { useEffect, useRef, useState } from 'react';
 
 function getRoleLabel(role) {
@@ -173,29 +173,44 @@ export default function Topbar({ title, sidebarCollapsed = false, onToggleSideba
                             )}
                     </div>
 
-                    <Dropdown>
-                        <Dropdown.Trigger>
-                            <button
-                                type="button"
-                                className="inline-flex h-8 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-[#2a3a5c] dark:bg-[#0d1526] dark:text-slate-200 dark:hover:bg-[#1a2540]"
-                                aria-label="Open user menu"
-                            >
-                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#0033a0] text-xs font-semibold text-white">
-                                    {user?.name?.charAt(0)?.toUpperCase() || <UserOutlined />}
-                                </span>
-                                <span className="hidden max-w-28 truncate sm:inline">{user?.name || 'User'}</span>
-                            </button>
-                        </Dropdown.Trigger>
-
-                        <Dropdown.Content align="right">
-                            <div className="border-b border-slate-200 px-4 py-2 text-sm text-slate-700 dark:border-[#1e2d47] dark:text-slate-300">
-                                <p className="font-semibold dark:text-white">{user?.name || 'User'}</p>
-                                <p className="mb-1 truncate text-xs text-slate-500 dark:text-slate-400">{user?.email || ''}</p>
-                                <p className="text-xs font-medium text-[#0033a0] dark:text-blue-300">{roleLabel}</p>
+                    <Dropdown
+                        trigger={['click']}
+                        placement="bottomRight"
+                        dropdownRender={() => (
+                            <div className="min-w-[200px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-[#1e2d47] dark:bg-[#111827]">
+                                <div className="border-b border-slate-200 px-4 py-2.5 dark:border-[#1e2d47]">
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.name || 'User'}</p>
+                                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">{user?.email || ''}</p>
+                                    <p className="mt-0.5 text-xs font-medium text-[#0033a0] dark:text-blue-300">{roleLabel}</p>
+                                </div>
+                                <div className="py-1">
+                                    <Link
+                                        href={route('profile.edit')}
+                                        className="block w-full px-4 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-[#1a2540]"
+                                    >
+                                        Profile Settings
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        className="block w-full px-4 py-2 text-left text-sm text-rose-600 transition-colors hover:bg-slate-50 dark:text-rose-400 dark:hover:bg-[#1a2540]"
+                                        onClick={() => router.post(route('logout'))}
+                                    >
+                                        Sign Out
+                                    </button>
+                                </div>
                             </div>
-                            <Dropdown.Link href={route('profile.edit')}>Profile Settings</Dropdown.Link>
-                            <Dropdown.Link href={route('logout')} method="post" as="button">Sign Out</Dropdown.Link>
-                        </Dropdown.Content>
+                        )}
+                    >
+                        <button
+                            type="button"
+                            className="inline-flex h-8 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-[#2a3a5c] dark:bg-[#0d1526] dark:text-slate-200 dark:hover:bg-[#1a2540]"
+                            aria-label="Open user menu"
+                        >
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#0033a0] text-xs font-semibold text-white">
+                                {user?.name?.charAt(0)?.toUpperCase() || <UserOutlined />}
+                            </span>
+                            <span className="hidden max-w-28 truncate sm:inline">{user?.name || 'User'}</span>
+                        </button>
                     </Dropdown>
                 </div>
             </div>

@@ -1,5 +1,4 @@
-import InputError from '@/Components/InputError';
-import { Button, Input } from 'antd';
+import { Button, Form, Input } from 'antd';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
@@ -31,23 +30,24 @@ export default function ForgotPassword({ status }) {
                 </div>
             )}
 
-            <form onSubmit={submit} className="space-y-5">
-                <div>
-                    <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">Email address</label>
-                <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    className="mt-1.5"
-                    autoFocus
-                    placeholder="you@example.com"
-                    status={errors.email ? 'error' : ''}
-                    onChange={(e) => setData('email', e.target.value)}
-                />
-                </div>
-
-                <InputError message={errors.email} className="mt-1.5" />
+            <form onSubmit={submit}>
+                <Form layout="vertical" component={false}>
+                    <Form.Item
+                        label="Email address"
+                        validateStatus={errors.email ? 'error' : ''}
+                        help={errors.email || undefined}
+                    >
+                        <Input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={data.email}
+                            autoFocus
+                            placeholder="you@example.com"
+                            onChange={(e) => setData('email', e.target.value)}
+                        />
+                    </Form.Item>
+                </Form>
 
                 <Button htmlType="submit" type="primary" block size="large" loading={processing} disabled={processing}>
                     {processing ? 'Sending link…' : 'Send password reset link'}

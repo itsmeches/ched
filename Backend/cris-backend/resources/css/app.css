@@ -88,6 +88,172 @@ button:focus,
 	outline: none;
 }
 
+/* Uniform input styling for both Input and Input.Password */
+.ant-input-uniform {
+	border-color: rgba(0, 51, 160, 0.2) !important;
+	background: #ffffff !important;
+	color: #0f172a !important;
+	transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.ant-input-affix-wrapper.ant-input-uniform {
+	background: #ffffff !important;
+	padding-inline: 11px !important;
+	overflow: visible !important;
+}
+
+.ant-input-affix-wrapper.ant-input-uniform .ant-input {
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	color: inherit !important;
+	padding-inline: 0 !important;
+}
+
+.ant-input-affix-wrapper.ant-input-uniform .ant-input-password-icon {
+	color: #64748b;
+}
+
+.ant-input-uniform:hover {
+	border-color: rgba(0, 51, 160, 0.3) !important;
+}
+
+.ant-input-uniform:focus,
+.ant-input-uniform:focus-visible {
+	border-color: #0033a0 !important;
+	box-shadow: none !important;
+	outline: 2px solid rgba(0, 51, 160, 0.4) !important;
+	outline-offset: 2px !important;
+}
+
+.ant-input-affix-wrapper.ant-input-uniform.ant-input-affix-wrapper-focused,
+.ant-input-affix-wrapper.ant-input-uniform:focus,
+.ant-input-affix-wrapper.ant-input-uniform:focus-visible,
+.ant-input-affix-wrapper.ant-input-uniform:focus-within {
+	border-color: #0033a0 !important;
+	box-shadow: none !important;
+	outline: 2px solid rgba(0, 51, 160, 0.4) !important;
+	outline-offset: 2px !important;
+}
+
+.ant-input-uniform:-webkit-autofill,
+.ant-input-uniform:-webkit-autofill:hover,
+.ant-input-uniform:-webkit-autofill:focus,
+.ant-input-affix-wrapper.ant-input-uniform .ant-input:-webkit-autofill,
+.ant-input-affix-wrapper.ant-input-uniform .ant-input:-webkit-autofill:hover,
+.ant-input-affix-wrapper.ant-input-uniform .ant-input:-webkit-autofill:focus {
+	-webkit-text-fill-color: #0f172a !important;
+	caret-color: #0f172a !important;
+	-webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+	transition: background-color 9999s ease-out 0s;
+}
+
+html.dark .ant-input-uniform {
+	border-color: rgba(96, 165, 250, 0.2) !important;
+	background: #ffffff !important;
+	color: #0f172a !important;
+}
+
+html.dark .ant-input-uniform:hover {
+	border-color: rgba(96, 165, 250, 0.3) !important;
+}
+
+html.dark .ant-input-uniform:focus,
+html.dark .ant-input-uniform:focus-visible {
+	border-color: #60a5fa !important;
+	box-shadow: none !important;
+	outline: 2px solid rgba(0, 51, 160, 0.4) !important;
+	outline-offset: 2px !important;
+}
+
+html.dark .ant-input-affix-wrapper.ant-input-uniform.ant-input-affix-wrapper-focused,
+html.dark .ant-input-affix-wrapper.ant-input-uniform:focus,
+html.dark .ant-input-affix-wrapper.ant-input-uniform:focus-visible,
+html.dark .ant-input-affix-wrapper.ant-input-uniform:focus-within {
+	border-color: #60a5fa !important;
+	box-shadow: none !important;
+	outline: 2px solid rgba(0, 51, 160, 0.4) !important;
+	outline-offset: 2px !important;
+}
+
+html.dark .ant-input-affix-wrapper.ant-input-uniform {
+	background: #ffffff !important;
+}
+
+html.dark .ant-input-affix-wrapper.ant-input-uniform .ant-input-password-icon {
+	color: #64748b;
+}
+
+html.dark .ant-input-uniform:-webkit-autofill,
+html.dark .ant-input-uniform:-webkit-autofill:hover,
+html.dark .ant-input-uniform:-webkit-autofill:focus,
+html.dark .ant-input-affix-wrapper.ant-input-uniform .ant-input:-webkit-autofill,
+html.dark .ant-input-affix-wrapper.ant-input-uniform .ant-input:-webkit-autofill:hover,
+html.dark .ant-input-affix-wrapper.ant-input-uniform .ant-input:-webkit-autofill:focus {
+	-webkit-text-fill-color: #0f172a !important;
+	caret-color: #0f172a !important;
+	-webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+}
+
+/* Keep password inner input/autofill visually consistent inside user-management drawer. */
+.user-form-drawer .ant-input-affix-wrapper .ant-input {
+	background: transparent !important;
+	box-shadow: none !important;
+	padding-inline: 0 !important;
+}
+
+.user-form-drawer .ant-input-affix-wrapper .ant-input:-webkit-autofill,
+.user-form-drawer .ant-input-affix-wrapper .ant-input:-webkit-autofill:hover,
+.user-form-drawer .ant-input-affix-wrapper .ant-input:-webkit-autofill:focus {
+	-webkit-text-fill-color: #0f172a !important;
+	caret-color: #0f172a !important;
+	-webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+}
+
+html.dark .user-form-drawer .ant-input-affix-wrapper .ant-input:-webkit-autofill,
+html.dark .user-form-drawer .ant-input-affix-wrapper .ant-input:-webkit-autofill:hover,
+html.dark .user-form-drawer .ant-input-affix-wrapper .ant-input:-webkit-autofill:focus {
+	-webkit-text-fill-color: #e2e8f0 !important;
+	caret-color: #e2e8f0 !important;
+	-webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+}
+
+/* Keep create-account inputs from turning white when browser autofill is active in dark mode. */
+.super-admin-account-panel .ant-input-affix-wrapper .ant-input {
+	background: transparent !important;
+	box-shadow: none !important;
+	padding-inline: 0 !important;
+}
+
+html.dark .super-admin-account-panel .ant-input:-webkit-autofill,
+html.dark .super-admin-account-panel .ant-input:-webkit-autofill:hover,
+html.dark .super-admin-account-panel .ant-input:-webkit-autofill:focus,
+html.dark .super-admin-account-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill,
+html.dark .super-admin-account-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill:hover,
+html.dark .super-admin-account-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill:focus {
+	-webkit-text-fill-color: #e2e8f0 !important;
+	caret-color: #e2e8f0 !important;
+	-webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+}
+
+/* Shared role-based create-account page (CHED/HEI/Faculty/Student). */
+.hierarchical-account-create-panel .ant-input-affix-wrapper .ant-input {
+	background: transparent !important;
+	box-shadow: none !important;
+	padding-inline: 0 !important;
+}
+
+html.dark .hierarchical-account-create-panel .ant-input:-webkit-autofill,
+html.dark .hierarchical-account-create-panel .ant-input:-webkit-autofill:hover,
+html.dark .hierarchical-account-create-panel .ant-input:-webkit-autofill:focus,
+html.dark .hierarchical-account-create-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill,
+html.dark .hierarchical-account-create-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill:hover,
+html.dark .hierarchical-account-create-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill:focus {
+	-webkit-text-fill-color: #e2e8f0 !important;
+	caret-color: #e2e8f0 !important;
+	-webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+}
+
 /* =========================================================
    ADMIN CARD SHELL - clean solid card, consistent in both modes
    ========================================================= */

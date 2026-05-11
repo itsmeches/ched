@@ -535,18 +535,24 @@ class DashboardController extends Controller
         $proposalTotal = (clone $base)->count();
         $approvedTotal = (clone $base)->where('status', ResearchProposal::STATUS_APPROVED)->count();
 
+        // User counts scoped by institution filter when active (year/discipline only apply to proposals)
+        $userBase = User::query();
+        if ($filters['hei_id'] !== '') {
+            $userBase->where('institution_id', (int) $filters['hei_id']);
+        }
+
         $stats = [
-            'users'        => User::count(),
+            'users'        => (clone $userBase)->count(),
             'institutions' => Institution::count(),
             'proposals'    => $proposalTotal,
             'approved'     => $approvedTotal,
             'pending'      => (clone $base)->whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
             'rejected'     => (clone $base)->where('status', ResearchProposal::STATUS_REJECTED)->count(),
-            'heiUsers'     => User::where('role', 'hei')->count(),
-            'facultyUsers' => User::where('role', 'faculty')->count(),
-            'studentUsers' => User::where('role', 'student')->count(),
-            'chedUsers'    => User::where('role', 'ched')->count(),
-            'admins'       => User::where('role', 'super_admin')->count(),
+            'heiUsers'     => (clone $userBase)->where('role', 'hei')->count(),
+            'facultyUsers' => (clone $userBase)->where('role', 'faculty')->count(),
+            'studentUsers' => (clone $userBase)->where('role', 'student')->count(),
+            'chedUsers'    => (clone $userBase)->where('role', 'ched')->count(),
+            'admins'       => (clone $userBase)->where('role', 'super_admin')->count(),
             'approvalRate' => $proposalTotal > 0 ? round(($approvedTotal / $proposalTotal) * 100, 1) : 0,
         ];
 

@@ -12,6 +12,6 @@ if (! app()->environment(['local', 'testing'])) {
     exit(1);
 }
 
-$users = App\\Models\\User::select('id', 'name', 'email', 'role')->get();
+$users = App\Models\User::select('id', 'name', 'email', 'role')->get();
 
 echo json_encode($users, JSON_PRETTY_PRINT) . PHP_EOL;

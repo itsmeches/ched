@@ -1,7 +1,4 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import Modal from '@/Components/Modal';
-import { Button, Input } from 'antd';
+import { Button, Form, Input, Modal } from 'antd';
 import { useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 
@@ -62,12 +59,15 @@ export default function DeleteUserForm({ className = '' }) {
                 Delete Account
             </Button>
 
-            <Modal show={confirmingUserDeletion} onClose={closeModal}>
-                <form onSubmit={deleteUser} className="p-6">
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                        Are you sure you want to delete your account?
-                    </h2>
-
+            <Modal
+                open={confirmingUserDeletion}
+                onCancel={closeModal}
+                footer={null}
+                centered
+                title="Are you sure you want to delete your account?"
+                width={480}
+            >
+                <form onSubmit={deleteUser}>
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                         Once your account is deleted, all of its resources and
                         data will be permanently deleted. Please enter your
@@ -75,39 +75,34 @@ export default function DeleteUserForm({ className = '' }) {
                         your account.
                     </p>
 
-                    <div className="mt-6">
-                        <InputLabel
-                            htmlFor="password"
-                            value="Password"
-                            className="sr-only"
-                        />
-
-                        <Input.Password
-                            id="password"
-                            name="password"
-                            ref={passwordInput}
-                            value={data.password}
-                            onChange={(e) =>
-                                setData('password', e.target.value)
-                            }
-                            className="mt-1.5"
-                            autoFocus
-                            status={errors.password ? 'error' : ''}
-                            placeholder="Password"
-                        />
-
-                        <InputError
-                            message={errors.password}
-                            className="mt-2"
-                        />
+                    <div className="mt-4">
+                        <Form layout="vertical" component={false}>
+                            <Form.Item
+                                validateStatus={errors.password ? 'error' : ''}
+                                help={errors.password || undefined}
+                                style={{ marginBottom: 0 }}
+                            >
+                                <Input.Password
+                                    id="password"
+                                    name="password"
+                                    ref={passwordInput}
+                                    value={data.password}
+                                    onChange={(e) =>
+                                        setData('password', e.target.value)
+                                    }
+                                    autoFocus
+                                    placeholder="Password"
+                                />
+                            </Form.Item>
+                        </Form>
                     </div>
 
-                    <div className="mt-6 flex justify-end">
+                    <div className="mt-6 flex justify-end gap-2">
                         <Button onClick={closeModal}>
                             Cancel
                         </Button>
 
-                        <Button danger type="primary" className="ms-3" loading={processing} disabled={processing}>
+                        <Button danger type="primary" htmlType="submit" loading={processing} disabled={processing}>
                             Delete Account
                         </Button>
                     </div>

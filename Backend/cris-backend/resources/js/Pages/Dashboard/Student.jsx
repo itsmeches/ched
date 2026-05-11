@@ -14,8 +14,8 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
     const statItems = [
-        { key: 'total', label: 'Total Papers', color: accentPrimary, icon: <FileTextOutlined /> },
         { key: 'pending', label: 'Pending', color: '#d97706', icon: <ClockCircleOutlined /> },
+        { key: 'total', label: 'Total Papers', color: accentPrimary, icon: <FileTextOutlined /> },
         { key: 'approved', label: 'Approved', color: accentPrimary, icon: <CheckCircleOutlined /> },
         { key: 'rejected', label: 'Rejected', color: '#dc2626', icon: <StopOutlined /> },
     ];
@@ -109,6 +109,14 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
                     disciplines={filterOptions.disciplines ?? []}
                 />
 
+                <Card className="admin-dashboard-shell dashboard-table-card" title="Review Queue" bordered={false}>
+                    {pendingQueue.length === 0 ? (
+                        <Alert type="success" showIcon message="No submissions currently pending review." />
+                    ) : (
+                        <Table rowKey="id" columns={pendingColumns} dataSource={pendingQueue} pagination={false} size="small" />
+                    )}
+                </Card>
+
                 <Row gutter={[16, 16]}>
                     {statItems.map((item, index) => (
                         <Col xs={24} sm={12} xl={24 / statItems.length} key={item.key}>
@@ -118,14 +126,6 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
                         </Col>
                     ))}
                 </Row>
-
-                <Card className="admin-dashboard-shell dashboard-table-card" title="Review Queue" bordered={false}>
-                    {pendingQueue.length === 0 ? (
-                        <Alert type="success" showIcon message="No submissions currently pending review." />
-                    ) : (
-                        <Table rowKey="id" columns={pendingColumns} dataSource={pendingQueue} pagination={false} size="small" />
-                    )}
-                </Card>
 
                 <Card title="Recent Uploads" className="admin-dashboard-shell dashboard-table-card">
                     {recentUploads.length === 0 ? (

@@ -67,7 +67,7 @@ export default function AccountsCreate({ creatorRole, targetRole, targetRoleLabe
             <div className="space-y-4">
                 {errors?.role_linkage && <Alert type="error" showIcon message={errors.role_linkage} />}
 
-                <Card className="admin-dashboard-shell" bordered={false}>
+                <Card className="admin-dashboard-shell hierarchical-account-create-panel" bordered={false}>
                     <Space direction="vertical" size={16} style={{ width: '100%' }}>
                         <Space wrap>
                             <Tag color="blue">Creator: {String(creatorRole).replace('_', ' ').toUpperCase()}</Tag>

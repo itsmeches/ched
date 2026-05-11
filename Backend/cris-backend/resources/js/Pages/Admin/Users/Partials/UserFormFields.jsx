@@ -60,12 +60,22 @@ export default function UserFormFields({ data, setData, errors, roles, instituti
             <Row gutter={16}>
                 <Col xs={24} md={12}>
                     <Form.Item label={includePasswordHint ? 'New Password' : 'Password'} validateStatus={errors.password ? 'error' : ''} help={errors.password}>
-                        <Input.Password size="large" value={data.password} onChange={(event) => setData('password', event.target.value)} placeholder={includePasswordHint ? 'Leave blank to keep current password' : 'Set account password'} />
+                        <Input.Password
+                            size="large"
+                            value={data.password}
+                            onChange={(event) => setData('password', event.target.value)}
+                            placeholder={includePasswordHint ? 'Leave blank to keep current password' : 'Set account password'}
+                        />
                     </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                     <Form.Item label={includePasswordHint ? 'Confirm New Password' : 'Confirm Password'} validateStatus={errors.password_confirmation ? 'error' : ''} help={errors.password_confirmation}>
-                        <Input.Password size="large" value={data.password_confirmation} onChange={(event) => setData('password_confirmation', event.target.value)} placeholder="Repeat password" />
+                        <Input.Password
+                            size="large"
+                            value={data.password_confirmation}
+                            onChange={(event) => setData('password_confirmation', event.target.value)}
+                            placeholder="Repeat password"
+                        />
                     </Form.Item>
                 </Col>
             </Row>

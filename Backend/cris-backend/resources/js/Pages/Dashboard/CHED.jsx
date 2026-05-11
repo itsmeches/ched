@@ -17,9 +17,9 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
     const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
     const statItems = [
         { key: 'pending', label: 'Pending Review', color: '#d97706', icon: <ClockCircleOutlined /> },
+        { key: 'total', label: 'Total Papers', color: accentPrimary, icon: <InboxOutlined /> },
         { key: 'approved', label: 'Approved', color: accentPrimary, icon: <CheckCircleOutlined /> },
         { key: 'rejected', label: 'Rejected', color: '#dc2626', icon: <StopOutlined /> },
-        { key: 'total', label: 'Total Papers', color: accentPrimary, icon: <InboxOutlined /> },
     ];
 
     const DEFAULT_REJECT_REMARK = 'CHED final review: Please revise and resubmit with required corrections.';
@@ -180,16 +180,6 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                         disciplines={filterOptions.disciplines ?? []}
                     />
 
-                    <Row gutter={[16, 16]}>
-                        {statItems.map((item, index) => (
-                            <Col xs={24} sm={12} xl={6} key={item.key}>
-                                <Card className="admin-dashboard-shell kpi-stat-card dashboard-reveal" hoverable style={{ animationDelay: `${index * 55}ms` }}>
-                                    <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: metricTextColor }} />
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-
                     <Card title="Review Queue" extra={<Link href={route('research.index', { status: 'under_review_ched' })}>View all</Link>} className="admin-dashboard-shell dashboard-table-card" bordered={false}>
                         {forReview.length === 0 ? (
                             <Alert type="success" showIcon message="No papers pending review. The current queue is clear." />
@@ -278,6 +268,16 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                             </Space>
                         </Card>
                     )}
+
+                    <Row gutter={[16, 16]}>
+                        {statItems.map((item, index) => (
+                            <Col xs={24} sm={12} xl={6} key={item.key}>
+                                <Card className="admin-dashboard-shell kpi-stat-card dashboard-reveal" hoverable style={{ animationDelay: `${index * 55}ms` }}>
+                                    <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: metricTextColor }} />
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
 
                     <CHEDCharts stats={stats} monthlyTrends={monthlyTrends} disciplineBreakdown={disciplineBreakdown} approvalFunnel={approvalFunnel} />
 

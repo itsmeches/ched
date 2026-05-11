@@ -13,7 +13,7 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
     return (
         <Row gutter={[24, 24]}>
             <Col xs={24}>
-                <Card title={<Space><UserAddOutlined /><span>Create New Account</span></Space>} extra={<Tag style={{ color: accentPrimary, backgroundColor: dark ? 'rgba(147,197,253,0.15)' : '#e6f2ff', borderColor: accentPrimary }}>Writes directly to database</Tag>} className="admin-dashboard-shell dashboard-table-card" bordered={false}>
+                <Card title={<Space><UserAddOutlined /><span>Create New Account</span></Space>} extra={<Tag style={{ color: accentPrimary, backgroundColor: dark ? 'rgba(147,197,253,0.15)' : '#e6f2ff', borderColor: accentPrimary }}>Writes directly to database</Tag>} className="admin-dashboard-shell dashboard-table-card super-admin-account-panel" bordered={false}>
                     <Typography.Paragraph type="secondary" style={{ maxWidth: 860 }}>
                         Create HEI, Faculty, Student, CHED, or Super Admin users here. New accounts are available immediately after save.
                     </Typography.Paragraph>
