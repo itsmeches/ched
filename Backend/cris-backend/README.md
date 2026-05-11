@@ -1,5 +1,95 @@
 # CALABARZON Research Information System (CRIS)
 
+## 5-Minute Quickstart
+
+Run this from this folder (Backend/cris-backend).
+
+Windows (PowerShell):
+
+```bash
+composer install
+npm install
+copy .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve --host=127.0.0.1 --port=8001
+```
+
+In another terminal:
+
+```bash
+npm run dev
+```
+
+macOS/Linux:
+
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve --host=127.0.0.1 --port=8001
+```
+
+In another terminal:
+
+```bash
+npm run dev
+```
+
+Open http://127.0.0.1:8001
+
+## Troubleshooting
+
+### 1. Missing app key
+
+Symptoms:
+
+- "No application encryption key has been specified"
+
+Fix:
+
+```bash
+php artisan key:generate
+```
+
+### 2. Database connection refused
+
+Symptoms:
+
+- SQLSTATE connection errors
+- Migration fails with access denied or cannot connect
+
+Checklist:
+
+- Confirm DB service is running.
+- Verify .env values for DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, and DB_PASSWORD.
+- Clear config cache after changing env values.
+
+Fix:
+
+```bash
+php artisan config:clear
+php artisan migrate --seed
+```
+
+### 3. Vite port conflict
+
+Symptoms:
+
+- Frontend assets do not load in dev
+- Vite fails to start on default port
+
+Fix options:
+
+- Stop the process already using port 5173, then rerun npm run dev.
+- Or run Vite on another port.
+
+```bash
+npm run dev -- --port 5174
+```
+
 ## Overview
 
 This directory contains the main CRIS application:
@@ -7,6 +97,7 @@ This directory contains the main CRIS application:
 - Laravel 11 backend
 - Inertia.js + React frontend
 - Role-based workflows for Super Admin, CHED, HEI, Faculty, and Student users
+- Hierarchical account management (CHED to HEI to Faculty to Student)
 - Public research archive and public paper detail pages
 
 CRIS manages end-to-end research submission, review, approval, archival, and audit/history tracking for Region IV-A institutions.
@@ -24,6 +115,7 @@ This README is operations-focused for this app folder (setup, commands, routes, 
 - Global light/dark mode support (authenticated and public views)
 - Responsive admin tables with mobile column-priority behavior
 - Shared empty states and standardized confirmation dialogs
+- CHED HEI importer with institution-first creation and CSV audit output
 
 ## Stack
 
@@ -78,6 +170,8 @@ DB_PORT=3306
 DB_DATABASE=cris_db
 DB_USERNAME=root
 DB_PASSWORD=
+
+SANCTUM_STATEFUL_DOMAINS=localhost:5173
 ```
 
 ### 4. Generate application key
@@ -110,6 +204,29 @@ Open:
 
 - http://127.0.0.1:8001
 
+## Test Commands
+
+Backend tests:
+
+```bash
+php artisan test
+```
+
+Frontend unit tests (Vitest):
+
+```bash
+npm run test:unit
+npm run test:unit:watch
+npm run test:unit:coverage
+```
+
+Browser tests (Playwright):
+
+```bash
+npm run test:browser:install
+npm run test:browser
+```
+
 ## Production Build
 
 ```bash
@@ -117,6 +234,40 @@ npm run build
 ```
 
 The build pipeline includes a sanitizer step for generated assets to reduce scanner false positives.
+
+## CHED HEI Import Automation
+
+Use the importer to pull HEIs from CHED API, create institutions, create or match HEI accounts, and export a CSV audit report.
+
+Base command:
+
+```bash
+php artisan ched4a:import-heis
+```
+
+Common options:
+
+- --active-only
+- --dry-run
+- --update-existing
+- --ched-email=ched@cris.gov.ph
+- --password=ChangeMe123!
+- --report-path=app/reports/ched4a-heis-latest.csv
+
+Examples:
+
+```bash
+php artisan ched4a:import-heis --active-only --dry-run --report-path=app/reports/ched4a-heis-latest.csv
+php artisan ched4a:import-heis --active-only --report-path=app/reports/ched4a-heis-write.csv
+```
+
+Behavior highlights:
+
+- Institutions are created or matched first.
+- HEI users are then created or matched under CHED ownership.
+- Shared contact emails are handled safely.
+- Repeated runs are idempotent.
+- CSV report includes institution and HEI action metadata per row.
 
 ## Main Routes
 
@@ -145,6 +296,8 @@ The build pipeline includes a sanitizer step for generated assets to reduce scan
 - /admin/institutions
 - /admin/keywords
 - /admin/taxonomy
+- /accounts/create
+- /accounts/hierarchy
 
 ## API Summary
 
@@ -179,6 +332,21 @@ The build pipeline includes a sanitizer step for generated assets to reduce scan
 | CHED Reviewer  | ched@cris.gov.ph       | password |
 | HEI Researcher | hei@edu.ph             | password |
 
+## Developer Utility Scripts
+
+Available scripts in scripts/dev:
+
+- check_user.php
+- check_users.php
+- test_login.php
+- final_import_check.php
+
+Run final import validation:
+
+```bash
+php scripts/dev/final_import_check.php
+```
+
 ## Important Directories
 
 ```text
@@ -206,6 +374,12 @@ The app includes security hardening for:
 - CORS controls
 - Safe API fallback behavior
 - Scanner-compatible asset output
+
+## Repo Hygiene
+
+- Keep secrets only in .env and never commit local env variants.
+- Use .env.example as the onboarding template.
+- Generated importer reports are ignored under storage/app/reports.
 
 ## License
 
