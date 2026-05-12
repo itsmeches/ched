@@ -27,6 +27,32 @@ use Inertia\Response;
 
 class ResearchProposalController extends Controller
 {
+    /**
+     * Disk used for new research PDF uploads. Private (not symlinked into
+     * /public/storage), only served via downloadFile/publicDownloadFile
+     * after authorization.
+     */
+    private const RESEARCH_DISK = 'research';
+
+    /**
+     * Resolve which disk currently holds a research file. Newly uploaded
+     * files live on the private 'research' disk; legacy uploads may still
+     * be on the 'public' disk until migrated by `php artisan research:migrate-files`.
+     */
+    private function resolveResearchDisk(?string $filePath): ?string
+    {
+        if (! $filePath) {
+            return null;
+        }
+        if (Storage::disk(self::RESEARCH_DISK)->exists($filePath)) {
+            return self::RESEARCH_DISK;
+        }
+        if (Storage::disk('public')->exists($filePath)) {
+            return 'public';
+        }
+        return null;
+    }
+
     public function publicIndex(Request $request): Response
     {
         $sort = (string) $request->input('sort', 'recent');
@@ -104,15 +130,18 @@ class ResearchProposalController extends Controller
     {
         abort_unless($proposal->status === ResearchProposal::STATUS_APPROVED, 404);
         abort_if(empty($proposal->file_path), 404);
-        abort_unless(Storage::disk('public')->exists($proposal->file_path), 404);
 
-        $absolutePath = Storage::disk('public')->path($proposal->file_path);
+        $disk = $this->resolveResearchDisk($proposal->file_path);
+        abort_unless($disk !== null, 404);
+
+        $absolutePath = Storage::disk($disk)->path($proposal->file_path);
         $downloadName = $this->safePdfFileName($proposal);
         $disposition = request()->boolean('download') ? 'attachment' : 'inline';
 
         return response()->file($absolutePath, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => $disposition . '; filename="' . $downloadName . '"',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 
@@ -277,7 +306,7 @@ class ResearchProposalController extends Controller
 
         if ($request->hasFile('pdf_file')) {
             $data['file_path'] = $request->file('pdf_file')
-                ->store('research_papers', 'public');
+                ->store('research_papers', self::RESEARCH_DISK);
         }
 
         unset($data['pdf_file']);
@@ -412,15 +441,18 @@ class ResearchProposalController extends Controller
     {
         $this->authorize('view', $proposal);
         abort_if(empty($proposal->file_path), 404);
-        abort_unless(Storage::disk('public')->exists($proposal->file_path), 404);
 
-        $absolutePath = Storage::disk('public')->path($proposal->file_path);
+        $disk = $this->resolveResearchDisk($proposal->file_path);
+        abort_unless($disk !== null, 404);
+
+        $absolutePath = Storage::disk($disk)->path($proposal->file_path);
         $downloadName = $this->safePdfFileName($proposal);
         $disposition = request()->boolean('download') ? 'attachment' : 'inline';
 
         return response()->file($absolutePath, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => $disposition . '; filename="' . $downloadName . '"',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 
@@ -475,12 +507,14 @@ class ResearchProposalController extends Controller
         $data['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
 
         if ($request->hasFile('pdf_file')) {
-            // Remove old file
             if ($proposal->file_path) {
-                Storage::disk('public')->delete($proposal->file_path);
+                $oldDisk = $this->resolveResearchDisk($proposal->file_path);
+                if ($oldDisk) {
+                    Storage::disk($oldDisk)->delete($proposal->file_path);
+                }
             }
             $data['file_path'] = $request->file('pdf_file')
-                ->store('research_papers', 'public');
+                ->store('research_papers', self::RESEARCH_DISK);
         }
 
         if ($hasApprovedPermission) {
@@ -582,7 +616,10 @@ class ResearchProposalController extends Controller
         $this->logHistory($proposal, request()->user()?->id, 'deleted', $this->trackedValues($proposal), null);
 
         if ($proposal->file_path) {
-            Storage::disk('public')->delete($proposal->file_path);
+            $disk = $this->resolveResearchDisk($proposal->file_path);
+            if ($disk) {
+                Storage::disk($disk)->delete($proposal->file_path);
+            }
         }
 
         $proposal->delete();

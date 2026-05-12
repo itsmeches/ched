@@ -44,6 +44,16 @@ return [
             'throw' => false,
         ],
 
+        // Private disk for research PDFs. NOT symlinked into public/, only
+        // served through ResearchProposalController after authorization.
+        // Files stored under storage/app/private/research_papers/.
+        'research' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

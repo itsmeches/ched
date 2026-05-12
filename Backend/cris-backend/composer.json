@@ -48,15 +48,6 @@
         "test:hardening": [
             "@php artisan test --testdox --group=authorization-hardening"
         ],
-        "dev:check-user": [
-            "@php scripts/dev/check_user.php"
-        ],
-        "dev:check-users": [
-            "@php scripts/dev/check_users.php"
-        ],
-        "dev:test-login": [
-            "@php scripts/dev/test_login.php"
-        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
