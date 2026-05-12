@@ -9,7 +9,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Avatar, Button, Col, DatePicker, Input, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
-import { PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
+import { DownloadOutlined, PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useTheme } from '@/utils/ThemeContext';
 import { getRoleColor, palette } from '@/utils/designTokens';
@@ -210,6 +210,20 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
                             <Link href={route('admin.users.audits')}>
                                 <Button size="large">View Audits</Button>
                             </Link>
+                            <a
+                                href={route('admin.users.export', {
+                                    search: search || undefined,
+                                    role: role || undefined,
+                                    institution_id: institutionId || undefined,
+                                    from: joinedDateRange?.[0]?.format('YYYY-MM-DD') || undefined,
+                                    to: joinedDateRange?.[1]?.format('YYYY-MM-DD') || undefined,
+                                    deactivated: deactivated ? 1 : undefined,
+                                })}
+                            >
+                                <Button size="large" icon={<DownloadOutlined />}>
+                                    Export CSV
+                                </Button>
+                            </a>
                             <Link href={route('admin.users.create')}>
                                 <Button size="large" type="primary" icon={<PlusOutlined />}>
                                     Create User

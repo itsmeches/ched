@@ -13,6 +13,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserManagementController extends Controller
 {
@@ -116,6 +117,56 @@ class UserManagementController extends Controller
                 'faculty' => (int) ($roleCounts['faculty'] ?? 0),
                 'student' => (int) ($roleCounts['student'] ?? 0),
             ],
+        ]);
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $search = trim((string) $request->input('search', ''));
+        $role = trim((string) $request->input('role', ''));
+        $institutionId = (int) $request->input('institution_id', 0);
+        $from = trim((string) $request->input('from', ''));
+        $to = trim((string) $request->input('to', ''));
+        $showDeactivated = $request->boolean('deactivated', false);
+
+        $baseQuery = $showDeactivated ? User::onlyTrashed() : User::query();
+
+        $query = $baseQuery->with('institution:id,name')
+            ->when($search !== '', fn ($q) =>
+                $q->where(function ($inner) use ($search) {
+                    $inner->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })
+            )
+            ->when($role !== '', fn ($q) => $q->where('role', $role))
+            ->when($institutionId > 0, fn ($q) => $q->where('institution_id', $institutionId))
+            ->when($from !== '', fn ($q) => $q->whereDate('created_at', '>=', $from))
+            ->when($to !== '', fn ($q) => $q->whereDate('created_at', '<=', $to))
+            ->orderByDesc('created_at');
+
+        $fileName = 'users-' . now()->format('Ymd-His') . '.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['ID', 'Name', 'Email', 'Role', 'Institution', 'Created At', 'Deactivated At']);
+
+            $query->chunkById(500, function ($rows) use ($handle) {
+                foreach ($rows as $row) {
+                    fputcsv($handle, [
+                        $row->id,
+                        $row->name,
+                        $row->email,
+                        $row->role,
+                        $row->institution?->name,
+                        optional($row->created_at)->format('Y-m-d H:i:s'),
+                        optional($row->deleted_at ?? null)?->format('Y-m-d H:i:s'),
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
 

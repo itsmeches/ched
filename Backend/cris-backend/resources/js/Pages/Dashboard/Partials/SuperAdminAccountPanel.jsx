@@ -53,11 +53,15 @@ export default function SuperAdminAccountPanel({ data, setData, postSubmit, proc
                                     <Select
                                         size="large"
                                         value={data.institution_id || undefined}
-                                        placeholder={['hei', 'faculty', 'student'].includes(data.role) ? 'Select an institution' : 'Not required for this role'}
+                                        placeholder={['hei', 'faculty', 'student'].includes(data.role) ? 'Search or select an institution' : 'Not required for this role'}
                                         disabled={!['hei', 'faculty', 'student'].includes(data.role)}
                                         options={institutions.map((institution) => ({ value: institution.id, label: getInstitutionOptionLabel(institution) }))}
                                         onChange={(value) => setData('institution_id', value ?? '')}
                                         allowClear
+                                        showSearch
+                                        filterOption={(input, option) =>
+                                            String(option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                        }
                                     />
                                 </Form.Item>
                             </Col>

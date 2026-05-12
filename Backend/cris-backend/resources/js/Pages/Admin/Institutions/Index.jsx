@@ -7,7 +7,7 @@ import { confirmAction } from '@/utils/confirmAction';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Col, Input, Row, Space, Table, Tag, message } from 'antd';
-import { BankOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { BankOutlined, DownloadOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 
 const acronymStopWords = new Set(['of', 'and', 'the', 'for', 'at', 'in', 'on']);
 
@@ -114,11 +114,18 @@ export default function InstitutionsIndex({ institutions, filters }) {
                 <AdminPageHeader
                     title="Institution Management"
                     actions={(
-                        <Link href={route('admin.institutions.create')}>
-                            <Button size="large" type="primary" icon={<PlusOutlined />}>
-                                Add Institution
-                            </Button>
-                        </Link>
+                        <Space>
+                            <a href={route('admin.institutions.export', { search: search || undefined })}>
+                                <Button size="large" icon={<DownloadOutlined />}>
+                                    Export CSV
+                                </Button>
+                            </a>
+                            <Link href={route('admin.institutions.create')}>
+                                <Button size="large" type="primary" icon={<PlusOutlined />}>
+                                    Add Institution
+                                </Button>
+                            </Link>
+                        </Space>
                     )}
                 />
             )}

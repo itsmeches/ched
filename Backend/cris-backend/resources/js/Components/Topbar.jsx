@@ -169,6 +169,14 @@ export default function Topbar({ title, sidebarCollapsed = false, onToggleSideba
                                             ))
                                         )}
                                     </div>
+                                    <div className="border-t border-slate-200 px-4 py-2 text-center dark:border-[#1e2d47]">
+                                        <Link
+                                            href={route('notifications.index')}
+                                            className="text-xs font-medium text-[#0033a0] hover:underline dark:text-blue-300"
+                                        >
+                                            View all notifications
+                                        </Link>
+                                    </div>
                                 </div>
                             )}
                     </div>
