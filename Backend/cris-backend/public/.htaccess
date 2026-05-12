@@ -1,3 +1,8 @@
+# Block direct access to .htaccess and sensitive files
+<Files ".htaccess">
+    Require all denied
+</Files>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
@@ -22,9 +27,23 @@
 
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always unset X-Powered-By
+    Header always unset Server
 </IfModule>
 
 <IfModule mod_php.c>
     php_flag expose_php Off
 </IfModule>
+
+# Block access to sensitive files
+<FilesMatch "\.(env|yaml|yml|json|lock|git|htaccess|config|cache)\.?">
+    Require all denied
+</FilesMatch>
+
+# Block access to vendor and node_modules
+<DirectoryMatch "(vendor|node_modules|storage|bootstrap/cache)">
+    Require all denied
+</DirectoryMatch>
