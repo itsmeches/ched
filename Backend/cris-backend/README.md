@@ -107,10 +107,13 @@ This README is operations-focused for this app folder (setup, commands, routes, 
 ## Core Capabilities
 
 - Authentication and role-based authorization
+- Stable Inertia auth redirects for login/logout with current CSRF handling
 - Research submission and multi-stage review workflow
 - CHED decisioning and review history
 - Admin management for users, institutions, keywords, and taxonomy
+- Searchable institution selection in Super Admin account creation for large institution lists
 - Public research listing and detail pages with PDF viewing/downloading
+- Citation tools on research detail pages (copy citation, export RIS, export BIB)
 - History page with filters, CSV export (super_admin), and collapsible grouping by paper
 - Global light/dark mode support (authenticated and public views)
 - Responsive admin tables with mobile column-priority behavior
@@ -269,6 +272,12 @@ Behavior highlights:
 - Repeated runs are idempotent.
 - CSV report includes institution and HEI action metadata per row.
 
+Validation highlights:
+
+- Active-school import run validated with CSV-to-database integrity checks.
+- Duplicate email edge cases are handled by deterministic suffixing.
+- Final verification utility script confirms email + institution alignment.
+
 ## Main Routes
 
 ### Public
@@ -374,6 +383,20 @@ The app includes security hardening for:
 - CORS controls
 - Safe API fallback behavior
 - Scanner-compatible asset output
+
+Recent hardening updates:
+
+- Added strict security headers via middleware (frame, content-type, referrer, permissions).
+- CSP is environment-aware:
+    - Local development keeps allowances required by Vite HMR.
+    - Non-local environments use nonce-based script/style policy without `unsafe-eval`.
+- Session cookie settings are explicitly documented in `.env.example` (`SESSION_HTTP_ONLY`, `SESSION_SECURE_COOKIE`, session lifetime settings).
+- Public web root `.htaccess` includes additional restrictions and disclosure-reduction headers for Apache deployments.
+
+ZAP scanning guidance:
+
+- Run production-style scans with `APP_ENV=production` and `APP_DEBUG=false` to evaluate strict CSP behavior.
+- In local mode, some alerts can be expected due to development tooling requirements.
 
 ## Repo Hygiene
 
