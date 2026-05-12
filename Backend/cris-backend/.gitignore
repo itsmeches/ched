@@ -5,6 +5,8 @@
 /public/storage
 /storage/*.key
 /storage/app/reports/
+/storage/app/private/research_papers/
+/scripts/dev/
 /vendor
 .env
 .env.backup
