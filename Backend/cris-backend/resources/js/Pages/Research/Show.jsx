@@ -123,23 +123,47 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
         );
     }
 
-    const metadataItems = [
-        { label: 'Author', value: proposal.authors },
-        { label: 'Author Email', value: proposal.author_email || '—' },
-        { label: 'Author Phone', value: proposal.author_phone || '—' },
-        { label: 'Co-Authors', value: proposal.co_authors || '—' },
-        { label: 'Co-Author Emails', value: proposal.co_author_emails || '—' },
-        { label: 'Co-Author Phones', value: proposal.co_author_phones || '—' },
-        { label: 'School', value: proposal.school || '—' },
-        { label: 'Keywords', value: proposal.keywords || '—' },
-        { label: 'Institution', value: proposal.institution?.name ?? '—' },
-        { label: 'Submitted By', value: proposal.submitter?.name ?? '—' },
-        { label: 'Viewed By CHED', value: proposal.viewer?.name ?? 'Not viewed yet' },
-        { label: 'Viewed At', value: formatDateTime(proposal.viewed_at) || 'Not viewed yet' },
-        { label: 'Last Action By', value: proposal.last_action_by || '—' },
-        { label: 'Last Action At', value: formatDateTime(proposal.last_action_at) || '—' },
-        { label: 'Approved By', value: proposal.approver?.name ?? '—' },
-        { label: 'Approved At', value: formatDateTime(proposal.approved_at) || '—' },
+    const keywordList = String(proposal.keywords || '')
+        .split(/[,;]/)
+        .map((k) => k.trim())
+        .filter(Boolean);
+
+    const formatContact = (email, phone) => {
+        const parts = [email, phone].map((v) => (v || '').trim()).filter(Boolean);
+        return parts.length > 0 ? parts.join(' · ') : null;
+    };
+
+    const sidebarSections = [
+        {
+            title: 'Authors',
+            rows: [
+                { label: 'Author', value: proposal.authors, sub: formatContact(proposal.author_email, proposal.author_phone) },
+                { label: 'Co-Authors', value: proposal.co_authors || '—', sub: formatContact(proposal.co_author_emails, proposal.co_author_phones) },
+            ],
+        },
+        {
+            title: 'Classification',
+            rows: [
+                { label: 'Category', value: proposal.category || '—' },
+                { label: 'Year', value: proposal.year ? String(proposal.year) : '—' },
+            ],
+        },
+        {
+            title: 'Publication',
+            rows: [
+                { label: 'Institution', value: proposal.institution?.name ?? '—' },
+                { label: 'School', value: proposal.school || '—' },
+            ],
+        },
+        {
+            title: 'Workflow',
+            rows: [
+                { label: 'Submitted By', value: proposal.submitter?.name ?? '—' },
+                { label: 'Viewed By CHED', value: proposal.viewer?.name ?? 'Not viewed yet', sub: formatDateTime(proposal.viewed_at) || null },
+                { label: 'Last Action', value: proposal.last_action_by || '—', sub: formatDateTime(proposal.last_action_at) || null },
+                { label: 'Approved By', value: proposal.approver?.name ?? '—', sub: formatDateTime(proposal.approved_at) || null },
+            ],
+        },
     ];
 
     const auditSummaryItems = [
@@ -449,32 +473,61 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
-                                {metadataItems.map((item) => (
-                                    <div key={item.label} className="rounded-xl border border-slate-200/80 dark:border-[#1e2d47] bg-slate-50/80 dark:bg-[#0d1526] px-3.5 py-2.5">
-                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{item.label}</p>
-                                        <p className="mt-0.5 break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">{item.value}</p>
-                                    </div>
-                                ))}
+                            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                                <div className="lg:col-span-2 space-y-6">
+                                    <section>
+                                        <Typography.Title level={5} style={{ marginBottom: 4 }}>Abstract</Typography.Title>
+                                        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 10, fontSize: 12 }}>
+                                            Research summary and key findings
+                                        </Typography.Text>
+                                        <Typography.Paragraph
+                                            style={{
+                                                whiteSpace: 'pre-line',
+                                                fontSize: 15,
+                                                lineHeight: 1.85,
+                                                marginBottom: 0,
+                                            }}
+                                        >
+                                            {proposal.abstract || <Typography.Text type="secondary">No abstract provided.</Typography.Text>}
+                                        </Typography.Paragraph>
+                                    </section>
+
+                                    {keywordList.length > 0 && (
+                                        <section>
+                                            <Typography.Title level={5} style={{ marginBottom: 8 }}>Keywords</Typography.Title>
+                                            <Space wrap size={[6, 6]}>
+                                                {keywordList.map((kw) => (
+                                                    <Tag key={kw} style={{ borderRadius: 999, padding: '2px 10px' }}>{kw}</Tag>
+                                                ))}
+                                            </Space>
+                                        </section>
+                                    )}
+                                </div>
+
+                                <aside className="space-y-4 lg:border-l lg:border-slate-200/80 lg:pl-6 dark:lg:border-[#1e2d47]">
+                                    {sidebarSections.map((section) => (
+                                        <div key={section.title}>
+                                            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                                {section.title}
+                                            </p>
+                                            <dl className="space-y-2">
+                                                {section.rows.map((row) => (
+                                                    <div key={row.label}>
+                                                        <dt className="text-[11px] text-slate-500 dark:text-slate-400">{row.label}</dt>
+                                                        <dd className="break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">
+                                                            {row.value}
+                                                            {row.sub && (
+                                                                <span className="block text-[11px] text-slate-500 dark:text-slate-400">{row.sub}</span>
+                                                            )}
+                                                        </dd>
+                                                    </div>
+                                                ))}
+                                            </dl>
+                                        </div>
+                                    ))}
+                                </aside>
                             </div>
                         </div>
-
-                        <Divider />
-                        <Typography.Title level={5} style={{ marginBottom: 6 }}>Abstract</Typography.Title>
-                        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 14 }}>
-                            Research summary and key findings
-                        </Typography.Text>
-                        <Typography.Paragraph
-                            className="max-w-4xl"
-                            style={{
-                                whiteSpace: 'pre-line',
-                                fontSize: 17,
-                                lineHeight: 1.9,
-                                marginBottom: 0,
-                            }}
-                        >
-                            {proposal.abstract}
-                        </Typography.Paragraph>
                     </Card>
 
                     {pdfOpen && proposal.file_path && (

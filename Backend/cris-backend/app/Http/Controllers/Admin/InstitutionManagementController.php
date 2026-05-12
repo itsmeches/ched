@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InstitutionManagementController extends Controller
 {
@@ -31,6 +32,42 @@ class InstitutionManagementController extends Controller
     public function create(): Response
     {
         return Inertia::render('Admin/Institutions/Create');
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $query = Institution::withCount('users')
+            ->when($request->search, fn ($q, $s) =>
+                $q->where('name', 'like', "%{$s}%")
+                  ->orWhere('code', 'like', "%{$s}%")
+            )
+            ->orderBy('name');
+
+        $fileName = 'institutions-' . now()->format('Ymd-His') . '.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['ID', 'Name', 'Code', 'Address', 'Contact Email', 'Contact Phone', 'Users', 'Created At']);
+
+            $query->chunkById(500, function ($rows) use ($handle) {
+                foreach ($rows as $row) {
+                    fputcsv($handle, [
+                        $row->id,
+                        $row->name,
+                        $row->code,
+                        $row->address,
+                        $row->contact_email,
+                        $row->contact_phone,
+                        $row->users_count,
+                        optional($row->created_at)->format('Y-m-d H:i:s'),
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

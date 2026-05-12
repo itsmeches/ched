@@ -4,8 +4,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HierarchicalAccountController;
 use App\Http\Controllers\EditPermissionController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResearchProposalController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\InstitutionManagementController;
 use App\Http\Controllers\Admin\KeywordManagementController;
@@ -13,10 +15,12 @@ use App\Http\Controllers\Admin\ResearchTaxonomyManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/robots.txt', function () {
-    return response("User-agent: *\nDisallow:", 200, [
+    return response("User-agent: *\nDisallow:\nSitemap: " . url('/sitemap.xml'), 200, [
         'Content-Type' => 'text/plain; charset=UTF-8',
     ]);
 });
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::middleware('throttle:60,1')->group(function () {
     Route::get('/', [ResearchProposalController::class, 'publicIndex'])
@@ -94,11 +98,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
     Route::get('/history/export', [HistoryController::class, 'exportCsv'])->name('history.export');
 
+    Route::get('/notifications', [NotificationController::class, 'index'])
+        ->name('notifications.index');
+
     Route::post('/notifications/read-all', [DashboardController::class, 'markAllNotificationsRead'])
         ->name('notifications.read-all');
 
     Route::post('/notifications/{id}/read', [DashboardController::class, 'markNotificationRead'])
         ->name('notifications.read-one')
+        ->whereNumber('id');
+
+    Route::post('/notifications/{id}/unread', [NotificationController::class, 'markUnread'])
+        ->name('notifications.unread')
+        ->whereNumber('id');
+
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])
+        ->name('notifications.destroy')
         ->whereNumber('id');
 
     // Hierarchical account creation (CHED -> HEI -> Faculty -> Student)
@@ -130,6 +145,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('users', UserManagementController::class)
             ->except(['show']);
 
+        Route::get('users-export', [UserManagementController::class, 'export'])
+            ->name('users.export');
+
         Route::get('users/audits', [UserManagementController::class, 'audits'])
             ->name('users.audits');
 
@@ -138,6 +156,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('institutions', InstitutionManagementController::class)
             ->except(['show']);
+
+        Route::get('institutions-export', [InstitutionManagementController::class, 'export'])
+            ->name('institutions.export');
 
         Route::resource('keywords', KeywordManagementController::class)
             ->except(['show', 'create', 'edit']);

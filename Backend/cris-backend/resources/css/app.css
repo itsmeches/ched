@@ -218,11 +218,23 @@ html.dark .user-form-drawer .ant-input-affix-wrapper .ant-input:-webkit-autofill
 	-webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
 }
 
-/* Keep create-account inputs from turning white when browser autofill is active in dark mode. */
+/* Super Admin create-account page. Keep password input inner field aligned with wrapper styling. */
 .super-admin-account-panel .ant-input-affix-wrapper .ant-input {
 	background: transparent !important;
 	box-shadow: none !important;
 	padding-inline: 0 !important;
+}
+
+.super-admin-account-panel .ant-input:-webkit-autofill,
+.super-admin-account-panel .ant-input:-webkit-autofill:hover,
+.super-admin-account-panel .ant-input:-webkit-autofill:focus,
+.super-admin-account-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill,
+.super-admin-account-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill:hover,
+.super-admin-account-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill:focus {
+	-webkit-text-fill-color: #0f172a !important;
+	caret-color: #0f172a !important;
+	-webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+	transition: background-color 9999s ease-out 0s;
 }
 
 html.dark .super-admin-account-panel .ant-input:-webkit-autofill,
@@ -234,6 +246,7 @@ html.dark .super-admin-account-panel .ant-input-affix-wrapper .ant-input:-webkit
 	-webkit-text-fill-color: #e2e8f0 !important;
 	caret-color: #e2e8f0 !important;
 	-webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+	transition: background-color 9999s ease-out 0s;
 }
 
 /* Shared role-based create-account page (CHED/HEI/Faculty/Student). */
@@ -241,6 +254,17 @@ html.dark .super-admin-account-panel .ant-input-affix-wrapper .ant-input:-webkit
 	background: transparent !important;
 	box-shadow: none !important;
 	padding-inline: 0 !important;
+}
+
+.hierarchical-account-create-panel .ant-input:-webkit-autofill,
+.hierarchical-account-create-panel .ant-input:-webkit-autofill:hover,
+.hierarchical-account-create-panel .ant-input:-webkit-autofill:focus,
+.hierarchical-account-create-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill,
+.hierarchical-account-create-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill:hover,
+.hierarchical-account-create-panel .ant-input-affix-wrapper .ant-input:-webkit-autofill:focus {
+	-webkit-text-fill-color: #0f172a !important;
+	caret-color: #0f172a !important;
+	-webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
 }
 
 html.dark .hierarchical-account-create-panel .ant-input:-webkit-autofill,

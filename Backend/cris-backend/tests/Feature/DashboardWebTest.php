@@ -91,6 +91,7 @@ class DashboardWebTest extends TestCase
 
     public function test_student_cannot_hit_faculty_dashboard(): void
     {
+        /** @var User $student */
         $student = User::factory()->create(['role' => User::ROLE_STUDENT]);
 
         // Faculty dashboard route is in a role-gated middleware group;
