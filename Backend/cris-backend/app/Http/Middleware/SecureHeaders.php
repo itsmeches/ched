@@ -20,33 +20,36 @@ class SecureHeaders
         $isLocal = app()->environment('local');
         $viteOrigins = " http://127.0.0.1:5173 http://localhost:5173";
         $viteConnect = " ws://127.0.0.1:5173 ws://localhost:5173";
+        // Dev mode allows unsafe-inline/eval for Vite HMR and dev speed.
+        // Production uses strict nonce-based CSP (no unsafe-*) for security.
+        // Vite does NOT need 'unsafe-eval' (it uses ES modules with source maps).
+        // Keep 'unsafe-inline' for dev so Vite HMR injection works, but production uses nonce.
         $scriptSrc = $isLocal
-            ? "'self' 'unsafe-inline' 'unsafe-eval'{$viteOrigins}"
+            ? "'self' 'unsafe-inline'{$viteOrigins}"
             : "'self' 'nonce-{$nonce}'";
         $styleSrc = $isLocal
             ? "'self' 'unsafe-inline' https://fonts.bunny.net{$viteOrigins}"
             : "'self' 'nonce-{$nonce}' https://fonts.bunny.net";
         $connectSrc = "'self'" . ($isLocal ? $viteOrigins . $viteConnect : '');
+        $upgradeInsecure = $isLocal ? '' : '; upgrade-insecure-requests';
 
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+        $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none');
         $response->headers->remove('X-Powered-By');
+        $response->headers->remove('Server');
 
-        // Strict CSP baseline without unsafe-inline; nonce enables framework-managed inline tags.
+        // Strict CSP baseline: nonce-based in production, dev allows unsafe-* for Vite HMR.
+        // style-src-attr 'unsafe-inline' is required for Ant Design component inline styles.
         $response->headers->set(
             'Content-Security-Policy',
-            "default-src 'self'; script-src {$scriptSrc}; style-src {$styleSrc}; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.bunny.net data:; img-src 'self' data: blob:; connect-src {$connectSrc}; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+            "default-src 'self'; script-src {$scriptSrc}; style-src {$styleSrc}; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.bunny.net data:; img-src 'self' data: blob:; connect-src {$connectSrc}; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'{$upgradeInsecure}"
         );
 
         if ($request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-        }
-
-        if ($response->isRedirection()) {
-            $response->setContent('');
-            $response->headers->set('Content-Length', '0');
         }
 
         return $response;
