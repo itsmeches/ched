@@ -1,17 +1,43 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
-import { Button, Card, Divider, message, Space, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Divider, message, Space, Spin, Tag, Typography } from 'antd';
 import { ArrowLeftOutlined, FilePdfOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
 import { buildApa, buildBibtex, buildRis, downloadText } from '@/utils/citations';
 import PublicSectionCard from '@/Components/Public/PublicSectionCard';
 import PublicNav from '@/Components/Public/PublicNav';
+import { StatusBadge } from '@/Components/StatusBadge';
 
 export default function PublicResearchShow({ proposal, relatedProposals = [], canLogin, canRegister }) {
-    const { auth } = usePage().props;
     const { dark } = useTheme();
     const [pdfOpen, setPdfOpen] = useState(false);
+    const [pdfLoading, setPdfLoading] = useState(false);
+    const [pdfError, setPdfError] = useState(false);
+    const [pdfViewerKey, setPdfViewerKey] = useState(0);
+    const pdfSectionRef = useRef(null);
+
+    useEffect(() => {
+        if (!pdfOpen || !pdfLoading) return;
+
+        const timeoutId = window.setTimeout(() => {
+            setPdfLoading(false);
+            setPdfError(true);
+        }, 12000);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [pdfOpen, pdfLoading]);
+
+    useEffect(() => {
+        if (!pdfOpen) return;
+
+        // Wait for the PDF card to mount, then scroll it into view smoothly.
+        const frameId = window.requestAnimationFrame(() => {
+            pdfSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, [pdfOpen]);
 
     function formatDisciplineLabel(value) {
         if (!value) return '—';
@@ -121,7 +147,7 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                     {proposal.year && <Tag color="blue">Year {proposal.year}</Tag>}
                                     {(proposal.research_category || proposal.category) && <Tag color="geekblue">{proposal.research_category || proposal.category}</Tag>}
                                     {proposal.discipline_label && <Tag color="cyan">{formatDisciplineLabel(proposal.discipline_label)}</Tag>}
-                                    <Tag style={{ backgroundColor: '#0033a0', color: '#fff', border: 'none' }}>Approved</Tag>
+                                    <StatusBadge status={proposal.status || 'approved'} />
                                 </Space>
                                 <Typography.Text className="dark:!text-slate-300" style={{ display: 'block', color: '#475569', fontSize: 13 }}>
                                     by <span style={{ fontWeight: 600 }}>{proposal.authors}</span>
@@ -142,7 +168,15 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                         size="middle"
                                         type={pdfOpen ? 'primary' : 'default'}
                                         icon={<FilePdfOutlined />}
-                                        onClick={() => setPdfOpen((prev) => !prev)}
+                                        onClick={() => {
+                                            const nextOpen = !pdfOpen;
+                                            setPdfOpen(nextOpen);
+                                            if (nextOpen) {
+                                                setPdfLoading(true);
+                                                setPdfError(false);
+                                                setPdfViewerKey((prev) => prev + 1);
+                                            }
+                                        }}
                                     >
                                         {pdfOpen ? 'Hide PDF' : 'View PDF'}
                                     </Button>
@@ -258,26 +292,81 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                     </Card>
 
                     {pdfOpen && proposal.file_path && (
-                        <Card
-                            className="admin-dashboard-shell"
-                            bordered={false}
-                            style={{ marginTop: 10, borderRadius: 14 }}
-                            title={
-                                <Space>
-                                    <FilePdfOutlined style={{ color: '#0033a0' }} />
-                                    <span>PDF Viewer</span>
-                                </Space>
-                            }
-                            extra={
-                                <Button size="small" onClick={() => setPdfOpen(false)}>Close</Button>
-                            }
-                        >
-                            <iframe
-                                src={route('research.public.file', proposal.id)}
-                                title="Research PDF"
-                                style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8 }}
-                            />
-                        </Card>
+                        <div ref={pdfSectionRef} className="scroll-mt-24">
+                            <Card
+                                className="admin-dashboard-shell"
+                                bordered={false}
+                                style={{ marginTop: 10, borderRadius: 14 }}
+                                title={
+                                    <Space>
+                                        <FilePdfOutlined style={{ color: '#0033a0' }} />
+                                        <span>PDF Viewer</span>
+                                    </Space>
+                                }
+                                extra={
+                                    <Button
+                                        size="small"
+                                        onClick={() => {
+                                            setPdfOpen(false);
+                                            setPdfLoading(false);
+                                            setPdfError(false);
+                                        }}
+                                    >
+                                        Close
+                                    </Button>
+                                }
+                            >
+                                {pdfLoading && (
+                                    <div className="mb-3 flex items-center gap-2 text-slate-600 dark:text-slate-300" role="status" aria-live="polite">
+                                        <Spin size="small" />
+                                        <span>Loading PDF preview...</span>
+                                    </div>
+                                )}
+
+                                {pdfError && (
+                                    <Alert
+                                        style={{ marginBottom: 12 }}
+                                        type="warning"
+                                        showIcon
+                                        message="Preview unavailable"
+                                        description="The PDF could not be displayed right now. You can retry the preview or use Download PDF."
+                                        action={(
+                                            <Button
+                                                size="small"
+                                                onClick={() => {
+                                                    setPdfLoading(true);
+                                                    setPdfError(false);
+                                                    setPdfViewerKey((prev) => prev + 1);
+                                                }}
+                                            >
+                                                Retry
+                                            </Button>
+                                        )}
+                                    />
+                                )}
+
+                                <iframe
+                                    key={pdfViewerKey}
+                                    src={route('research.public.file', proposal.id)}
+                                    title="Research PDF"
+                                    onLoad={() => {
+                                        setPdfLoading(false);
+                                        setPdfError(false);
+                                    }}
+                                    onError={() => {
+                                        setPdfLoading(false);
+                                        setPdfError(true);
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        height: '70vh',
+                                        border: 'none',
+                                        borderRadius: 8,
+                                        opacity: pdfLoading ? 0.55 : 1,
+                                    }}
+                                />
+                            </Card>
+                        </div>
                     )}
 
                     {relatedProposals.length > 0 && (
