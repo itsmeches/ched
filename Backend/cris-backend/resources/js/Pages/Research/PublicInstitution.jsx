@@ -1,12 +1,13 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Button, Card, Pagination, Space, Tag, Typography } from 'antd';
 import { ArrowLeftOutlined, BankOutlined, CalendarOutlined, EnvironmentOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useTheme } from '@/utils/ThemeContext';
 import PublicSectionCard from '@/Components/Public/PublicSectionCard';
 import PublicNav from '@/Components/Public/PublicNav';
+import EmptyState from '@/Components/EmptyState';
+import { StatusBadge } from '@/Components/StatusBadge';
 
 export default function PublicInstitution({ institution, papers, stats, canLogin, canRegister }) {
-    const { auth } = usePage().props;
     const { dark } = useTheme();
 
     return (
@@ -50,7 +51,7 @@ export default function PublicInstitution({ institution, papers, stats, canLogin
                                                 </Typography.Text>
                                                 <div className="flex flex-wrap gap-2">
                                                     {stats.top_categories.map((item) => (
-                                                        <span key={item.label} className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${dark ? 'border-purple-900/50 bg-purple-950/30 text-purple-100' : 'border-purple-200 bg-purple-50 text-purple-700'}`}>
+                                                        <span key={item.label} className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${dark ? 'border-blue-800/60 bg-blue-950/35 text-blue-100' : 'border-blue-200 bg-blue-50 text-blue-700'}`}>
                                                             {item.label} ({item.total})
                                                         </span>
                                                     ))}
@@ -112,31 +113,43 @@ export default function PublicInstitution({ institution, papers, stats, canLogin
                         subtitle="Browse approved papers linked to this institution."
                         extra={<Tag color="geekblue" style={{ marginInlineEnd: 0 }}>{papers.total} total</Tag>}
                     >
-                        <div className="space-y-3">
-                            {papers.data.map((paper) => (
-                                <Card key={paper.id} className="admin-dashboard-shell border border-slate-200 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-[#1e2d47]" bordered={false} styles={{ body: { padding: 18 } }}>
-                                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                        <div className="min-w-0 flex-1 space-y-2">
-                                            <Link href={route('research.public.show', paper.id)} className="block text-base font-semibold text-[#0033a0] hover:underline dark:text-blue-300">
-                                                {paper.title}
-                                            </Link>
-                                            <div className="text-sm text-slate-600 dark:text-slate-300">
-                                                {paper.authors || 'Unknown author'}
-                                                {paper.school && <> · {paper.school}</>}
-                                                {paper.year && <> · {paper.year}</>}
+                        {papers.data.length === 0 ? (
+                            <EmptyState
+                                title="No published research yet"
+                                description="This institution does not have approved papers in the archive yet."
+                                action={(
+                                    <Link href={route('research.public.index')}>
+                                        <Button type="primary" size="small">Browse Archive</Button>
+                                    </Link>
+                                )}
+                            />
+                        ) : (
+                            <div className="space-y-3">
+                                {papers.data.map((paper) => (
+                                    <Card key={paper.id} className="admin-dashboard-shell border border-slate-200 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-[#1e2d47]" bordered={false} styles={{ body: { padding: 18 } }}>
+                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                            <div className="min-w-0 flex-1 space-y-2">
+                                                <Link href={route('research.public.show', paper.id)} className="block text-base font-semibold text-[#0033a0] hover:underline dark:text-blue-300">
+                                                    {paper.title}
+                                                </Link>
+                                                <div className="text-sm text-slate-600 dark:text-slate-300">
+                                                    {paper.authors || 'Unknown author'}
+                                                    {paper.school && <> · {paper.school}</>}
+                                                    {paper.year && <> · {paper.year}</>}
+                                                </div>
+                                                <Space wrap size={[6, 6]}>
+                                                    {(paper.research_category || paper.category) && <Tag color="geekblue">{paper.research_category || paper.category}</Tag>}
+                                                    <StatusBadge status={paper.status || 'approved'} />
+                                                </Space>
                                             </div>
-                                            <Space wrap size={[6, 6]}>
-                                                {(paper.research_category || paper.category) && <Tag color="geekblue">{paper.research_category || paper.category}</Tag>}
-                                                {paper.approved_at && <Tag color="cyan">Approved</Tag>}
-                                            </Space>
+                                            <Link href={route('research.public.show', paper.id)}>
+                                                <Button type="primary">Open Paper</Button>
+                                            </Link>
                                         </div>
-                                        <Link href={route('research.public.show', paper.id)}>
-                                            <Button type="primary">Open Paper</Button>
-                                        </Link>
-                                    </div>
-                                </Card>
-                            ))}
-                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
                     </PublicSectionCard>
 
                     {papers.last_page > 1 && (

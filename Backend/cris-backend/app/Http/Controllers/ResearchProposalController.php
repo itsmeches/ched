@@ -161,7 +161,7 @@ class ResearchProposalController extends Controller
     {
         $papers = ResearchProposal::query()
             ->with(['institution:id,name'])
-            ->select(['id', 'title', 'authors', 'school', 'year', 'research_category', 'category', 'discipline_code', 'institution_id', 'approved_at'])
+            ->select(['id', 'title', 'authors', 'school', 'year', 'research_category', 'category', 'discipline_code', 'status', 'institution_id', 'approved_at'])
             ->where('status', ResearchProposal::STATUS_APPROVED)
             ->where('institution_id', $institution->id)
             ->orderByDesc('approved_at')

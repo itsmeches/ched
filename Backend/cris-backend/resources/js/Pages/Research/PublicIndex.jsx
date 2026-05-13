@@ -1,17 +1,16 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Button, Col, Input, Pagination, Row, Select, Tag } from 'antd';
+import { Head, Link, router } from '@inertiajs/react';
+import { Col, Input, Modal, Pagination, Row, Select, Skeleton, Tag } from 'antd';
 import {
     BookOutlined,
     CloseOutlined,
     ControlOutlined,
-    MoonOutlined,
     SearchOutlined,
-    SunOutlined,
     UpOutlined,
     DownOutlined,
 } from '@ant-design/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
+import PublicNav from '@/Components/Public/PublicNav';
 
 // ── Popular discipline quick-links shown below search bar ────────────────────
 const POPULAR_TOPICS = ['Agriculture', 'Engineering', 'Information Technology', 'Education', 'Health Sciences'];
@@ -26,10 +25,12 @@ export default function PublicResearchIndex({
     canLogin,
     canRegister,
 }) {
-    const { auth } = usePage().props;
-    const { dark, toggleDark } = useTheme();
+    const { dark } = useTheme();
 
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [isFiltering, setIsFiltering] = useState(false);
+    const [saveSearchModalOpen, setSaveSearchModalOpen] = useState(false);
+    const [saveSearchName, setSaveSearchName] = useState('');
 
     useEffect(() => {
         function handleScroll() {
@@ -109,11 +110,36 @@ export default function PublicResearchIndex({
     }
 
     function applyFilters(page = 1) {
-        router.get(
-            route('research.public.index'),
-            { search, year_from: yearFrom, year_to: yearTo, school, institution_id: institutionId, category, discipline_code: disciplineCode, sort, page },
-            { preserveState: true, replace: true, preserveScroll: true },
-        );
+        runIndexRequest({
+            search,
+            year_from: yearFrom,
+            year_to: yearTo,
+            school,
+            institution_id: institutionId,
+            category,
+            discipline_code: disciplineCode,
+            sort,
+            page,
+        });
+    }
+
+    function runIndexRequest(params, overrides = {}) {
+        const { onStart, onFinish, ...rest } = overrides;
+
+        router.get(route('research.public.index'), params, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true,
+            ...rest,
+            onStart: () => {
+                setIsFiltering(true);
+                onStart?.();
+            },
+            onFinish: () => {
+                setIsFiltering(false);
+                onFinish?.();
+            },
+        });
     }
 
     function currentFilterPayload() {
@@ -149,22 +175,27 @@ export default function PublicResearchIndex({
     }
 
     function saveCurrentSearch() {
-        const name = window.prompt('Save this search as:', search ? `Search: ${search}` : 'My saved search');
+        setSaveSearchName(search ? `Search: ${search}` : 'My saved search');
+        setSaveSearchModalOpen(true);
+    }
 
-        if (!name || !name.trim()) {
-            return;
-        }
+    function confirmSaveCurrentSearch() {
+        const name = saveSearchName.trim();
+
+        if (!name) return;
 
         const next = [
             {
                 id: Date.now(),
-                name: name.trim(),
+                name,
                 filters: currentFilterPayload(),
             },
             ...savedSearches,
         ].slice(0, 8);
 
         persistSavedSearches(next);
+        setSaveSearchModalOpen(false);
+        setSaveSearchName('');
     }
 
     function applySavedSearch(item) {
@@ -178,7 +209,7 @@ export default function PublicResearchIndex({
         setDisciplineCode(next.discipline_code ?? '');
         setSort(next.sort ?? 'recent');
 
-        router.get(route('research.public.index'), next, { preserveState: true, replace: true, preserveScroll: true });
+        runIndexRequest(next);
     }
 
     function deleteSavedSearch(id) {
@@ -188,7 +219,7 @@ export default function PublicResearchIndex({
     function clearAll() {
         setSearch(''); setYearFrom(''); setYearTo(''); setSchool('');
         setInstitutionId(''); setCategory(''); setDisciplineCode(''); setSort('recent');
-        router.get(route('research.public.index'), {}, { replace: true, preserveScroll: true });
+        runIndexRequest({});
     }
 
     // persist dark mode — handled globally by ThemeContext
@@ -215,9 +246,7 @@ export default function PublicResearchIndex({
     const textSecond= D ? 'text-slate-400'     : 'text-slate-500';
     const textMeta  = D ? 'text-slate-300'     : 'text-slate-600';
     const hoverCard = D ? 'hover:border-blue-500 hover:shadow-blue-900/30' : 'hover:border-blue-200 hover:shadow-md';
-    const advBg     = D ? 'bg-[#0d1526] border-[#1e2d47]' : 'bg-white border-slate-200';
     const labelCls  = D ? 'text-slate-400'     : 'text-slate-500';
-    const inputBg   = D ? '[&_.ant-input]:bg-[#1a2540] [&_.ant-input]:text-white [&_.ant-input]:border-[#2a3a5c] [&_.ant-select-selector]:bg-[#1a2540] [&_.ant-select-selector]:text-white [&_.ant-select-selector]:border-[#2a3a5c]' : '';
 
     return (
         <>
@@ -226,53 +255,13 @@ export default function PublicResearchIndex({
             </Head>
 
             <div className={`min-h-screen transition-colors duration-300 ${bg}`}>
+                <PublicNav canLogin={canLogin} canRegister={canRegister} />
 
-                {/* ── Top navbar ──────────────────────────────────────────── */}
-                <nav className={`sticky top-0 z-40 border-b backdrop-blur-md ${D ? 'bg-[#0a0f1e]/90 border-[#1e2d47]' : 'bg-white/90 border-slate-200'}`}>
-                    <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-                        <div className="flex items-center gap-2.5">
-                            <img src="/cris-mark.svg" alt="CRIS" className="h-8 w-8 rounded-lg" />
-                            <span className={`hidden text-sm font-semibold sm:block ${D ? 'text-white' : 'text-slate-800'}`}>
-                                CRIS
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {/* Dark / light toggle */}
-                            <button
-                                type="button"
-                                onClick={toggleDark}
-                                aria-label="Toggle theme"
-                                className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${D ? 'bg-[#1a2540] text-yellow-300 hover:bg-[#243054]' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                            >
-                                {D ? <SunOutlined /> : <MoonOutlined />}
-                            </button>
-                            {auth?.user ? (
-                                <Link href={route('dashboard')}>
-                                    <button type="button" className="rounded-lg bg-[#0033a0] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
-                                        Dashboard
-                                    </button>
-                                </Link>
-                            ) : (
-                                <>
-                                    {canLogin && (
-                                        <Link href={route('login')}>
-                                            <button type="button" className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${D ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>
-                                                Sign In
-                                            </button>
-                                        </Link>
-                                    )}
-                                    {canRegister && (
-                                        <Link href={route('register')}>
-                                            <button type="button" className="rounded-lg bg-[#0033a0] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
-                                                Submit Research
-                                            </button>
-                                        </Link>
-                                    )}
-                                </>
-                            )}
-                        </div>
+                {isFiltering && (
+                    <div className="sticky top-0 z-30 h-1 w-full overflow-hidden bg-transparent">
+                        <div className="h-full w-1/3 animate-pulse rounded-r bg-[#0033a0]" />
                     </div>
-                </nav>
+                )}
 
                 {/* ── Hero ────────────────────────────────────────────────── */}
                 <section className={`${heroBg} relative overflow-hidden pb-16 pt-20 text-center`}>
@@ -307,9 +296,12 @@ export default function PublicResearchIndex({
                             <div className={`flex overflow-hidden rounded-2xl p-1.5 shadow-xl backdrop-blur-md ring-1 ${D ? 'bg-white/10 shadow-black/20 ring-white/20' : 'bg-slate-100 shadow-slate-200/80 ring-slate-200'}`}>
                                 <div className="flex flex-1 items-center gap-2 rounded-xl bg-white px-4 py-1">
                                     <SearchOutlined className="flex-shrink-0 text-slate-400" style={{ fontSize: 18 }} />
+                                    <label htmlFor="public-archive-search" className="sr-only">Search approved papers</label>
                                     <input
+                                        id="public-archive-search"
                                         type="text"
                                         value={search}
+                                        aria-label="Search approved papers by title, author, or topic"
                                         placeholder="Search for papers, authors, or topics..."
                                         className="flex-1 border-0 bg-transparent py-2 text-sm text-slate-800 placeholder-slate-400 outline-none ring-0 focus:border-0 focus:outline-none focus:ring-0"
                                         onChange={(e) => {
@@ -327,9 +319,10 @@ export default function PublicResearchIndex({
                                 <button
                                     type="button"
                                     onClick={() => applyFilters()}
+                                    disabled={isFiltering}
                                     className="ml-1.5 rounded-xl bg-[#0033a0] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 active:scale-95"
                                 >
-                                    Search
+                                    {isFiltering ? 'Searching...' : 'Search'}
                                 </button>
                             </div>
 
@@ -429,14 +422,14 @@ export default function PublicResearchIndex({
                             )}
 
                             {/* ── Popular topics ─────────────────────────── */}
-                            <div className={`mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm ${D ? 'text-blue-100/70' : 'text-slate-400'}`}>
+                            <div className={`mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm ${D ? 'text-slate-300' : 'text-slate-500'}`}>
                                 <span className="font-medium">Popular:</span>
                                 {POPULAR_TOPICS.map((topic) => (
                                     <button
                                         key={topic}
                                         type="button"
                                         onClick={() => { isLiveFilterEnabled.current = true; setSearch(topic); applyFilters(); }}
-                                        className="transition-colors hover:text-white"
+                                        className={`transition-colors ${D ? 'hover:text-blue-200' : 'hover:text-blue-600'} hover:underline`}
                                     >
                                         {topic}
                                     </button>
@@ -493,7 +486,7 @@ export default function PublicResearchIndex({
                                             type="button"
                                             aria-label={`Delete saved search ${item.name}`}
                                             onClick={() => deleteSavedSearch(item.id)}
-                                            className={`${D ? 'text-blue-300 hover:text-white' : 'text-blue-500 hover:text-blue-800'}`}
+                                            className={`${D ? 'text-blue-300 hover:text-blue-100' : 'text-blue-500 hover:text-blue-800'}`}
                                         >
                                             <CloseOutlined style={{ fontSize: 10 }} />
                                         </button>
@@ -505,7 +498,13 @@ export default function PublicResearchIndex({
 
                     {/* results list */}
                     <div className="space-y-3">
-                        {proposals.data.length === 0 ? (
+                        {isFiltering ? (
+                            Array.from({ length: 3 }).map((_, idx) => (
+                                <div key={`skeleton-${idx}`} className={`rounded-2xl border px-5 py-4 ${cardBg} ${cardBorder}`}>
+                                    <Skeleton active paragraph={{ rows: 2 }} title={{ width: '65%' }} />
+                                </div>
+                            ))
+                        ) : proposals.data.length === 0 ? (
                             <div className={`rounded-2xl border px-6 py-16 text-center ${cardBg} ${cardBorder}`}>
                                 <SearchOutlined className={`block mx-auto mb-3 ${textSecond}`} style={{ fontSize: 40 }} />
                                 <p className={textSecond}>No approved papers found for this search.</p>
@@ -612,6 +611,29 @@ export default function PublicResearchIndex({
                     <UpOutlined style={{ fontSize: 14 }} />
                 </button>
             )}
+
+            <Modal
+                title="Save Search"
+                open={saveSearchModalOpen}
+                onCancel={() => setSaveSearchModalOpen(false)}
+                onOk={confirmSaveCurrentSearch}
+                okText="Save"
+                okButtonProps={{ disabled: !saveSearchName.trim() }}
+            >
+                <label htmlFor="saved-search-name" className="mb-2 block text-xs font-medium text-slate-500">
+                    Search Name
+                </label>
+                <Input
+                    id="saved-search-name"
+                    value={saveSearchName}
+                    maxLength={80}
+                    onChange={(event) => setSaveSearchName(event.target.value)}
+                    placeholder="My saved search"
+                    onPressEnter={() => {
+                        if (saveSearchName.trim()) confirmSaveCurrentSearch();
+                    }}
+                />
+            </Modal>
         </>
     );
 }
