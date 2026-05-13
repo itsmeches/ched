@@ -4,9 +4,10 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
 import Breadcrumb from '@/Components/Breadcrumb';
 import { formatDateTime } from '@/utils/date';
-import { Alert, Button, Card, Divider, Input, Modal, Popconfirm, Space, Steps, Tag, Timeline, Typography, message } from 'antd';
+import { Alert, Button, Card, Divider, Input, Modal, Popconfirm, Select, Space, Steps, Tag, Timeline, Typography, message } from 'antd';
 import { DownloadOutlined, FilePdfOutlined, KeyOutlined, LockOutlined } from '@ant-design/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { getReviewRemarkTemplates } from '@/utils/reviewRemarkTemplates';
 
 export default function ResearchShow({ proposal, researchHistory = [], canEdit, canReview, canDelete, editPermission, pendingEditRequests, breadcrumbs = [] }) {
     const { flash, auth } = usePage().props;
@@ -218,6 +219,9 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
             : proposal.status === 'under_review_ched'
                 ? 'CHED Reject Submission'
                 : 'Reject Submission';
+
+    const rejectTemplates = getReviewRemarkTemplates(proposal.status === 'submitted' ? 'under_review_faculty' : proposal.status);
+    const remarkTemplateOptions = rejectTemplates.map((template) => ({ value: template, label: template }));
 
     const actionMeta = {
         submitted: { label: 'Submitted', color: 'blue' },
@@ -719,6 +723,29 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
                         okButtonProps={{ danger: true, loading: isSubmittingReview }}
                     >
                         <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                            {rejectTemplates.length > 0 && (
+                                <div>
+                                    <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
+                                        Quick templates
+                                    </Typography.Text>
+                                    <Space wrap size={[6, 6]}>
+                                        {rejectTemplates.map((template) => (
+                                            <Tag.CheckableTag
+                                                key={template}
+                                                checked={rejectModal.comments === template}
+                                                onChange={() => setRejectModal((prev) => ({ ...prev, comments: template, error: '' }))}
+                                            >
+                                                {template.length > 58 ? `${template.slice(0, 58)}...` : template}
+                                            </Tag.CheckableTag>
+                                        ))}
+                                    </Space>
+                                </div>
+                            )}
+                            <Select
+                                placeholder="Apply remark template"
+                                options={remarkTemplateOptions}
+                                onChange={(value) => setRejectModal((prev) => ({ ...prev, comments: value, error: '' }))}
+                            />
                             <Input.TextArea
                                 rows={4}
                                 value={rejectModal.comments}

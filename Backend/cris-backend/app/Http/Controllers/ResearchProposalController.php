@@ -62,7 +62,7 @@ class ResearchProposalController extends Controller
         }
 
         $query = ResearchProposal::with(['institution:id,name'])
-            ->select(['id', 'title', 'authors', 'school', 'year', 'keywords', 'category', 'research_category', 'discipline_code', 'status', 'institution_id', 'approved_at', 'updated_at'])
+            ->select(['id', 'title', 'abstract', 'authors', 'school', 'year', 'keywords', 'category', 'research_category', 'discipline_code', 'status', 'institution_id', 'approved_at', 'updated_at'])
             ->where('status', ResearchProposal::STATUS_APPROVED);
 
         if ($sort === 'oldest') {
@@ -87,6 +87,8 @@ class ResearchProposalController extends Controller
             $name = $code !== '' ? $disciplineLabels->get($code) : null;
 
             $proposal->setAttribute('discipline_label', $name ? ($code . ' - ' . $name) : ($code !== '' ? $code : null));
+            $proposal->setAttribute('abstract_snippet', $proposal->abstract ? \Illuminate\Support\Str::limit($proposal->abstract, 220) : null);
+            $proposal->makeHidden('abstract');
 
             return $proposal;
         });
@@ -119,9 +121,86 @@ class ResearchProposalController extends Controller
                 : ($proposal->discipline_code ?: null)
         );
 
+        $relatedProposals = collect();
+
+        if ($proposal->institution_id || $proposal->research_category || $proposal->category || $proposal->discipline_code) {
+            $relatedProposals = ResearchProposal::query()
+                ->with(['institution:id,name'])
+                ->select(['id', 'title', 'authors', 'year', 'institution_id', 'research_category', 'category', 'discipline_code', 'approved_at'])
+                ->where('status', ResearchProposal::STATUS_APPROVED)
+                ->whereKeyNot($proposal->id)
+                ->where(function ($query) use ($proposal) {
+                    if ($proposal->institution_id) {
+                        $query->orWhere('institution_id', $proposal->institution_id);
+                    }
+
+                    if ($proposal->research_category || $proposal->category) {
+                        $query->orWhere('research_category', $proposal->research_category ?: $proposal->category)
+                            ->orWhere('category', $proposal->research_category ?: $proposal->category);
+                    }
+
+                    if ($proposal->discipline_code) {
+                        $query->orWhere('discipline_code', $proposal->discipline_code);
+                    }
+                })
+                ->orderByRaw('CASE WHEN institution_id = ? THEN 0 ELSE 1 END', [$proposal->institution_id ?: 0])
+                ->orderByDesc('approved_at')
+                ->limit(4)
+                ->get();
+        }
+
         return Inertia::render('Research/PublicShow', [
             'proposal'    => $proposal,
+            'relatedProposals' => $relatedProposals,
             'canLogin'    => Route::has('login'),
+            'canRegister' => Route::has('register'),
+        ]);
+    }
+
+    public function publicInstitutionShow(Request $request, Institution $institution): Response
+    {
+        $papers = ResearchProposal::query()
+            ->with(['institution:id,name'])
+            ->select(['id', 'title', 'authors', 'school', 'year', 'research_category', 'category', 'discipline_code', 'institution_id', 'approved_at'])
+            ->where('status', ResearchProposal::STATUS_APPROVED)
+            ->where('institution_id', $institution->id)
+            ->orderByDesc('approved_at')
+            ->paginate(12)
+            ->withQueryString();
+
+        $statsBase = ResearchProposal::query()
+            ->where('status', ResearchProposal::STATUS_APPROVED)
+            ->where('institution_id', $institution->id);
+
+        $latestApprovedAt = (clone $statsBase)->max('approved_at');
+        $topCategories = (clone $statsBase)
+            ->selectRaw('COALESCE(research_category, category) as label, COUNT(*) as total')
+            ->where(function ($query) {
+                $query->whereNotNull('research_category')
+                    ->orWhereNotNull('category');
+            })
+            ->groupByRaw('COALESCE(research_category, category)')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
+        return Inertia::render('Research/PublicInstitution', [
+            'institution' => [
+                'id' => $institution->id,
+                'name' => $institution->name,
+                'code' => $institution->code,
+                'address' => $institution->address,
+                'contact_email' => $institution->contact_email,
+                'contact_phone' => $institution->contact_phone,
+            ],
+            'papers' => $papers,
+            'stats' => [
+                'approved_count' => (clone $statsBase)->count(),
+                'latest_year' => (clone $statsBase)->max('year'),
+                'latest_approved_at' => $latestApprovedAt,
+                'top_categories' => $topCategories,
+            ],
+            'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
         ]);
     }

@@ -2,13 +2,14 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
-import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Row, Select, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, FileSearchOutlined, SendOutlined, StopOutlined, TeamOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import DashboardFilters from '@/Components/DashboardFilters';
 import { useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
 import FacultyCharts from './Partials/FacultyCharts';
+import { getReviewRemarkTemplates } from '@/utils/reviewRemarkTemplates';
 
 export default function FacultyDashboard({ stats, stageCounts = {}, forReview, recentDecisions, monthlyTrends = [], studentBreakdown = [], filters = {}, filterOptions = {} }) {
     const { dark } = useTheme();
@@ -22,6 +23,7 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
     ];
 
     const DEFAULT_REJECT_REMARK = 'Faculty review: Please revise and improve the submission based on stage requirements.';
+    const remarkTemplateOptions = getReviewRemarkTemplates('under_review_faculty').map((template) => ({ value: template, label: template }));
 
     const [rejectModal, setRejectModal] = useState({
         open: false,
@@ -222,6 +224,27 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
                     okButtonProps={{ danger: true, loading: rejectModal.loading }}
                 >
                     <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                        <div>
+                            <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
+                                Quick templates
+                            </Typography.Text>
+                            <Space wrap size={[6, 6]}>
+                                {remarkTemplateOptions.map((item) => (
+                                    <Tag.CheckableTag
+                                        key={item.value}
+                                        checked={rejectModal.comments === item.value}
+                                        onChange={() => setRejectModal((prev) => ({ ...prev, comments: item.value, error: '' }))}
+                                    >
+                                        {item.label.length > 58 ? `${item.label.slice(0, 58)}...` : item.label}
+                                    </Tag.CheckableTag>
+                                ))}
+                            </Space>
+                        </div>
+                        <Select
+                            placeholder="Apply remark template"
+                            options={remarkTemplateOptions}
+                            onChange={(value) => setRejectModal((prev) => ({ ...prev, comments: value, error: '' }))}
+                        />
                         <Input.TextArea
                             rows={4}
                             value={rejectModal.comments}

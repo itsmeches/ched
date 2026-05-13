@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserManagementAudit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -326,6 +327,81 @@ class UserManagementController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User reactivated.');
+    }
+
+    public function bulkAction(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'action' => ['required', Rule::in(['deactivate', 'restore'])],
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['integer'],
+        ]);
+
+        $ids = array_values(array_unique(array_map('intval', $data['user_ids'])));
+        $actorId = $request->user()?->id;
+
+        if ($data['action'] === 'deactivate') {
+            $targets = User::query()
+                ->whereIn('id', $ids)
+                ->where('id', '!=', $actorId)
+                ->get();
+
+            $processed = $this->deactivateMany($request, $targets);
+
+            return redirect()->route('admin.users.index')
+                ->with('success', $processed . ' user' . ($processed === 1 ? '' : 's') . ' deactivated.');
+        }
+
+        $targets = User::onlyTrashed()
+            ->whereIn('id', $ids)
+            ->get();
+
+        $processed = $this->restoreMany($request, $targets);
+
+        return redirect()->route('admin.users.index', ['deactivated' => 1])
+            ->with('success', $processed . ' user' . ($processed === 1 ? '' : 's') . ' reactivated.');
+    }
+
+    private function deactivateMany(Request $request, Collection $targets): int
+    {
+        $processed = 0;
+
+        foreach ($targets as $target) {
+            $oldValues = ['deleted_at' => $target->deleted_at?->toDateTimeString()];
+            $target->delete();
+            $processed++;
+
+            $this->logUserManagementAudit(
+                request: $request,
+                target: $target,
+                action: 'admin_user_deactivated',
+                oldValues: $oldValues,
+                newValues: ['deleted_at' => $target->fresh()?->deleted_at?->toDateTimeString()]
+            );
+        }
+
+        return $processed;
+    }
+
+    private function restoreMany(Request $request, Collection $targets): int
+    {
+        $processed = 0;
+
+        foreach ($targets as $target) {
+            $oldValues = ['deleted_at' => $target->deleted_at?->toDateTimeString()];
+            $target->restore();
+            $processed++;
+
+            $this->logUserManagementAudit(
+                request: $request,
+                target: $target,
+                action: 'admin_user_restored',
+                oldValues: $oldValues,
+                newValues: ['deleted_at' => null]
+            );
+        }
+
+        return $processed;
     }
 
     private function logUserManagementAudit(
