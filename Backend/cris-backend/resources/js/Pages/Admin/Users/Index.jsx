@@ -44,6 +44,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
         filters.from && filters.to ? [dayjs(filters.from), dayjs(filters.to)] : null,
     );
     const [tableData, setTableData] = useState(users.data ?? []);
+    const [selectedUserIds, setSelectedUserIds] = useState([]);
 
     const categoryItems = useMemo(() => [
         { key: 'all', label: roleLabelMap.all, count: roleCounts?.all ?? 0, color: accentPrimary },
@@ -57,6 +58,7 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
 
     useEffect(() => {
         setTableData(users.data ?? []);
+        setSelectedUserIds([]);
     }, [users.data]);
 
     useEffect(() => {
@@ -200,6 +202,28 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
         });
     }
 
+    function runBulkAction(action) {
+        const verb = action === 'restore' ? 'reactivate' : 'deactivate';
+
+        confirmAction({
+            title: `${verb.charAt(0).toUpperCase() + verb.slice(1)} selected users?`,
+            content: `${selectedUserIds.length} account${selectedUserIds.length === 1 ? '' : 's'} will be updated.`,
+            okText: verb.charAt(0).toUpperCase() + verb.slice(1),
+            danger: action === 'deactivate',
+            onOk: () => {
+                router.post(route('admin.users.bulk-action'), {
+                    action,
+                    user_ids: selectedUserIds,
+                }, {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        setSelectedUserIds([]);
+                    },
+                });
+            },
+        });
+    }
+
     return (
         <AuthenticatedLayout
             header={(
@@ -336,7 +360,27 @@ export default function UsersIndex({ users, filters, roleCounts, institutions })
                         title={roleLabelMap[role || 'all']}
                         summary={`${users.total} ${deactivated ? 'deactivated' : 'active'} user${users.total === 1 ? '' : 's'} in this category`}
                     >
-                        <Table rowKey="id" size="middle" columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, institution_id: institutionId, from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '', to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '', deactivated: deactivated ? 1 : 0, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: <EmptyState title="No users matched your filters" description="Adjust role, institution, date, or search terms to find users." /> }} />
+                        {selectedUserIds.length > 0 && (
+                            <div className={`mb-4 rounded-2xl border px-4 py-3 ${dark ? 'border-[#1e2d47] bg-[#0d1526]' : 'border-blue-200 bg-blue-50/70'}`}>
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <Space wrap>
+                                        <Tag color="blue" style={{ marginInlineEnd: 0 }}>{selectedUserIds.length} selected</Tag>
+                                        <Typography.Text type="secondary">
+                                            Bulk actions apply to the checked user accounts in the current table.
+                                        </Typography.Text>
+                                    </Space>
+                                    <Space wrap>
+                                        <Button onClick={() => setSelectedUserIds([])}>Clear Selection</Button>
+                                    {deactivated ? (
+                                        <Button onClick={() => runBulkAction('restore')}>Restore Selected</Button>
+                                    ) : (
+                                        <Button danger onClick={() => runBulkAction('deactivate')}>Deactivate Selected</Button>
+                                    )}
+                                    </Space>
+                                </div>
+                            </div>
+                        )}
+                        <Table rowKey="id" size="middle" rowSelection={{ selectedRowKeys: selectedUserIds, onChange: (keys) => setSelectedUserIds(keys.map((key) => Number(key))) }} columns={columns} dataSource={tableData} pagination={{ current: users.current_page, pageSize: users.per_page, total: users.total, onChange: (page) => router.get(route('admin.users.index'), { ...filters, search, role, institution_id: institutionId, from: joinedDateRange?.[0]?.format('YYYY-MM-DD') ?? '', to: joinedDateRange?.[1]?.format('YYYY-MM-DD') ?? '', deactivated: deactivated ? 1 : 0, page }, { preserveState: true, replace: true }) }} scroll={{ x: 880 }} locale={{ emptyText: <EmptyState title="No users matched your filters" description="Adjust role, institution, date, or search terms to find users." /> }} />
                     </AdminTableCard>
             </div>
         </AuthenticatedLayout>

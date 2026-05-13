@@ -1,14 +1,16 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
-import { Button, Card, Divider, message, Space, Tag, Tooltip, Typography } from 'antd';
-import { ArrowLeftOutlined, FilePdfOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
+import { Button, Card, Divider, message, Space, Tag, Typography } from 'antd';
+import { ArrowLeftOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
 import { buildApa, buildBibtex, buildRis, downloadText } from '@/utils/citations';
+import PublicSectionCard from '@/Components/Public/PublicSectionCard';
+import PublicNav from '@/Components/Public/PublicNav';
 
-export default function PublicResearchShow({ proposal, canLogin, canRegister }) {
+export default function PublicResearchShow({ proposal, relatedProposals = [], canLogin, canRegister }) {
     const { auth } = usePage().props;
-    const { dark, toggleDark } = useTheme();
+    const { dark } = useTheme();
     const [pdfOpen, setPdfOpen] = useState(false);
 
     function formatDisciplineLabel(value) {
@@ -95,53 +97,9 @@ export default function PublicResearchShow({ proposal, canLogin, canRegister }) 
                     background: 'radial-gradient(circle at 0% 0%, rgba(14, 116, 144, 0.18), transparent 28%), radial-gradient(circle at 100% 0%, rgba(217, 119, 6, 0.16), transparent 30%), linear-gradient(180deg, #f8fbfd 0%, #edf4f7 100%)',
                 }}
             >
-                <div className="mx-auto max-w-5xl px-4 pb-8 pt-4 sm:px-6 lg:px-8">
-                    <header style={{ marginBottom: 10 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                            <div>
-                                <Space size={10} align="center" style={{ marginBottom: 2 }}>
-                                    <Tag style={{ borderRadius: 999, fontWeight: 700, marginInlineEnd: 0, backgroundColor: '#0033a0', color: '#fff', border: 'none' }}>
-                                        CRIS
-                                    </Tag>
-                                    <Typography.Title level={4} className="!m-0 dark:!text-slate-100" style={{ color: '#0f172a' }}>
-                                        CALABARZON Research Information System
-                                    </Typography.Title>
-                                </Space>
-                                <Typography.Paragraph className="!mt-1 !mb-0 dark:!text-slate-400" style={{ color: '#475569' }}>
-                                    Public catalog of approved research papers for Region IV-A institutions.
-                                </Typography.Paragraph>
-                            </div>
-                            <Space style={{ marginLeft: 'auto' }}>
-                                <Tooltip title={dark ? 'Switch to light mode' : 'Switch to dark mode'}>
-                                    <Button
-                                        shape="circle"
-                                        icon={dark ? <SunOutlined /> : <MoonOutlined />}
-                                        onClick={toggleDark}
-                                        aria-label="Toggle dark mode"
-                                    />
-                                </Tooltip>
-                                {auth?.user ? (
-                                    <Link href={route('dashboard')}>
-                                        <Button type="primary">Dashboard</Button>
-                                    </Link>
-                                ) : (
-                                    <>
-                                        {canLogin && (
-                                            <Link href={route('login')}>
-                                                <Button>Log in</Button>
-                                            </Link>
-                                        )}
-                                        {canRegister && (
-                                            <Link href={route('register')}>
-                                                <Button type="primary">Register</Button>
-                                            </Link>
-                                        )}
-                                    </>
-                                )}
-                            </Space>
-                        </div>
-                    </header>
+                <PublicNav canLogin={canLogin} canRegister={canRegister} />
 
+                <div className="mx-auto max-w-5xl px-4 pb-8 pt-4 sm:px-6 lg:px-8">
                     <div style={{ marginBottom: 8 }}>
                         <Link href={route('research.public.index')}>
                             <Button size="small" icon={<ArrowLeftOutlined />}>Back to Archive</Button>
@@ -167,7 +125,14 @@ export default function PublicResearchShow({ proposal, canLogin, canRegister }) 
                                 </Space>
                                 <Typography.Text className="dark:!text-slate-300" style={{ display: 'block', color: '#475569', fontSize: 13 }}>
                                     by <span style={{ fontWeight: 600 }}>{proposal.authors}</span>
-                                    {proposal.institution?.name && <> · {proposal.institution.name}</>}
+                                    {proposal.institution?.name && (
+                                        <>
+                                            {' '}·{' '}
+                                            <Link href={route('research.public.institution', proposal.institution.id)} className="font-semibold text-[#0033a0] hover:underline dark:text-blue-300">
+                                                {proposal.institution.name}
+                                            </Link>
+                                        </>
+                                    )}
                                 </Typography.Text>
                             </div>
 
@@ -213,10 +178,23 @@ export default function PublicResearchShow({ proposal, canLogin, canRegister }) 
 
                                 {keywordList.length > 0 && (
                                     <section>
-                                        <Typography.Title level={5} className="!mb-2 dark:!text-slate-100" style={{ color: '#0f172a' }}>Keywords</Typography.Title>
+                                        <Typography.Title level={5} className="!mb-1 dark:!text-slate-100" style={{ color: '#0f172a' }}>Keywords</Typography.Title>
+                                        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
+                                            Click a keyword to browse related papers
+                                        </Typography.Text>
                                         <Space wrap size={[6, 6]}>
                                             {keywordList.map((kw) => (
-                                                <Tag key={kw} style={{ borderRadius: 999, padding: '2px 10px' }}>{kw}</Tag>
+                                                <Link
+                                                    key={kw}
+                                                    href={`${route('research.public.index')}?search=${encodeURIComponent(kw)}`}
+                                                >
+                                                    <Tag
+                                                        style={{ borderRadius: 999, padding: '2px 10px', cursor: 'pointer' }}
+                                                        className="transition-colors hover:border-blue-400 hover:text-blue-600"
+                                                    >
+                                                        {kw}
+                                                    </Tag>
+                                                </Link>
                                             ))}
                                         </Space>
                                     </section>
@@ -261,7 +239,11 @@ export default function PublicResearchShow({ proposal, canLogin, canRegister }) 
                                                 <div key={row.label}>
                                                     <dt className="text-[11px] text-slate-500 dark:text-slate-400">{row.label}</dt>
                                                     <dd className="break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">
-                                                        {row.value}
+                                                        {row.label === 'Institution' && proposal.institution?.id ? (
+                                                            <Link href={route('research.public.institution', proposal.institution.id)} className="font-medium text-[#0033a0] hover:underline dark:text-blue-300">
+                                                                {row.value}
+                                                            </Link>
+                                                        ) : row.value}
                                                         {row.sub && (
                                                             <span className="block text-[11px] text-slate-500 dark:text-slate-400">{row.sub}</span>
                                                         )}
@@ -296,6 +278,36 @@ export default function PublicResearchShow({ proposal, canLogin, canRegister }) 
                                 style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8 }}
                             />
                         </Card>
+                    )}
+
+                    {relatedProposals.length > 0 && (
+                        <PublicSectionCard
+                            className="mt-2"
+                            title="Related Papers"
+                            subtitle="More approved research connected by institution, category, or discipline."
+                        >
+                            <div className="space-y-3">
+                                {relatedProposals.map((item) => (
+                                    <div key={item.id} className="rounded-xl border border-slate-200 px-4 py-3 dark:border-[#1e2d47]">
+                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                            <div className="min-w-0 flex-1">
+                                                <Link href={route('research.public.show', item.id)} className="text-sm font-semibold text-[#0033a0] hover:underline dark:text-blue-300">
+                                                    {item.title}
+                                                </Link>
+                                                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                    {item.authors || 'Unknown author'}
+                                                    {item.institution?.name && <> · {item.institution.name}</>}
+                                                    {item.year && <> · {item.year}</>}
+                                                </div>
+                                            </div>
+                                            <Link href={route('research.public.show', item.id)}>
+                                                <Button size="small">Open</Button>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </PublicSectionCard>
                     )}
                 </div>
             </div>

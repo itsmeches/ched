@@ -15,6 +15,7 @@ import { useTheme } from '@/utils/ThemeContext';
 
 // ── Popular discipline quick-links shown below search bar ────────────────────
 const POPULAR_TOPICS = ['Agriculture', 'Engineering', 'Information Technology', 'Education', 'Health Sciences'];
+const SAVED_SEARCHES_KEY = 'cris.public.saved-searches';
 
 export default function PublicResearchIndex({
     proposals,
@@ -28,6 +29,16 @@ export default function PublicResearchIndex({
     const { auth } = usePage().props;
     const { dark, toggleDark } = useTheme();
 
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    useEffect(() => {
+        function handleScroll() {
+            setShowScrollTop(window.scrollY > 400);
+        }
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     // ── filter state ──────────────────────────────────────────────────────────
     const [search, setSearch] = useState(filters.search ?? '');
     const [yearFrom, setYearFrom] = useState(filters.year_from ?? '');
@@ -38,6 +49,7 @@ export default function PublicResearchIndex({
     const [disciplineCode, setDisciplineCode] = useState(filters.discipline_code ?? '');
     const [sort, setSort] = useState(filters.sort ?? 'recent');
     const [advancedOpen, setAdvancedOpen] = useState(false);
+    const [savedSearches, setSavedSearches] = useState([]);
 
     const hasActiveFilters = Boolean(
         search || yearFrom || yearTo || school || institutionId || category || disciplineCode || (sort && sort !== 'recent'),
@@ -104,6 +116,75 @@ export default function PublicResearchIndex({
         );
     }
 
+    function currentFilterPayload() {
+        return {
+            search,
+            year_from: yearFrom,
+            year_to: yearTo,
+            school,
+            institution_id: institutionId,
+            category,
+            discipline_code: disciplineCode,
+            sort,
+        };
+    }
+
+    function loadSavedSearches() {
+        if (typeof window === 'undefined') return;
+
+        try {
+            const parsed = JSON.parse(window.localStorage.getItem(SAVED_SEARCHES_KEY) || '[]');
+            setSavedSearches(Array.isArray(parsed) ? parsed : []);
+        } catch {
+            setSavedSearches([]);
+        }
+    }
+
+    function persistSavedSearches(next) {
+        setSavedSearches(next);
+
+        if (typeof window !== 'undefined') {
+            window.localStorage.setItem(SAVED_SEARCHES_KEY, JSON.stringify(next));
+        }
+    }
+
+    function saveCurrentSearch() {
+        const name = window.prompt('Save this search as:', search ? `Search: ${search}` : 'My saved search');
+
+        if (!name || !name.trim()) {
+            return;
+        }
+
+        const next = [
+            {
+                id: Date.now(),
+                name: name.trim(),
+                filters: currentFilterPayload(),
+            },
+            ...savedSearches,
+        ].slice(0, 8);
+
+        persistSavedSearches(next);
+    }
+
+    function applySavedSearch(item) {
+        const next = item.filters || {};
+        setSearch(next.search ?? '');
+        setYearFrom(next.year_from ?? '');
+        setYearTo(next.year_to ?? '');
+        setSchool(next.school ?? '');
+        setInstitutionId(next.institution_id ?? '');
+        setCategory(next.category ?? '');
+        setDisciplineCode(next.discipline_code ?? '');
+        setSort(next.sort ?? 'recent');
+
+        router.get(route('research.public.index'), next, { preserveState: true, replace: true, preserveScroll: true });
+    }
+
+    function deleteSavedSearch(id) {
+        persistSavedSearches(savedSearches.filter((item) => item.id !== id));
+    }
+
     function clearAll() {
         setSearch(''); setYearFrom(''); setYearTo(''); setSchool('');
         setInstitutionId(''); setCategory(''); setDisciplineCode(''); setSort('recent');
@@ -119,6 +200,10 @@ export default function PublicResearchIndex({
         return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search, yearFrom, yearTo, school, institutionId, category, disciplineCode, sort]);
+
+    useEffect(() => {
+        loadSavedSearches();
+    }, []);
 
     // ── theme tokens ──────────────────────────────────────────────────────────
     const D = dark;
@@ -381,10 +466,42 @@ export default function PublicResearchIndex({
                                 {category && selectedCategoryLabel && <Tag color="geekblue" closable onClose={() => { setCategory(''); applyFilters(); }}>Category: {selectedCategoryLabel}</Tag>}
                                 {disciplineCode && selectedDisciplineLabel && <Tag color="cyan" closable onClose={() => { setDisciplineCode(''); applyFilters(); }}>Discipline: {selectedDisciplineLabel}</Tag>}
                                 {sort && sort !== 'recent' && <Tag color="purple" closable onClose={() => { setSort('recent'); applyFilters(); }}>Sort: {sortLabelMap[sort]}</Tag>}
+                                <button type="button" onClick={saveCurrentSearch} className={`text-xs underline ${textSecond} hover:text-blue-500`}>Save search</button>
                                 <button type="button" onClick={clearAll} className={`text-xs underline ${textSecond} hover:text-red-400`}>Clear all</button>
                             </div>
                         )}
                     </div>
+
+                    {savedSearches.length > 0 && (
+                        <div className={`mb-4 rounded-2xl border px-4 py-3 ${D ? 'border-[#1e2d47] bg-[#111827]' : 'border-slate-200 bg-white'}`}>
+                            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <p className={`text-xs font-semibold uppercase tracking-wide ${textSecond}`}>Saved Searches</p>
+                                    <p className={`text-xs ${textSecond}`}>Quickly reopen your common discovery filters.</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {savedSearches.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${D ? 'border-blue-900/50 bg-blue-950/30 text-blue-100' : 'border-blue-200 bg-blue-50 text-blue-700'}`}
+                                    >
+                                        <button type="button" onClick={() => applySavedSearch(item)} className="hover:underline">
+                                            {item.name}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            aria-label={`Delete saved search ${item.name}`}
+                                            onClick={() => deleteSavedSearch(item.id)}
+                                            className={`${D ? 'text-blue-300 hover:text-white' : 'text-blue-500 hover:text-blue-800'}`}
+                                        >
+                                            <CloseOutlined style={{ fontSize: 10 }} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* results list */}
                     <div className="space-y-3">
@@ -427,11 +544,21 @@ export default function PublicResearchIndex({
                                                     {row.school && (
                                                         <span><span className={`font-medium ${textMeta}`}>School:</span> {row.school}</span>
                                                     )}
-                                                    {row.institution?.name && <span>{row.institution.name}</span>}
+                                                    {row.institution?.name && (
+                                                        <Link href={route('research.public.institution', row.institution.id)} className="font-medium text-[#0033a0] hover:underline">
+                                                            {row.institution.name}
+                                                        </Link>
+                                                    )}
                                                     {row.year && (
                                                         <span><span className={`font-medium ${textMeta}`}>Year:</span> {row.year}</span>
                                                     )}
                                                 </div>
+
+                                                {row.abstract_snippet && (
+                                                    <p className={`line-clamp-2 text-xs leading-relaxed ${textSecond}`}>
+                                                        {row.abstract_snippet}
+                                                    </p>
+                                                )}
                                             </div>
 
                                             <div className="flex-shrink-0 sm:pl-4">
@@ -469,6 +596,22 @@ export default function PublicResearchIndex({
                     </p>
                 </div>
             </div>
+
+            {/* ── Scroll-to-top ───────────────────────────────────────────── */}
+            {showScrollTop && (
+                <button
+                    type="button"
+                    aria-label="Scroll to top"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className={`fixed bottom-6 right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all duration-200 hover:scale-110 active:scale-95 ${
+                        D
+                            ? 'bg-[#1a2540] text-white ring-1 ring-white/20 hover:bg-[#243054]'
+                            : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100'
+                    }`}
+                >
+                    <UpOutlined style={{ fontSize: 14 }} />
+                </button>
+            )}
         </>
     );
 }

@@ -28,6 +28,8 @@ Route::middleware('throttle:60,1')->group(function () {
 
     Route::get('/public/research', [ResearchProposalController::class, 'publicIndex'])
         ->name('research.public.archive');
+    Route::get('/public/institutions/{institution}', [ResearchProposalController::class, 'publicInstitutionShow'])
+        ->name('research.public.institution');
     Route::get('/public/research/{proposal}', [ResearchProposalController::class, 'publicShow'])
         ->name('research.public.show');
     Route::get('/public/research/{proposal}/file', [ResearchProposalController::class, 'publicDownloadFile'])
@@ -141,6 +143,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── SUPER ADMIN ───────────────────────────────────────────────────────────
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+
+        Route::post('users/bulk-action', [UserManagementController::class, 'bulkAction'])
+            ->name('users.bulk-action');
 
         Route::resource('users', UserManagementController::class)
             ->except(['show']);

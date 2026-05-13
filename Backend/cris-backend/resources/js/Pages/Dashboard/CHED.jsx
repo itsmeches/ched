@@ -3,13 +3,14 @@ import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import EmptyState from '@/Components/EmptyState';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
-import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Col, Input, Modal, Popconfirm, Progress, Row, Select, Space, Statistic, Table, Tag, Typography } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, DatabaseOutlined, FileSearchOutlined, InboxOutlined, KeyOutlined, OrderedListOutlined, StopOutlined } from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import DashboardFilters from '@/Components/DashboardFilters';
 import { useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
 import CHEDCharts from './Partials/CHEDCharts';
+import { getReviewRemarkTemplates } from '@/utils/reviewRemarkTemplates';
 
 export default function CHEDDashboard({ stats, stageCounts = {}, forReview, editRequests, monthlyTrends = [], disciplineBreakdown = [], approvalFunnel = [], filters = {}, filterOptions = {} }) {
     const { dark } = useTheme();
@@ -23,6 +24,7 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
     ];
 
     const DEFAULT_REJECT_REMARK = 'CHED final review: Please revise and resubmit with required corrections.';
+    const remarkTemplateOptions = getReviewRemarkTemplates('under_review_ched').map((template) => ({ value: template, label: template }));
 
     const [rejectModal, setRejectModal] = useState({
         open: false,
@@ -290,6 +292,27 @@ export default function CHEDDashboard({ stats, stageCounts = {}, forReview, edit
                         okButtonProps={{ danger: true, loading: rejectModal.loading }}
                     >
                         <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                            <div>
+                                <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
+                                    Quick templates
+                                </Typography.Text>
+                                <Space wrap size={[6, 6]}>
+                                    {remarkTemplateOptions.map((item) => (
+                                        <Tag.CheckableTag
+                                            key={item.value}
+                                            checked={rejectModal.comments === item.value}
+                                            onChange={() => setRejectModal((prev) => ({ ...prev, comments: item.value, error: '' }))}
+                                        >
+                                            {item.label.length > 58 ? `${item.label.slice(0, 58)}...` : item.label}
+                                        </Tag.CheckableTag>
+                                    ))}
+                                </Space>
+                            </div>
+                            <Select
+                                placeholder="Apply remark template"
+                                options={remarkTemplateOptions}
+                                onChange={(value) => setRejectModal((prev) => ({ ...prev, comments: value, error: '' }))}
+                            />
                             <Input.TextArea
                                 rows={4}
                                 value={rejectModal.comments}
