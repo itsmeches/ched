@@ -12,8 +12,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
 import PublicNav from '@/Components/Public/PublicNav';
 
-// ── Popular discipline quick-links shown below search bar ────────────────────
-const POPULAR_TOPICS = ['Agriculture', 'Engineering', 'Information Technology', 'Education', 'Health Sciences'];
 const SAVED_SEARCHES_KEY = 'cris.public.saved-searches';
 
 export default function PublicResearchIndex({
@@ -22,6 +20,7 @@ export default function PublicResearchIndex({
     institutions = [],
     categories = [],
     disciplines = [],
+    popularDisciplines = [],
     canLogin,
     canRegister,
 }) {
@@ -421,14 +420,29 @@ export default function PublicResearchIndex({
                             {/* ── Popular topics ─────────────────────────── */}
                             <div className={`mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm ${D ? 'text-slate-300' : 'text-slate-500'}`}>
                                 <span className="font-medium">Popular:</span>
-                                {POPULAR_TOPICS.map((topic) => (
+                                {popularDisciplines.map((item) => (
                                     <button
-                                        key={topic}
+                                        key={item.code}
                                         type="button"
-                                        onClick={() => { isLiveFilterEnabled.current = true; setSearch(topic); applyFilters(); }}
+                                        onClick={() => {
+                                            isLiveFilterEnabled.current = true;
+                                            setDisciplineCode(item.code);
+                                            runIndexRequest({
+                                                search,
+                                                year_from: yearFrom,
+                                                year_to: yearTo,
+                                                school,
+                                                institution_id: institutionId,
+                                                category,
+                                                discipline_code: item.code,
+                                                sort,
+                                                page: 1,
+                                            });
+                                        }}
+                                        title={`${item.total} approved papers`}
                                         className={`transition-colors ${D ? 'hover:text-blue-200' : 'hover:text-blue-600'} hover:underline`}
                                     >
-                                        {topic}
+                                        {item.name}
                                     </button>
                                 ))}
                             </div>

@@ -81,7 +81,7 @@ class ResearchProposalController extends Controller
 
         $this->applySearchFilters($query, $request, includeStatus: false);
         $disciplineLabels = Discipline::query()->pluck('name', 'code');
-        $proposals = $query->paginate(12)->withQueryString();
+        $proposals = $query->paginate(10)->withQueryString();
         $proposals->getCollection()->transform(function (ResearchProposal $proposal) use ($disciplineLabels) {
             $code = (string) ($proposal->discipline_code ?? '');
             $name = $code !== '' ? $disciplineLabels->get($code) : null;
@@ -93,12 +93,32 @@ class ResearchProposalController extends Controller
             return $proposal;
         });
 
+        $popularDisciplines = ResearchProposal::query()
+            ->where('status', ResearchProposal::STATUS_APPROVED)
+            ->whereNotNull('discipline_code')
+            ->selectRaw('discipline_code, COUNT(*) as total')
+            ->groupBy('discipline_code')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get()
+            ->map(function ($item) use ($disciplineLabels) {
+                $code = (string) $item->discipline_code;
+
+                return [
+                    'code' => $code,
+                    'name' => $disciplineLabels->get($code) ?: $code,
+                    'total' => (int) $item->total,
+                ];
+            })
+            ->values();
+
         return Inertia::render('Research/PublicIndex', [
             'proposals'    => $proposals,
             'filters'      => (object) $request->only(['search', 'year', 'year_from', 'year_to', 'school', 'institution_id', 'category', 'discipline_code', 'sort']),
             'institutions' => Institution::query()->orderBy('name')->get(['id', 'name']),
             'categories'   => ResearchCategory::query()->orderBy('label')->get(['value', 'label']),
             'disciplines'  => Discipline::query()->orderBy('code')->get(['code', 'name']),
+            'popularDisciplines' => $popularDisciplines,
             'canLogin'     => Route::has('login'),
             'canRegister'  => Route::has('register'),
         ]);
@@ -177,7 +197,7 @@ class ResearchProposalController extends Controller
 
         $papers = $papersQuery
             ->orderByDesc('approved_at')
-            ->paginate(12)
+            ->paginate(10)
             ->withQueryString();
 
         $statsBase = ResearchProposal::query()
