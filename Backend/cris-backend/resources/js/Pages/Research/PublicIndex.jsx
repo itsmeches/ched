@@ -392,7 +392,7 @@ export default function PublicResearchIndex({
                                             <label className={`mb-1 block text-xs ${labelCls}`}>Discipline</label>
                                             <Select placeholder="All disciplines" value={disciplineCode || undefined} allowClear showSearch optionFilterProp="label" options={disciplineOptions} onChange={(v) => { isLiveFilterEnabled.current = true; setDisciplineCode(v ?? ''); }} style={{ width: '100%' }} size="middle" />
                                         </Col>
-                                        <Col xs={24}>
+                                        <Col xs={24} sm={12}>
                                             <label className={`mb-1 block text-xs ${labelCls}`}>Sort By</label>
                                             <Select
                                                 value={sort}
@@ -411,11 +411,8 @@ export default function PublicResearchIndex({
                                         </Col>
                                     </Row>
                                     <div className="mt-3 flex justify-end gap-2 border-t border-slate-100/10 pt-3">
-                                        <button type="button" onClick={clearAll} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${D ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-800'}`}>
+                                        <button type="button" onClick={clearAll} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${D ? 'text-slate-400 hover:text-blue-100' : 'text-slate-500 hover:text-slate-800'}`}>
                                             Clear All
-                                        </button>
-                                        <button type="button" onClick={() => { applyFilters(); setAdvancedOpen(false); }} className="rounded-lg bg-[#0033a0] px-4 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 transition-colors">
-                                            Apply Filters
                                         </button>
                                     </div>
                                 </div>
@@ -514,6 +511,11 @@ export default function PublicResearchIndex({
                                 const rawCategory = row.research_category || row.category;
                                 const categoryLabel = rawCategory ? (categoryLabelMap[rawCategory] ?? rawCategory) : null;
                                 const disciplineLabel = row.discipline_label ? formatDisciplineLabel(row.discipline_label) : null;
+                                const keywordTags = String(row.keywords || '')
+                                    .split(',')
+                                    .map((item) => item.trim())
+                                    .filter((item) => item.length > 0)
+                                    .slice(0, 5);
 
                                 return (
                                     <div
@@ -524,7 +526,7 @@ export default function PublicResearchIndex({
                                             <div className="min-w-0 flex-1 space-y-2">
                                                 <Link
                                                     href={route('research.public.show', row.id)}
-                                                    className={`block text-base font-semibold leading-snug transition-colors hover:text-blue-500 ${textPrim}`}
+                                                    className="block text-base font-semibold leading-snug text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline transition-colors"
                                                 >
                                                     {row.title}
                                                 </Link>
@@ -536,6 +538,35 @@ export default function PublicResearchIndex({
                                                     </div>
                                                 )}
 
+                                                {keywordTags.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {keywordTags.map((item) => (
+                                                            <Tag
+                                                                key={`${row.id}-tag-${item}`}
+                                                                color="blue"
+                                                                style={{ margin: 0, cursor: 'pointer' }}
+                                                                onClick={() => {
+                                                                    setSearch(item);
+                                                                    isLiveFilterEnabled.current = true;
+                                                                    runIndexRequest({
+                                                                        search: item,
+                                                                        year_from: yearFrom,
+                                                                        year_to: yearTo,
+                                                                        school,
+                                                                        institution_id: institutionId,
+                                                                        category,
+                                                                        discipline_code: disciplineCode,
+                                                                        sort,
+                                                                        page: 1,
+                                                                    });
+                                                                }}
+                                                            >
+                                                                #{item}
+                                                            </Tag>
+                                                        ))}
+                                                    </div>
+                                                )}
+
                                                 <div className={`flex flex-wrap gap-x-4 gap-y-0.5 text-xs ${textSecond}`}>
                                                     {row.authors && (
                                                         <span><span className={`font-medium ${textMeta}`}>Author:</span> {row.authors}</span>
@@ -544,7 +575,7 @@ export default function PublicResearchIndex({
                                                         <span><span className={`font-medium ${textMeta}`}>School:</span> {row.school}</span>
                                                     )}
                                                     {row.institution?.name && (
-                                                        <Link href={route('research.public.institution', row.institution.id)} className="font-medium text-[#0033a0] hover:underline">
+                                                        <Link href={route('research.public.institution', row.institution.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
                                                             {row.institution.name}
                                                         </Link>
                                                     )}

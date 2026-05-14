@@ -159,11 +159,23 @@ class ResearchProposalController extends Controller
 
     public function publicInstitutionShow(Request $request, Institution $institution): Response
     {
-        $papers = ResearchProposal::query()
+        $papersQuery = ResearchProposal::query()
             ->with(['institution:id,name'])
-            ->select(['id', 'title', 'authors', 'school', 'year', 'research_category', 'category', 'discipline_code', 'status', 'institution_id', 'approved_at'])
+            ->select(['id', 'title', 'abstract', 'authors', 'school', 'year', 'keywords', 'research_category', 'category', 'discipline_code', 'status', 'institution_id', 'approved_at'])
             ->where('status', ResearchProposal::STATUS_APPROVED)
-            ->where('institution_id', $institution->id)
+            ->where('institution_id', $institution->id);
+
+        $this->applySearchFilters($papersQuery, $request, includeStatus: false);
+
+        $tag = trim((string) $request->input('tag', ''));
+        if ($tag !== '') {
+            $papersQuery->where(function ($query) use ($tag) {
+                $query->where('keywords', 'like', "%{$tag}%")
+                    ->orWhereHas('keywordItems', fn ($keywordQuery) => $keywordQuery->where('name', 'like', "%{$tag}%"));
+            });
+        }
+
+        $papers = $papersQuery
             ->orderByDesc('approved_at')
             ->paginate(12)
             ->withQueryString();
@@ -200,6 +212,16 @@ class ResearchProposalController extends Controller
                 'latest_approved_at' => $latestApprovedAt,
                 'top_categories' => $topCategories,
             ],
+            'filters' => (object) $request->only(['search', 'category', 'discipline_code', 'year', 'tag']),
+            'categories' => ResearchCategory::query()->orderBy('label')->get(['value', 'label']),
+            'disciplines' => Discipline::query()->orderBy('code')->get(['code', 'name']),
+            'years' => (clone $statsBase)
+                ->whereNotNull('year')
+                ->select('year')
+                ->distinct()
+                ->orderByDesc('year')
+                ->pluck('year')
+                ->values(),
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
         ]);

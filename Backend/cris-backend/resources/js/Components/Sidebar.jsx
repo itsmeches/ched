@@ -332,7 +332,7 @@ export default function Sidebar({ collapsed = false, mobileOpen = false, onClose
                                         className={`group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                                             active
                                                 ? 'bg-white/14 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.22)]'
-                                                : 'text-blue-100/90 hover:-translate-y-[1px] hover:bg-white/10 hover:text-white'
+                                                : 'text-blue-100/90 hover:-translate-y-[1px] hover:bg-white/10 hover:text-blue-50'
                                         }`}
                                     >
                                         <span

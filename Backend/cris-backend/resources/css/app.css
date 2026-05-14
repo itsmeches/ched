@@ -753,6 +753,31 @@ html.dark .admin-dashboard-shell .ant-table-tbody > tr:hover > td {
 	background: rgba(26, 37, 64, 0.8) !important;
 }
 
+/* Keep table links readable during row hover in both themes. */
+.admin-dashboard-shell .ant-table-tbody > tr > td a,
+.admin-dashboard-shell .ant-table-tbody > tr > td .ant-btn-link {
+	color: #0b3ea9;
+	font-weight: 500;
+	transition: color 160ms ease;
+}
+
+.admin-dashboard-shell .ant-table-tbody > tr > td a:hover,
+.admin-dashboard-shell .ant-table-tbody > tr > td .ant-btn-link:hover {
+	color: #001f66;
+	text-decoration: underline;
+}
+
+html.dark .admin-dashboard-shell .ant-table-tbody > tr > td a,
+html.dark .admin-dashboard-shell .ant-table-tbody > tr > td .ant-btn-link {
+	color: #93c5fd;
+}
+
+html.dark .admin-dashboard-shell .ant-table-tbody > tr > td a:hover,
+html.dark .admin-dashboard-shell .ant-table-tbody > tr > td .ant-btn-link:hover {
+	color: #dbeafe;
+	text-decoration: underline;
+}
+
 /* === Super Admin: ensure Recent Research Activity title is readable in dark mode === */
 html.dark .recent-research-activity-card .ant-card-head-title {
 	color: #ffffff;

@@ -84,7 +84,7 @@ export default function ResetPassword({ token, email }) {
 
             <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 Return to{' '}
-                <Link href={route('login')} className="font-medium text-[#0033a0] transition-colors hover:text-[#001f66] dark:text-blue-300 dark:hover:text-blue-200">
+                <Link href={route('login')} className="font-medium text-[#0b3ea9] transition-colors hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
                     sign in
                 </Link>
             </p>

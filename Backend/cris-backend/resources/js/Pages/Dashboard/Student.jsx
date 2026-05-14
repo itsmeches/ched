@@ -25,7 +25,11 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
             title: 'Title',
             dataIndex: 'title',
             key: 'title',
-            render: (value, row) => <Link href={route('research.show', row.id)}>{value}</Link>,
+            render: (value, row) => (
+                <Link href={route('research.show', row.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                    {value}
+                </Link>
+            ),
         },
         { title: 'Year', dataIndex: 'year', key: 'year', width: 100 },
         {
@@ -53,7 +57,11 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
             title: 'Submission',
             dataIndex: 'title',
             key: 'title',
-            render: (value, row) => <Link href={route('research.show', row.id)}>{value}</Link>,
+            render: (value, row) => (
+                <Link href={route('research.show', row.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                    {value}
+                </Link>
+            ),
         },
         {
             title: 'Submitted',
