@@ -154,7 +154,7 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                     {proposal.institution?.name && (
                                         <>
                                             {' '}·{' '}
-                                            <Link href={route('research.public.institution', proposal.institution.id)} className="font-semibold text-[#0033a0] hover:underline dark:text-blue-300">
+                                            <Link href={route('research.public.institution', proposal.institution.id)} className="font-semibold text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
                                                 {proposal.institution.name}
                                             </Link>
                                         </>
@@ -224,7 +224,7 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                                 >
                                                     <Tag
                                                         style={{ borderRadius: 999, padding: '2px 10px', cursor: 'pointer' }}
-                                                        className="transition-colors hover:border-blue-400 hover:text-blue-600"
+                                                        className="transition-colors text-[#0b3ea9] hover:text-[#001f66] dark:text-blue-300 dark:hover:text-blue-100"
                                                     >
                                                         {kw}
                                                     </Tag>
@@ -274,7 +274,7 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                                     <dt className="text-[11px] text-slate-500 dark:text-slate-400">{row.label}</dt>
                                                     <dd className="break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">
                                                         {row.label === 'Institution' && proposal.institution?.id ? (
-                                                            <Link href={route('research.public.institution', proposal.institution.id)} className="font-medium text-[#0033a0] hover:underline dark:text-blue-300">
+                                                            <Link href={route('research.public.institution', proposal.institution.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
                                                                 {row.value}
                                                             </Link>
                                                         ) : row.value}
@@ -380,7 +380,7 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                     <div key={item.id} className="rounded-xl border border-slate-200 px-4 py-3 dark:border-[#1e2d47]">
                                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                             <div className="min-w-0 flex-1">
-                                                <Link href={route('research.public.show', item.id)} className="text-sm font-semibold text-[#0033a0] hover:underline dark:text-blue-300">
+                                                <Link href={route('research.public.show', item.id)} className="text-sm font-semibold text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
                                                     {item.title}
                                                 </Link>
                                                 <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">

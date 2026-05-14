@@ -55,7 +55,7 @@ export default function PublicNav({ canLogin, canRegister }) {
                                         type="button"
                                         className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                                             D
-                                                ? 'text-slate-300 hover:text-white'
+                                                ? 'text-slate-300 hover:text-blue-100'
                                                 : 'text-slate-600 hover:text-slate-900'
                                         }`}
                                     >

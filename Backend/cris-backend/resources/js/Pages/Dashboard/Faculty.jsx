@@ -90,7 +90,11 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
             title: 'Title',
             dataIndex: 'title',
             key: 'title',
-            render: (value, row) => <Link href={route('research.show', row.id)}>{value}</Link>,
+            render: (value, row) => (
+                <Link href={route('research.show', row.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                    {value}
+                </Link>
+            ),
         },
         {
             title: 'Student',
@@ -134,7 +138,11 @@ export default function FacultyDashboard({ stats, stageCounts = {}, forReview, r
             title: 'Title',
             dataIndex: 'title',
             key: 'title',
-            render: (value, row) => <Link href={route('research.show', row.id)}>{value}</Link>,
+            render: (value, row) => (
+                <Link href={route('research.show', row.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                    {value}
+                </Link>
+            ),
         },
         { title: 'Status', dataIndex: 'status', key: 'status', render: (value) => <StatusBadge status={value} /> },
         { title: 'Remarks', dataIndex: 'remarks', key: 'remarks', render: (value) => value || '—' },

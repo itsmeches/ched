@@ -292,7 +292,7 @@ export default function Navbar() {
                                                             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
                                                                 childActive
                                                                     ? 'bg-blue-50 text-blue-900 dark:bg-[#1a2540] dark:text-blue-300'
-                                                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-[#1a2540] dark:hover:text-white'
+                                                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-[#1a2540] dark:hover:text-blue-100'
                                                             }`}
                                                         >
                                                             {child.label}
@@ -307,7 +307,7 @@ export default function Navbar() {
                                             className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                                                 isActive(item)
                                                     ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300 border-b-2'
-                                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-white'
+                                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-blue-100'
                                             }`}
                                             style={isActive(item) ? { borderColor: '#0033a0' } : {}}
                                         >
@@ -324,7 +324,7 @@ export default function Navbar() {
                                         className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                                             isActive(item)
                                                 ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300 border-b-2'
-                                                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-white'
+                                                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-blue-100'
                                         }`}
                                         style={isActive(item) ? { borderColor: '#0033a0' } : {}}
                                     >
@@ -548,7 +548,7 @@ export default function Navbar() {
                                                 const cls = `block pl-7 pr-4 py-2 text-sm font-medium transition-all duration-200 ${
                                                     childActive
                                                         ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300'
-                                                        : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-white'
+                                                        : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-blue-100'
                                                 }`;
                                                 return child.isLink ? (
                                                     <Link
@@ -578,7 +578,7 @@ export default function Navbar() {
                                         className={`block px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                                             isActive(item)
                                                 ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300'
-                                                : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-white'
+                                                : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-blue-100'
                                         }`}
                                         onClick={() => setMenuOpen(false)}
                                     >
@@ -592,7 +592,7 @@ export default function Navbar() {
                             <p className="mt-1 text-xs leading-none text-slate-500 dark:text-slate-400 mb-2">{user.email}</p>
                             <Link
                                 href={route('profile.edit')}
-                                className="block text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white mb-2"
+                                className="block text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-blue-100 mb-2"
                             >
                                 Profile Settings
                             </Link>

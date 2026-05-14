@@ -1,14 +1,132 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Button, Card, Pagination, Space, Tag, Typography } from 'antd';
-import { ArrowLeftOutlined, BankOutlined, CalendarOutlined, EnvironmentOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Input, Pagination, Row, Select, Space, Tag, Typography } from 'antd';
+import { ArrowLeftOutlined, BankOutlined, CalendarOutlined, ControlOutlined, DownOutlined, EnvironmentOutlined, MailOutlined, PhoneOutlined, UpOutlined } from '@ant-design/icons';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
 import PublicSectionCard from '@/Components/Public/PublicSectionCard';
 import PublicNav from '@/Components/Public/PublicNav';
 import EmptyState from '@/Components/EmptyState';
 import { StatusBadge } from '@/Components/StatusBadge';
 
-export default function PublicInstitution({ institution, papers, stats, canLogin, canRegister }) {
+export default function PublicInstitution({ institution, papers, stats, filters = {}, categories = [], disciplines = [], years = [], canLogin, canRegister }) {
     const { dark } = useTheme();
+    const [searchTerm, setSearchTerm] = useState(filters.search ?? '');
+    const [category, setCategory] = useState(filters.category ?? '');
+    const [disciplineCode, setDisciplineCode] = useState(filters.discipline_code ?? '');
+    const [year, setYear] = useState(filters.year ? String(filters.year) : '');
+    const [tag, setTag] = useState(filters.tag ?? '');
+    const [advancedOpen, setAdvancedOpen] = useState(Boolean(filters.search || filters.category || filters.discipline_code || filters.year || filters.tag));
+    const isLiveFilterEnabled = useRef(false);
+    const liveDebounceTimeoutRef = useRef(null);
+
+    const categoryOptions = useMemo(
+        () => categories.map((item) => ({ value: item.value, label: item.label })),
+        [categories],
+    );
+    const categoryLabelMap = useMemo(
+        () => Object.fromEntries(categories.map((item) => [item.value, item.label])),
+        [categories],
+    );
+    const disciplineOptions = useMemo(
+        () => disciplines.map((item) => ({ value: item.code, label: item.name })),
+        [disciplines],
+    );
+    const disciplineLabelMap = useMemo(
+        () => Object.fromEntries(disciplines.map((item) => [item.code, item.name])),
+        [disciplines],
+    );
+    const yearOptions = useMemo(
+        () => years.map((item) => ({ value: String(item), label: String(item) })),
+        [years],
+    );
+
+    const hasActiveFilters = Boolean(searchTerm || category || disciplineCode || year || tag);
+    const visibleCount = Array.isArray(papers?.data) ? papers.data.length : 0;
+    const resultStart = papers?.from ?? (visibleCount > 0 ? (((papers?.current_page || 1) - 1) * (papers?.per_page || 0)) + 1 : 0);
+    const resultEnd = papers?.to ?? (visibleCount > 0 ? resultStart + visibleCount - 1 : 0);
+    const [countFlash, setCountFlash] = useState(false);
+
+    useEffect(() => {
+        setCountFlash(true);
+        const timeoutId = window.setTimeout(() => setCountFlash(false), 420);
+        return () => window.clearTimeout(timeoutId);
+    }, [papers.total, papers.current_page, papers.from, papers.to, hasActiveFilters]);
+
+    useEffect(() => {
+        if (!isLiveFilterEnabled.current) {
+            return undefined;
+        }
+
+        if (liveDebounceTimeoutRef.current) {
+            window.clearTimeout(liveDebounceTimeoutRef.current);
+        }
+
+        liveDebounceTimeoutRef.current = window.setTimeout(() => {
+            runInstitutionFilters({ searchTerm, category, disciplineCode, year, tag }, 1);
+        }, 375);
+
+        return () => {
+            if (liveDebounceTimeoutRef.current) {
+                window.clearTimeout(liveDebounceTimeoutRef.current);
+            }
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchTerm, category, disciplineCode, year, tag]);
+
+    function runInstitutionFilters(nextState, page = 1) {
+        const payload = {
+            search: String(nextState.searchTerm || '').trim(),
+            category: String(nextState.category || '').trim(),
+            discipline_code: String(nextState.disciplineCode || '').trim(),
+            year: String(nextState.year || '').trim(),
+            tag: String(nextState.tag || '').trim(),
+            page,
+        };
+
+        Object.keys(payload).forEach((key) => {
+            if (payload[key] === '') {
+                delete payload[key];
+            }
+        });
+
+        router.get(route('research.public.institution', institution.id), payload, {
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+        });
+    }
+
+    function applyInstitutionFilters(page = 1) {
+        if (liveDebounceTimeoutRef.current) {
+            window.clearTimeout(liveDebounceTimeoutRef.current);
+        }
+        runInstitutionFilters({ searchTerm, category, disciplineCode, year, tag }, page);
+    }
+
+    function removeSingleFilter(key) {
+        isLiveFilterEnabled.current = true;
+
+        if (key === 'search') {
+            setSearchTerm('');
+        } else if (key === 'category') {
+            setCategory('');
+        } else if (key === 'discipline') {
+            setDisciplineCode('');
+        } else if (key === 'year') {
+            setYear('');
+        } else if (key === 'tag') {
+            setTag('');
+        }
+    }
+
+    function clearFilters() {
+        isLiveFilterEnabled.current = true;
+        setSearchTerm('');
+        setCategory('');
+        setDisciplineCode('');
+        setYear('');
+        setTag('');
+    }
 
     return (
         <>
@@ -110,13 +228,149 @@ export default function PublicInstitution({ institution, papers, stats, canLogin
                     <PublicSectionCard
                         className="mt-6"
                         title="Published Research"
-                        subtitle="Browse approved papers linked to this institution."
+                        subtitle="Search approved papers by title, type, discipline, tags, and year."
                         extra={<Tag color="geekblue" style={{ marginInlineEnd: 0 }}>{papers.total} total</Tag>}
                     >
+                        <div className="mb-4">
+                            <button
+                                type="button"
+                                onClick={() => setAdvancedOpen((value) => !value)}
+                                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                                    hasActiveFilters
+                                        ? (dark ? 'bg-blue-500/30 text-blue-200 ring-1 ring-blue-400/40' : 'bg-blue-50 text-blue-700 ring-1 ring-blue-200')
+                                        : (dark ? 'bg-white/10 text-blue-100 hover:bg-white/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')
+                                }`}
+                            >
+                                <ControlOutlined />
+                                Advanced Search
+                                {advancedOpen ? <UpOutlined style={{ fontSize: 10 }} /> : <DownOutlined style={{ fontSize: 10 }} />}
+                            </button>
+
+                            {advancedOpen && (
+                                <div className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-[#1e2d47] bg-[#0d1526]' : 'border-slate-200 bg-slate-50'}`}>
+                                    <Row gutter={[12, 12]}>
+                                        <Col xs={24} md={12}>
+                                            <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Search Research</label>
+                                            <Input
+                                                placeholder="Title, author, school, or keyword"
+                                                value={searchTerm}
+                                                onChange={(event) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setSearchTerm(event.target.value);
+                                                }}
+                                                onPressEnter={() => applyInstitutionFilters(1)}
+                                            />
+                                        </Col>
+                                        <Col xs={24} md={6}>
+                                            <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Type of Research</label>
+                                            <Select
+                                                value={category || undefined}
+                                                placeholder="All types"
+                                                allowClear
+                                                options={categoryOptions}
+                                                onChange={(value) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setCategory(value ?? '');
+                                                }}
+                                                style={{ width: '100%' }}
+                                            />
+                                        </Col>
+                                        <Col xs={24} md={6}>
+                                            <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Discipline</label>
+                                            <Select
+                                                value={disciplineCode || undefined}
+                                                placeholder="All disciplines"
+                                                allowClear
+                                                showSearch
+                                                optionFilterProp="label"
+                                                options={disciplineOptions}
+                                                onChange={(value) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setDisciplineCode(value ?? '');
+                                                }}
+                                                style={{ width: '100%' }}
+                                            />
+                                        </Col>
+                                        <Col xs={24} md={6}>
+                                            <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Year</label>
+                                            <Select
+                                                value={year || undefined}
+                                                placeholder="All years"
+                                                allowClear
+                                                options={yearOptions}
+                                                onChange={(value) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setYear(value ?? '');
+                                                }}
+                                                style={{ width: '100%' }}
+                                            />
+                                        </Col>
+                                        <Col xs={24} md={12}>
+                                            <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Tags</label>
+                                            <Input
+                                                placeholder="Enter a keyword tag"
+                                                value={tag}
+                                                onChange={(event) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setTag(event.target.value);
+                                                }}
+                                                onPressEnter={() => applyInstitutionFilters(1)}
+                                            />
+                                        </Col>
+                                        <Col xs={24}>
+                                            <div className="flex justify-end">
+                                                <Space>
+                                                    <Button onClick={clearFilters} disabled={!hasActiveFilters}>Clear All</Button>
+                                                </Space>
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                </div>
+                            )}
+
+                            {hasActiveFilters && (
+                                <div className="mt-3 flex flex-wrap items-center gap-2">
+                                    {searchTerm && (
+                                        <Tag closable color="blue" onClose={() => removeSingleFilter('search')}>
+                                            Search: {searchTerm}
+                                        </Tag>
+                                    )}
+                                    {category && (
+                                        <Tag closable color="geekblue" onClose={() => removeSingleFilter('category')}>
+                                            Type: {categoryLabelMap[category] || category}
+                                        </Tag>
+                                    )}
+                                    {disciplineCode && (
+                                        <Tag closable color="cyan" onClose={() => removeSingleFilter('discipline')}>
+                                            Discipline: {disciplineLabelMap[disciplineCode] || disciplineCode}
+                                        </Tag>
+                                    )}
+                                    {year && (
+                                        <Tag closable color="gold" onClose={() => removeSingleFilter('year')}>
+                                            Year: {year}
+                                        </Tag>
+                                    )}
+                                    {tag && (
+                                        <Tag closable color="purple" onClose={() => removeSingleFilter('tag')}>
+                                            Tag: {tag}
+                                        </Tag>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className={`mt-2 text-xs transition-all duration-300 ${countFlash ? 'translate-y-[-1px] font-medium text-blue-700 dark:text-blue-200' : 'text-slate-500 dark:text-slate-400'}`}>
+                                {papers.total > 0
+                                    ? `Showing ${resultStart}-${resultEnd} of ${papers.total} ${hasActiveFilters ? 'filtered papers' : 'papers'}`
+                                    : `Showing 0 of 0 ${hasActiveFilters ? 'filtered papers' : 'papers'}`}
+                            </div>
+                        </div>
+
                         {papers.data.length === 0 ? (
                             <EmptyState
                                 title="No published research yet"
-                                description="This institution does not have approved papers in the archive yet."
+                                description={hasActiveFilters
+                                    ? 'No results matched your institution filters. Try broadening your search.'
+                                    : 'This institution does not have approved papers in the archive yet.'}
                                 action={(
                                     <Link href={route('research.public.index')}>
                                         <Button type="primary" size="small">Browse Archive</Button>
@@ -125,29 +379,64 @@ export default function PublicInstitution({ institution, papers, stats, canLogin
                             />
                         ) : (
                             <div className="space-y-3">
-                                {papers.data.map((paper) => (
-                                    <Card key={paper.id} className="admin-dashboard-shell border border-slate-200 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-[#1e2d47]" bordered={false} styles={{ body: { padding: 18 } }}>
-                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                            <div className="min-w-0 flex-1 space-y-2">
-                                                <Link href={route('research.public.show', paper.id)} className="block text-base font-semibold text-[#0033a0] hover:underline dark:text-blue-300">
-                                                    {paper.title}
-                                                </Link>
-                                                <div className="text-sm text-slate-600 dark:text-slate-300">
-                                                    {paper.authors || 'Unknown author'}
-                                                    {paper.school && <> · {paper.school}</>}
-                                                    {paper.year && <> · {paper.year}</>}
+                                {papers.data.map((paper) => {
+                                    const disciplineText = paper.discipline_code ? (disciplineLabelMap[paper.discipline_code] || paper.discipline_code) : null;
+                                    const paperTags = String(paper.keywords || '')
+                                        .split(',')
+                                        .map((item) => item.trim())
+                                        .filter((item) => item.length > 0)
+                                        .slice(0, 6);
+                                    const abstractSnippet = paper.abstract
+                                        ? (paper.abstract.length > 240 ? `${paper.abstract.slice(0, 240)}...` : paper.abstract)
+                                        : null;
+
+                                    return (
+                                        <Card key={paper.id} className="admin-dashboard-shell border border-slate-200 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-[#1e2d47]" bordered={false} styles={{ body: { padding: 18 } }}>
+                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                <div className="min-w-0 flex-1 space-y-2">
+                                                    <Link href={route('research.public.show', paper.id)} className="block text-base font-semibold text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                                                        {paper.title}
+                                                    </Link>
+                                                    <div className="text-sm text-slate-600 dark:text-slate-300">
+                                                        {paper.authors || 'Unknown author'}
+                                                        {paper.school && <> · {paper.school}</>}
+                                                        {paper.year && <> · {paper.year}</>}
+                                                    </div>
+                                                    {disciplineText && (
+                                                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                            <span className="font-medium">Discipline:</span> {disciplineText}
+                                                        </div>
+                                                    )}
+                                                    <Space wrap size={[6, 6]}>
+                                                        {(paper.research_category || paper.category) && <Tag color="geekblue">{paper.research_category || paper.category}</Tag>}
+                                                        {paperTags.map((item) => (
+                                                            <Tag
+                                                                key={`${paper.id}-tag-${item}`}
+                                                                color="cyan"
+                                                                style={{ cursor: 'pointer' }}
+                                                                onClick={() => {
+                                                                    isLiveFilterEnabled.current = true;
+                                                                    setAdvancedOpen(true);
+                                                                    setTag(item);
+                                                                }}
+                                                            >
+                                                                #{item}
+                                                            </Tag>
+                                                        ))}
+                                                        <StatusBadge status={paper.status || 'approved'} />
+                                                    </Space>
+                                                    <div className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                                        <span className="font-medium text-slate-700 dark:text-slate-200">Abstract:</span>{' '}
+                                                        {abstractSnippet || 'No abstract provided.'}
+                                                    </div>
                                                 </div>
-                                                <Space wrap size={[6, 6]}>
-                                                    {(paper.research_category || paper.category) && <Tag color="geekblue">{paper.research_category || paper.category}</Tag>}
-                                                    <StatusBadge status={paper.status || 'approved'} />
-                                                </Space>
+                                                <Link href={route('research.public.show', paper.id)}>
+                                                    <Button type="primary">Open Paper</Button>
+                                                </Link>
                                             </div>
-                                            <Link href={route('research.public.show', paper.id)}>
-                                                <Button type="primary">Open Paper</Button>
-                                            </Link>
-                                        </div>
-                                    </Card>
-                                ))}
+                                        </Card>
+                                    );
+                                })}
                             </div>
                         )}
                     </PublicSectionCard>
@@ -158,7 +447,7 @@ export default function PublicInstitution({ institution, papers, stats, canLogin
                                 current={papers.current_page}
                                 pageSize={papers.per_page}
                                 total={papers.total}
-                                onChange={(page) => router.get(route('research.public.institution', institution.id), { page }, { preserveScroll: true, preserveState: true, replace: true })}
+                                onChange={(page) => applyInstitutionFilters(page)}
                                 showSizeChanger={false}
                             />
                         </div>

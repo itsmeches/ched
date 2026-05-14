@@ -32,7 +32,11 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '',
             title: 'Title',
             dataIndex: 'title',
             key: 'title',
-            render: (value, row) => <Link href={route('research.show', row.id)}>{value}</Link>,
+            render: (value, row) => (
+                <Link href={route('research.show', row.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                    {value}
+                </Link>
+            ),
         },
         {
             title: 'Authors',
@@ -83,7 +87,11 @@ export default function ResearchIndex({ proposals, filters, canCreate, tab = '',
             title: 'Action',
             key: 'action',
             align: 'right',
-            render: (_, row) => <Link href={route('research.show', row.id)}>View</Link>,
+            render: (_, row) => (
+                <Link href={route('research.show', row.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                    View
+                </Link>
+            ),
         },
     ], []);
 
