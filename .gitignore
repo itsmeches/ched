@@ -1,1 +1,29 @@
 .vscode/
+.idea/
+.fleet/
+
+# OS and logs
+.DS_Store
+Thumbs.db
+*.log
+
+# Environment files (keep templates)
+.env
+.env.*
+!.env.example
+
+# Common dependency/build artifacts
+**/node_modules/
+**/vendor/
+**/dist/
+**/build/
+
+# Laravel backend generated artifacts
+Backend/cris-backend/public/build/
+Backend/cris-backend/public/hot
+Backend/cris-backend/storage/*.key
+Backend/cris-backend/storage/logs/*.log
+Backend/cris-backend/storage/app/reports/
+Backend/cris-backend/.phpunit.cache
+Backend/cris-backend/.phpunit.result.cache
+Backend/cris-backend/test-results/
