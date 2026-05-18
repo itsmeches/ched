@@ -1,6 +1,6 @@
 # CALABARZON Research Information System (CRIS)
 
-CRIS is a role-based research management platform for handling research proposal submission, review, approval, and archival across the CALABARZON region. It is built around a Laravel 11 backend with an Inertia.js + React interface, and supports three primary user groups: Super Admin, CHED reviewers, and HEI researchers.
+CRIS is a role-based research management platform for handling research proposal submission, review, approval, and archival across the CALABARZON region. It is built around a Laravel 11 backend with an Inertia.js + React interface, and supports hierarchical user management from CHED down to HEI, Faculty, and Student accounts.
 
 The system includes a public research archive and public paper detail pages, plus global light/dark mode support across authenticated and public views.
 
@@ -11,6 +11,7 @@ The application is designed to centralize the lifecycle of institutional researc
 - HEI researchers can submit and manage research proposals.
 - CHED reviewers can review submissions and issue decisions.
 - Super Admins can manage users, institutions, keywords, and monitor the system.
+- CHED, HEI, and Faculty users can manage subordinate accounts in a role-based hierarchy.
 - Public users can browse the public research archive.
 
 The active production-style application lives inside [Backend/cris-backend](Backend/cris-backend). It contains both the Laravel backend and the Inertia-powered React frontend.
@@ -18,12 +19,15 @@ The active production-style application lives inside [Backend/cris-backend](Back
 ## Core Features
 
 - Role-based authentication and authorization
+- Stable Inertia auth redirect flow for login/logout with current CSRF handling
 - HEI proposal submission and editing workflow
 - CHED review and decision management
 - Super Admin management for users, institutions, and keywords
 - Public research archive and file download endpoints
 - Proposal history and CSV export
 - Edit permission request workflow for restricted proposal updates
+- Hierarchical account creation and tracking (CHED to HEI to Faculty to Student)
+- Automated CHED 4-A HEI import command with institution-first creation and CSV audit report output
 - Global light/dark mode using a shared theme context (authenticated + public pages)
 - Responsive admin tables with mobile column-priority behavior
 - Collapsible history view grouped by paper for high-volume activity logs
@@ -41,8 +45,18 @@ The following front-end improvements were recently applied without changing busi
 - Added mobile responsiveness improvements to admin filters, table cards, and drawer footers
 - Added responsive column visibility for high-density tables (show key columns first on small screens)
 - Refined timeline-heavy history screens by grouping entries into collapsible paper-based sections
+- Added searchable institution selection in Super Admin account creation for large institution datasets
+- Improved create-account input autofill consistency in light mode to prevent inner field tint artifacts
 
 These updates are focused on readability, scalability, and mobile usability for large datasets and high-activity roles.
+
+## Recent Reliability and Security Updates (May 2026)
+
+- Hardened request headers and CSP behavior through centralized middleware.
+- Removed `unsafe-eval` from CSP and kept environment-aware policy behavior (local development vs production-style security).
+- Improved auth session flow handling to avoid stale-token behavior after login/logout transitions.
+- Added explicit session-cookie security configuration defaults in `.env.example`.
+- Extended Apache web-root protections for sensitive file exposure reduction.
 
 ## User Roles
 
@@ -60,6 +74,7 @@ These updates are focused on readability, scalability, and mobile usability for 
 - Review and decide on research proposals
 - Access a dedicated My Decisions page
 - View research history
+- Create and monitor linked HEI accounts
 
 ### HEI Researcher
 
@@ -67,6 +82,18 @@ These updates are focused on readability, scalability, and mobile usability for 
 - Submit research proposals
 - Edit eligible proposals
 - Track proposal progress and history
+- Manage subordinate Faculty accounts
+
+### Faculty
+
+- Access Faculty dashboard
+- Manage subordinate Student accounts
+- Participate in role-specific proposal workflows
+
+### Student
+
+- Access Student dashboard
+- Participate in institution-linked research workflows based on permissions
 
 ## Architecture
 
@@ -128,12 +155,35 @@ This root README is intentionally project-level.
 
 For local installation and day-to-day commands, go directly to [Backend/cris-backend/README.md](Backend/cris-backend/README.md).
 
+## Testing Status
+
+- Backend test suite is operational with Laravel PHPUnit.
+- Frontend unit tests are available through Vitest.
+- Browser-level checks are available through Playwright.
+
+See [Backend/cris-backend/README.md](Backend/cris-backend/README.md) for exact commands.
+
+## Data Import Automation
+
+The application now includes a CHED HEI import command that can:
+
+- fetch schools from the CHED API endpoint,
+- create institutions first,
+- create or match HEI accounts under CHED ownership,
+- handle shared contact emails safely,
+- produce CSV import audit reports for verification.
+
+Recent validation checks confirm successful active-school import runs with CSV-to-database integrity verification.
+
+Operational usage and options are documented in [Backend/cris-backend/README.md](Backend/cris-backend/README.md).
+
 ## Development Notes
 
 - The integrated app uses Laravel + Inertia, not the standalone `Frontend` folder.
 - If port `8000` is already occupied, run the app on `8001` and update `APP_URL` if needed.
 - For local development, Vite usually runs on `5173`.
 - Security headers are relaxed only where necessary for local developer workflow and kept strict for production-style behavior.
+- For ZAP and CSP validation, run production-style scans with `APP_ENV=production` and `APP_DEBUG=false`.
 
 ## Documentation
 
