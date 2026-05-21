@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Support\Concerns\InteractsWithProposalMutations;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -56,7 +57,11 @@ class ResearchProposalController extends Controller
         }
 
         $this->applySearchFilters($query, $request, includeStatus: false);
-        $disciplineLabels = Discipline::query()->pluck('name', 'code');
+        $disciplineLabels = Cache::remember(
+            'public:discipline_labels',
+            now()->addHour(),
+            fn () => Discipline::query()->pluck('name', 'code'),
+        );
         $proposals = $query->paginate(10)->withQueryString();
         $proposals->getCollection()->transform(function (ResearchProposal $proposal) use ($disciplineLabels) {
             $code = (string) ($proposal->discipline_code ?? '');
@@ -69,31 +74,46 @@ class ResearchProposalController extends Controller
             return $proposal;
         });
 
-        $popularDisciplines = ResearchProposal::query()
-            ->where('status', ResearchProposal::STATUS_APPROVED)
-            ->whereNotNull('discipline_code')
-            ->selectRaw('discipline_code, COUNT(*) as total')
-            ->groupBy('discipline_code')
-            ->orderByDesc('total')
-            ->limit(5)
-            ->get()
-            ->map(function ($item) use ($disciplineLabels) {
-                $code = (string) $item->discipline_code;
+        // Popular-disciplines aggregate is allowed to lag by ~15 minutes; not worth invalidating on every approval.
+        $popularDisciplines = Cache::remember(
+            'public:popular_disciplines',
+            now()->addMinutes(15),
+            fn () => ResearchProposal::query()
+                ->where('status', ResearchProposal::STATUS_APPROVED)
+                ->whereNotNull('discipline_code')
+                ->selectRaw('discipline_code, COUNT(*) as total')
+                ->groupBy('discipline_code')
+                ->orderByDesc('total')
+                ->limit(5)
+                ->get(),
+        )->map(function ($item) use ($disciplineLabels) {
+            $code = (string) $item->discipline_code;
 
-                return [
-                    'code' => $code,
-                    'name' => $disciplineLabels->get($code) ?: $code,
-                    'total' => (int) $item->total,
-                ];
-            })
-            ->values();
+            return [
+                'code' => $code,
+                'name' => $disciplineLabels->get($code) ?: $code,
+                'total' => (int) $item->total,
+            ];
+        })->values();
 
         return Inertia::render('Research/PublicIndex', [
             'proposals' => $proposals,
             'filters' => (object) $request->only(['search', 'year', 'year_from', 'year_to', 'school', 'institution_id', 'category', 'discipline_code', 'sort']),
-            'institutions' => Institution::query()->orderBy('name')->get(['id', 'name']),
-            'categories' => ResearchCategory::query()->orderBy('label')->get(['value', 'label']),
-            'disciplines' => Discipline::query()->orderBy('code')->get(['code', 'name']),
+            'institutions' => Cache::remember(
+                'public:institutions',
+                now()->addHour(),
+                fn () => Institution::query()->orderBy('name')->get(['id', 'name']),
+            ),
+            'categories' => Cache::remember(
+                'public:research_categories',
+                now()->addHour(),
+                fn () => ResearchCategory::query()->orderBy('label')->get(['value', 'label']),
+            ),
+            'disciplines' => Cache::remember(
+                'public:disciplines_list',
+                now()->addHour(),
+                fn () => Discipline::query()->orderBy('code')->get(['code', 'name']),
+            ),
             'popularDisciplines' => $popularDisciplines,
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),

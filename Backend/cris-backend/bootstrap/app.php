@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Sentry\Laravel\Integration;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -63,6 +64,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        Integration::handles($exceptions);
+
         $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $exception) {
             return $request->is('api/*') || $request->expectsJson();
         });
@@ -164,6 +167,15 @@ return Application::configure(basePath: dirname(__DIR__))
                     ? "'self' 'unsafe-inline' https://fonts.bunny.net{$viteOrigins}"
                     : "'self' 'nonce-{$nonce}' https://fonts.bunny.net";
                 $connectSrc = "'self'".($isLocal ? $viteOrigins.$viteConnect : '');
+
+                // When the browser Sentry SDK is configured, allow its ingest host in connect-src.
+                $sentryDsn = env('VITE_SENTRY_DSN');
+                if ($sentryDsn) {
+                    $sentryHost = parse_url($sentryDsn, PHP_URL_HOST);
+                    if ($sentryHost) {
+                        $connectSrc .= ' https://'.$sentryHost;
+                    }
+                }
                 $targetResponse->headers->set(
                     'Content-Security-Policy',
                     "default-src 'self'; script-src {$scriptSrc}; style-src {$styleSrc}; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.bunny.net data:; img-src 'self' data: blob:; connect-src {$connectSrc}; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
