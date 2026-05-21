@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Research\ReviewProposalAction;
-use App\Actions\Research\SubmitProposalAction;
-use App\Actions\Research\UpdateProposalAction;
 use App\Http\Requests\StoreResearchProposalRequest;
 use App\Http\Requests\UpdateResearchProposalRequest;
 use App\Models\Discipline;
@@ -13,8 +10,8 @@ use App\Models\Keyword;
 use App\Models\ResearchCategory;
 use App\Models\ResearchHistory;
 use App\Models\ResearchProposal;
+use App\Models\ResearchProposalHistory;
 use App\Models\User;
-use App\Support\Concerns\InteractsWithProposalMutations;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -28,7 +25,10 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ResearchProposalController extends Controller
 {
-    use InteractsWithProposalMutations;
+    /**
+     * Disk used for research PDF uploads.
+     */
+    private const RESEARCH_DISK = 'research';
 
     public function publicIndex(Request $request): Response
     {
@@ -243,7 +243,7 @@ class ResearchProposalController extends Controller
         ]);
     }
 
-    public function publicDownloadFile(ResearchProposal $proposal): BinaryFileResponse
+    public function publicDownloadFile(Request $request, ResearchProposal $proposal): BinaryFileResponse
     {
         abort_unless($proposal->status === ResearchProposal::STATUS_APPROVED, 404);
         abort_if(empty($proposal->file_path), 404);
@@ -253,7 +253,7 @@ class ResearchProposalController extends Controller
 
         $absolutePath = Storage::disk($disk)->path($proposal->file_path);
         $downloadName = $this->safePdfFileName($proposal);
-        $disposition = request()->boolean('download') ? 'attachment' : 'inline';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
 
         return response()->file($absolutePath, [
             'Content-Type' => 'application/pdf',
@@ -419,7 +419,7 @@ class ResearchProposalController extends Controller
         ]);
     }
 
-    public function store(StoreResearchProposalRequest $request, SubmitProposalAction $submit): RedirectResponse
+    public function store(StoreResearchProposalRequest $request): RedirectResponse
     {
         $guardErrors = $this->submissionGuardrailErrors($request->user());
 
@@ -427,7 +427,10 @@ class ResearchProposalController extends Controller
             return back()->withErrors($guardErrors)->withInput();
         }
 
-        $proposal = $submit(
+        $submit = app('App\\Actions\\Research\\SubmitProposalAction');
+        abort_unless(is_callable($submit), 500, 'Submit proposal action is unavailable.');
+
+        $proposal = $submit->__invoke(
             $request->user(),
             $request->validated(),
             $request->file('pdf_file'),
@@ -437,10 +440,10 @@ class ResearchProposalController extends Controller
             ->with('success', 'Research paper submitted for faculty review.');
     }
 
-    public function show(ResearchProposal $proposal): Response
+    public function show(Request $request, ResearchProposal $proposal): Response
     {
         $this->authorize('view', $proposal);
-        $user = request()->user();
+        $user = $request->user();
 
         if ($user?->isCHED() && $proposal->isPendingChed() && is_null($proposal->viewed_at)) {
             // Lock HEI editing after CHED has first opened the submission.
@@ -537,7 +540,7 @@ class ResearchProposalController extends Controller
         ]);
     }
 
-    public function downloadFile(ResearchProposal $proposal): BinaryFileResponse
+    public function downloadFile(Request $request, ResearchProposal $proposal): BinaryFileResponse
     {
         $this->authorize('view', $proposal);
         abort_if(empty($proposal->file_path), 404);
@@ -547,7 +550,7 @@ class ResearchProposalController extends Controller
 
         $absolutePath = Storage::disk($disk)->path($proposal->file_path);
         $downloadName = $this->safePdfFileName($proposal);
-        $disposition = request()->boolean('download') ? 'attachment' : 'inline';
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
 
         return response()->file($absolutePath, [
             'Content-Type' => 'application/pdf',
@@ -556,9 +559,9 @@ class ResearchProposalController extends Controller
         ]);
     }
 
-    public function edit(ResearchProposal $proposal): Response|RedirectResponse
+    public function edit(Request $request, ResearchProposal $proposal): Response|RedirectResponse
     {
-        if (! request()->user()?->can('update', $proposal)) {
+        if (! $request->user()?->can('update', $proposal)) {
             return redirect()->route('research.show', ['proposal' => $proposal->id])
                 ->with('error', 'You are not allowed to edit this research paper.');
         }
@@ -579,14 +582,16 @@ class ResearchProposalController extends Controller
     public function update(
         UpdateResearchProposalRequest $request,
         ResearchProposal $proposal,
-        UpdateProposalAction $update,
     ): RedirectResponse {
         if (! $request->user()->can('update', $proposal)) {
             return redirect()->route('research.show', ['proposal' => $proposal->id])
                 ->with('error', 'You are not allowed to update this research paper.');
         }
 
-        $proposal = $update(
+        $update = app('App\\Actions\\Research\\UpdateProposalAction');
+        abort_unless(is_callable($update), 500, 'Update proposal action is unavailable.');
+
+        $proposal = $update->__invoke(
             $request->user(),
             $proposal,
             $request->validated(),
@@ -599,9 +604,9 @@ class ResearchProposalController extends Controller
                 : 'Research paper updated.');
     }
 
-    public function resubmit(ResearchProposal $proposal): RedirectResponse
+    public function resubmit(Request $request, ResearchProposal $proposal): RedirectResponse
     {
-        $user = request()->user();
+        $user = $request->user();
 
         abort_unless($user && $user->isStudent() && $proposal->submitted_by === $user->id, 403);
 
@@ -638,11 +643,11 @@ class ResearchProposalController extends Controller
             ->with('success', 'Submission resubmitted and routed back to Faculty review.');
     }
 
-    public function destroy(ResearchProposal $proposal): RedirectResponse
+    public function destroy(Request $request, ResearchProposal $proposal): RedirectResponse
     {
         $this->authorize('delete', $proposal);
 
-        $this->logHistory($proposal, request()->user()?->id, 'deleted', $this->trackedValues($proposal), null);
+        $this->logHistory($proposal, $request->user()?->id, 'deleted', $this->trackedValues($proposal), null);
 
         if ($proposal->file_path) {
             $disk = $this->resolveResearchDisk($proposal->file_path);
@@ -658,7 +663,7 @@ class ResearchProposalController extends Controller
     }
 
     /** Faculty / HEI / CHED / Super Admin reviews a paper */
-    public function review(Request $request, ResearchProposal $proposal, ReviewProposalAction $review): RedirectResponse
+    public function review(Request $request, ResearchProposal $proposal): RedirectResponse
     {
         $this->authorize('review', $proposal);
 
@@ -671,7 +676,10 @@ class ResearchProposalController extends Controller
             'comments' => ['nullable', 'string', 'max:2000', 'required_if:action,reject'],
         ]);
 
-        $proposal = $review(
+        $review = app('App\\Actions\\Research\\ReviewProposalAction');
+        abort_unless(is_callable($review), 500, 'Review proposal action is unavailable.');
+
+        $proposal = $review->__invoke(
             $request->user(),
             $proposal,
             (string) $request->input('action'),
@@ -687,6 +695,105 @@ class ResearchProposalController extends Controller
         }
 
         return back()->with('success', 'Submission approved and moved to the next review stage.');
+    }
+
+    /**
+     * Resolve which disk holds the file path.
+     */
+    private function resolveResearchDisk(?string $filePath): ?string
+    {
+        if (! $filePath) {
+            return null;
+        }
+
+        if (Storage::disk(self::RESEARCH_DISK)->exists($filePath)) {
+            return self::RESEARCH_DISK;
+        }
+
+        if (Storage::disk('public')->exists($filePath)) {
+            return 'public';
+        }
+
+        return null;
+    }
+
+    private function safePdfFileName(ResearchProposal $proposal): string
+    {
+        $slug = Str::slug($proposal->title ?? 'research-paper');
+
+        if ($slug === '') {
+            $slug = 'research-paper-'.$proposal->id;
+        }
+
+        return $slug.'.pdf';
+    }
+
+    /** @return array<string, mixed> */
+    private function trackedValues(ResearchProposal $proposal): array
+    {
+        return $proposal->only([
+            'title', 'authors', 'author_email', 'author_phone',
+            'co_authors', 'co_author_emails', 'co_author_phones',
+            'year', 'school', 'abstract', 'category', 'research_category', 'category_type', 'discipline_code', 'keywords',
+            'status', 'comments',
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $oldValues
+     * @param  array<string, mixed>|null  $newValues
+     */
+    private function logHistory(
+        ResearchProposal $proposal,
+        ?int $userId,
+        string $action,
+        ?array $oldValues,
+        ?array $newValues,
+    ): void {
+        if ($action === 'updated' && $oldValues !== null && $newValues !== null) {
+            $changedOld = [];
+            $changedNew = [];
+
+            foreach ($newValues as $key => $newVal) {
+                $oldVal = $oldValues[$key] ?? null;
+                if ($oldVal !== $newVal) {
+                    $changedOld[$key] = $oldVal;
+                    $changedNew[$key] = $newVal;
+                }
+            }
+
+            if ($changedOld === []) {
+                return;
+            }
+
+            $oldValues = $changedOld;
+            $newValues = $changedNew;
+        }
+
+        ResearchProposalHistory::create([
+            'research_proposal_id' => $proposal->id,
+            'user_id' => $userId,
+            'action' => $action,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'performed_at' => now(),
+        ]);
+    }
+
+    private function logResearchHistory(
+        ResearchProposal $proposal,
+        ?User $actor,
+        string $action,
+        ?string $remarks = null,
+    ): void {
+        ResearchHistory::create([
+            'research_id' => $proposal->id,
+            'action' => $action,
+            'performed_by' => $actor?->id,
+            'role' => $actor?->role ?? 'system',
+            'remarks' => $remarks,
+            'created_at' => now(),
+        ]);
     }
 
     /** @return array<int, array<string, mixed>> */
