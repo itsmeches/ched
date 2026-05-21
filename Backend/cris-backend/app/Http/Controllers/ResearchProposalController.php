@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Research\ReviewProposalAction;
+use App\Actions\Research\SubmitProposalAction;
+use App\Actions\Research\UpdateProposalAction;
 use App\Http\Requests\StoreResearchProposalRequest;
 use App\Http\Requests\UpdateResearchProposalRequest;
 use App\Models\Discipline;
@@ -10,10 +13,8 @@ use App\Models\Keyword;
 use App\Models\ResearchCategory;
 use App\Models\ResearchHistory;
 use App\Models\ResearchProposal;
-use App\Models\ResearchProposalHistory;
 use App\Models\User;
-use App\Notifications\ResearchProposalReviewed;
-use App\Services\SimpleNotificationService;
+use App\Support\Concerns\InteractsWithProposalMutations;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,32 +27,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ResearchProposalController extends Controller
 {
-    /**
-     * Disk used for new research PDF uploads. Private (not symlinked into
-     * /public/storage), only served via downloadFile/publicDownloadFile
-     * after authorization.
-     */
-    private const RESEARCH_DISK = 'research';
-
-    /**
-     * Resolve which disk currently holds a research file. Newly uploaded
-     * files live on the private 'research' disk; legacy uploads may still
-     * be on the 'public' disk until migrated by `php artisan research:migrate-files`.
-     */
-    private function resolveResearchDisk(?string $filePath): ?string
-    {
-        if (! $filePath) {
-            return null;
-        }
-        if (Storage::disk(self::RESEARCH_DISK)->exists($filePath)) {
-            return self::RESEARCH_DISK;
-        }
-        if (Storage::disk('public')->exists($filePath)) {
-            return 'public';
-        }
-
-        return null;
-    }
+    use InteractsWithProposalMutations;
 
     public function publicIndex(Request $request): Response
     {
@@ -411,7 +387,7 @@ class ResearchProposalController extends Controller
         ]);
     }
 
-    public function store(StoreResearchProposalRequest $request): RedirectResponse
+    public function store(StoreResearchProposalRequest $request, SubmitProposalAction $submit): RedirectResponse
     {
         $guardErrors = $this->submissionGuardrailErrors($request->user());
 
@@ -419,41 +395,11 @@ class ResearchProposalController extends Controller
             return back()->withErrors($guardErrors)->withInput();
         }
 
-        $data = $request->validated();
-        $data['category'] = $data['research_category'];
-        $data['category_type'] = $this->resolveCategoryType($data['research_category']) ?? $data['category_type'] ?? null;
-        $data['discipline_code'] = $data['discipline'];
-        $normalizedKeywords = $this->parseKeywords($data['keywords'] ?? null);
-        $data['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
-
-        if ($request->hasFile('pdf_file')) {
-            $data['file_path'] = $request->file('pdf_file')
-                ->store('research_papers', self::RESEARCH_DISK);
-        }
-
-        unset($data['pdf_file']);
-        unset($data['discipline']);
-
-        $proposal = ResearchProposal::create([
-            ...$data,
-            'submitted_by' => $request->user()->id,
-            'submitted_at' => now(),
-            'institution_id' => $request->user()->institution_id,
-            'status' => ResearchProposal::STATUS_UNDER_REVIEW_FACULTY,
-        ]);
-
-        $requestUser = $request->user();
-        SimpleNotificationService::notify(
-            $requestUser?->faculty_id,
-            "New submission '{$proposal->title}' is waiting for your review.",
-            route('research.show', $proposal->id).'#review-decision',
-            'review_action_needed'
+        $proposal = $submit(
+            $request->user(),
+            $request->validated(),
+            $request->file('pdf_file'),
         );
-
-        $this->syncKeywords($proposal, $normalizedKeywords);
-
-        $this->logHistory($proposal, $request->user()->id, 'created', null, $this->trackedValues($proposal));
-        $this->logResearchHistory($proposal, $request->user(), 'submitted');
 
         return redirect()->route('research.show', ['proposal' => $proposal->id])
             ->with('success', 'Research paper submitted for faculty review.');
@@ -578,17 +524,6 @@ class ResearchProposalController extends Controller
         ]);
     }
 
-    private function safePdfFileName(ResearchProposal $proposal): string
-    {
-        $slug = Str::slug($proposal->title ?? 'research-paper');
-
-        if ($slug === '') {
-            $slug = 'research-paper-'.$proposal->id;
-        }
-
-        return $slug.'.pdf';
-    }
-
     public function edit(ResearchProposal $proposal): Response|RedirectResponse
     {
         if (! request()->user()?->can('update', $proposal)) {
@@ -609,85 +544,25 @@ class ResearchProposalController extends Controller
         ]);
     }
 
-    public function update(UpdateResearchProposalRequest $request, ResearchProposal $proposal): RedirectResponse
-    {
+    public function update(
+        UpdateResearchProposalRequest $request,
+        ResearchProposal $proposal,
+        UpdateProposalAction $update,
+    ): RedirectResponse {
         if (! $request->user()->can('update', $proposal)) {
             return redirect()->route('research.show', ['proposal' => $proposal->id])
                 ->with('error', 'You are not allowed to update this research paper.');
         }
 
-        $hasApprovedPermission = $proposal->editPermissionRequests()
-            ->where('requested_by', $request->user()->id)
-            ->where('status', 'approved')
-            ->exists();
-
-        $data = $request->validated();
-        $data['category'] = $data['research_category'];
-        $data['category_type'] = $this->resolveCategoryType($data['research_category']) ?? $data['category_type'] ?? null;
-        $data['discipline_code'] = $data['discipline'];
-        $normalizedKeywords = $this->parseKeywords($data['keywords'] ?? null);
-        $data['keywords'] = $normalizedKeywords !== [] ? implode(', ', $normalizedKeywords) : null;
-
-        if ($request->hasFile('pdf_file')) {
-            if ($proposal->file_path) {
-                $oldDisk = $this->resolveResearchDisk($proposal->file_path);
-                if ($oldDisk) {
-                    Storage::disk($oldDisk)->delete($proposal->file_path);
-                }
-            }
-            $data['file_path'] = $request->file('pdf_file')
-                ->store('research_papers', self::RESEARCH_DISK);
-        }
-
-        if ($hasApprovedPermission) {
-            $data = array_merge($data, [
-                'status' => ResearchProposal::STATUS_UNDER_REVIEW_FACULTY,
-                'submitted_at' => now(),
-                'reviewed_by' => null,
-                'reviewed_at' => null,
-                'approved_by' => null,
-                'approved_at' => null,
-                'approved_by_faculty_at' => null,
-                'approved_by_hei_at' => null,
-                'approved_by_ched_at' => null,
-                'rejected_at' => null,
-                'rejected_by' => null,
-                'remarks' => null,
-                'comments' => null,
-                'viewed_by' => null,
-                'viewed_at' => null,
-            ]);
-        }
-
-        unset($data['pdf_file']);
-        unset($data['discipline']);
-
-        $oldValues = $this->trackedValues($proposal);
-
-        $proposal->update($data);
-        $this->syncKeywords($proposal, $normalizedKeywords);
-
-        $newValues = $this->trackedValues($proposal->fresh());
-        $this->logHistory($proposal, $request->user()->id, 'updated', $oldValues, $newValues);
-        $this->logResearchHistory($proposal, $request->user(), 'edited');
-
-        // Consume the approved edit permission so the lock re-engages after this edit
-        $proposal->editPermissionRequests()
-            ->where('requested_by', $request->user()->id)
-            ->where('status', 'approved')
-            ->delete();
-
-        if ($hasApprovedPermission) {
-            SimpleNotificationService::notify(
-                $request->user()?->faculty_id,
-                "Updated submission '{$proposal->title}' was resubmitted and is awaiting your Faculty review.",
-                route('research.show', $proposal->id).'#review-decision',
-                'review_action_needed'
-            );
-        }
+        $proposal = $update(
+            $request->user(),
+            $proposal,
+            $request->validated(),
+            $request->file('pdf_file'),
+        );
 
         return redirect()->route('research.show', ['proposal' => $proposal->id])
-            ->with('success', $hasApprovedPermission
+            ->with('success', $proposal->getAttribute('was_resubmitted')
                 ? 'Research paper updated and routed back to Faculty review.'
                 : 'Research paper updated.');
     }
@@ -750,55 +625,8 @@ class ResearchProposalController extends Controller
             ->with('success', 'Research paper deleted.');
     }
 
-    /**
-     * @return array<int, string>
-     */
-    private function parseKeywords(?string $keywords): array
-    {
-        if (! $keywords) {
-            return [];
-        }
-
-        $items = array_filter(array_map(
-            static fn (string $value) => trim($value),
-            explode(',', $keywords),
-        ));
-
-        $normalized = [];
-
-        foreach ($items as $item) {
-            $key = mb_strtolower($item);
-
-            if (! isset($normalized[$key])) {
-                $normalized[$key] = $item;
-            }
-        }
-
-        return array_values($normalized);
-    }
-
-    /**
-     * @param  array<int, string>  $keywordNames
-     */
-    private function syncKeywords(ResearchProposal $proposal, array $keywordNames): void
-    {
-        if ($keywordNames === []) {
-            $proposal->keywordItems()->sync([]);
-
-            return;
-        }
-
-        $keywordIds = [];
-
-        foreach ($keywordNames as $keywordName) {
-            $keywordIds[] = Keyword::query()->firstOrCreate(['name' => $keywordName])->id;
-        }
-
-        $proposal->keywordItems()->sync(array_values(array_unique($keywordIds)));
-    }
-
     /** Faculty / HEI / CHED / Super Admin reviews a paper */
-    public function review(Request $request, ResearchProposal $proposal): RedirectResponse
+    public function review(Request $request, ResearchProposal $proposal, ReviewProposalAction $review): RedirectResponse
     {
         $this->authorize('review', $proposal);
 
@@ -811,126 +639,22 @@ class ResearchProposalController extends Controller
             'comments' => ['nullable', 'string', 'max:2000', 'required_if:action,reject'],
         ]);
 
-        $nextStatus = ResearchProposal::STATUS_REJECTED;
-        $isFinalApproval = false;
-        $reviewer = $request->user();
-        $approvedByFacultyAt = $proposal->approved_by_faculty_at;
-        $approvedByHeiAt = $proposal->approved_by_hei_at;
-        $approvedByChedAt = $proposal->approved_by_ched_at;
-        $rejectedAt = null;
-        $rejectedBy = null;
-        $remarks = null;
-
-        if ($request->action === 'approve') {
-            if ($reviewer->isFaculty()) {
-                $approvedByFacultyAt = now();
-            } elseif ($reviewer->role === User::ROLE_HEI) {
-                $approvedByHeiAt = now();
-            } elseif ($reviewer->isCHED()) {
-                $approvedByChedAt = now();
-            }
-
-            if ($proposal->isPendingFaculty()) {
-                $nextStatus = ResearchProposal::STATUS_UNDER_REVIEW_HEI;
-            } elseif ($proposal->isPendingHei()) {
-                $nextStatus = ResearchProposal::STATUS_UNDER_REVIEW_CHED;
-            } elseif ($proposal->isPendingChed()) {
-                $nextStatus = ResearchProposal::STATUS_APPROVED;
-                $isFinalApproval = true;
-            }
-        } else {
-            $rejectedAt = now();
-            $rejectedBy = $reviewer->id;
-            $remarks = $request->comments;
-            $nextStatus = ResearchProposal::STATUS_REJECTED;
-        }
-
-        $proposal->update([
-            'status' => $nextStatus,
-            'reviewed_by' => $request->user()->id,
-            'reviewed_at' => now(),
-            'approved_by' => $isFinalApproval ? $request->user()->id : null,
-            'approved_at' => $isFinalApproval ? now() : null,
-            'approved_by_faculty_at' => $approvedByFacultyAt,
-            'approved_by_hei_at' => $approvedByHeiAt,
-            'approved_by_ched_at' => $approvedByChedAt,
-            'rejected_at' => $rejectedAt,
-            'rejected_by' => $rejectedBy,
-            'remarks' => $remarks,
-            'comments' => $request->comments,
-        ]);
-
-        $submitter = $proposal->submitter;
-
-        if ($request->action === 'approve') {
-            if ($nextStatus === ResearchProposal::STATUS_UNDER_REVIEW_HEI) {
-                SimpleNotificationService::notify(
-                    $submitter?->hei_id,
-                    "Submission '{$proposal->title}' is now awaiting HEI review.",
-                    route('research.show', $proposal->id).'#review-decision',
-                    'review_action_needed'
-                );
-            } elseif ($nextStatus === ResearchProposal::STATUS_UNDER_REVIEW_CHED) {
-                SimpleNotificationService::notify(
-                    $submitter?->ched_id,
-                    "Submission '{$proposal->title}' is now awaiting CHED review.",
-                    route('research.show', $proposal->id).'#review-decision',
-                    'review_action_needed'
-                );
-            } elseif ($nextStatus === ResearchProposal::STATUS_APPROVED) {
-                SimpleNotificationService::notify(
-                    $submitter?->id,
-                    "Your submission '{$proposal->title}' was approved.",
-                    route('research.show', $proposal->id).'#research-actions',
-                    'research_approved'
-                );
-            }
-        } else {
-            SimpleNotificationService::notify(
-                $submitter?->id,
-                "Your submission '{$proposal->title}' was rejected.",
-                route('research.show', $proposal->id).'#reviewer-comments',
-                'research_rejected'
-            );
-        }
-
-        $this->logHistory($proposal, $request->user()->id, $request->action === 'approve' ? 'approved' : 'rejected', null, [
-            'status' => $proposal->status,
-            'comments' => $proposal->comments,
-        ]);
-        $this->logResearchHistory(
+        $proposal = $review(
+            $request->user(),
             $proposal,
-            $reviewer,
-            $request->action === 'approve' ? 'approved' : 'rejected',
-            $request->action === 'reject' ? (string) $request->comments : null,
+            (string) $request->input('action'),
+            $request->input('comments'),
         );
 
-        $proposal->loadMissing('submitter:id,name,email');
-
-        if ($proposal->submitter && $proposal->submitter->email) {
-            $proposal->submitter->notify(new ResearchProposalReviewed($proposal));
-        }
-
-        if ($request->action === 'reject') {
+        if ($proposal->getAttribute('decision') === 'reject') {
             return back()->with('success', 'Submission rejected and returned to student for revision.');
         }
 
-        if ($isFinalApproval) {
+        if ($proposal->getAttribute('is_final_approval')) {
             return back()->with('success', 'Final approval completed.');
         }
 
         return back()->with('success', 'Submission approved and moved to the next review stage.');
-    }
-
-    /** @return array<string, mixed> */
-    private function trackedValues(ResearchProposal $proposal): array
-    {
-        return $proposal->only([
-            'title', 'authors', 'author_email', 'author_phone',
-            'co_authors', 'co_author_emails', 'co_author_phones',
-            'year', 'school', 'abstract', 'category', 'research_category', 'category_type', 'discipline_code', 'keywords',
-            'status', 'comments',
-        ]);
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -982,72 +706,6 @@ class ResearchProposalController extends Controller
             })
             ->values()
             ->all();
-    }
-
-    private function resolveCategoryType(string $categoryValue): ?string
-    {
-        return ResearchCategory::query()
-            ->where('value', $categoryValue)
-            ->where('is_active', true)
-            ->value('type');
-    }
-
-    /**
-     * @param  array<string, mixed>|null  $oldValues
-     * @param  array<string, mixed>|null  $newValues
-     */
-    private function logHistory(
-        ResearchProposal $proposal,
-        ?int $userId,
-        string $action,
-        ?array $oldValues,
-        ?array $newValues,
-    ): void {
-        // For "updated" entries, only store fields that actually changed
-        if ($action === 'updated' && $oldValues !== null && $newValues !== null) {
-            $changedOld = [];
-            $changedNew = [];
-
-            foreach ($newValues as $key => $newVal) {
-                $oldVal = $oldValues[$key] ?? null;
-                if ($oldVal !== $newVal) {
-                    $changedOld[$key] = $oldVal;
-                    $changedNew[$key] = $newVal;
-                }
-            }
-
-            if ($changedOld === []) {
-                return; // nothing changed — skip log entry
-            }
-
-            $oldValues = $changedOld;
-            $newValues = $changedNew;
-        }
-
-        ResearchProposalHistory::create([
-            'research_proposal_id' => $proposal->id,
-            'user_id' => $userId,
-            'action' => $action,
-            'old_values' => $oldValues,
-            'new_values' => $newValues,
-            'performed_at' => now(),
-        ]);
-    }
-
-    private function logResearchHistory(
-        ResearchProposal $proposal,
-        ?User $actor,
-        string $action,
-        ?string $remarks = null,
-    ): void {
-        ResearchHistory::create([
-            'research_id' => $proposal->id,
-            'action' => $action,
-            'performed_by' => $actor?->id,
-            'role' => $actor?->role ?? 'system',
-            'remarks' => $remarks,
-            'created_at' => now(),
-        ]);
     }
 
     /**

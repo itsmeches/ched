@@ -1,2 +1,5 @@
 #!/usr/bin/env sh
+# Hook is invoked from the git repo root (monorepo root). Run lint-staged
+# from this package's directory so relative paths to vendor/bin resolve.
+cd "$(dirname "$0")/.." || exit 1
 npx lint-staged

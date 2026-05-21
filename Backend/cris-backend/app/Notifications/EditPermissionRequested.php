@@ -6,10 +6,11 @@ use App\Models\EditPermissionRequest;
 use App\Models\ResearchProposal;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class EditPermissionRequested extends Notification
+class EditPermissionRequested extends Notification implements ShouldQueue
 {
     use Queueable;
 
