@@ -36,7 +36,7 @@ The active production-style application lives inside [Backend/cris-backend](Back
 
 ## Recent UX/UI Updates (May 2026)
 
-The following front-end improvements were recently applied without changing business rules or workflow logic:
+The following front-end improvements were applied without changing business rules or workflow logic:
 
 - Improved dark mode coverage for profile settings, auth pages, and shared controls
 - Added public research detail theme toggle (light/dark) with persistent preference
@@ -48,9 +48,43 @@ The following front-end improvements were recently applied without changing busi
 - Added searchable institution selection in Super Admin account creation for large institution datasets
 - Improved create-account input autofill consistency in light mode to prevent inner field tint artifacts
 
-These updates are focused on readability, scalability, and mobile usability for large datasets and high-activity roles.
+## Engineering Improvements — Phases 1–4 (May 2026)
 
-## Recent Reliability and Security Updates (May 2026)
+A four-phase pass tightened tooling, refactored the backend, hardened the app for production, and broke up the largest frontend components. Each phase shipped as independent, reviewable commits and is non-breaking.
+
+### Phase 1 — Tooling & Code Quality
+
+- Laravel Pint, ESLint, Prettier, and Husky + `lint-staged` pre-commit hooks across PHP and JS.
+- GitHub Actions `quality.yml` workflow runs lint + format checks on every push/PR.
+- A11y bug fixes in shared components (`Dropdown`, taxonomy admin pages, history filters, profile form).
+- Auto-format pass over the whole codebase to establish a clean baseline.
+
+### Phase 2 — Backend Refactor
+
+- Extracted `ResearchProposalController` write paths into dedicated action classes: `SubmitProposalAction`, `UpdateProposalAction`, `ReviewProposalAction`.
+- Introduced an `InteractsWithProposalMutations` trait to share file handling, audit/history writes, and notification dispatch.
+- Controller dropped from ~400 LOC of mixed orchestration to a thin HTTP layer that delegates to actions.
+
+### Phase 3 — Production Readiness
+
+- Sentry wired up for both PHP (`config/sentry.php`) and the React app (`resources/js/sentry.js`).
+- Added a search-indexes migration for hot research-table columns.
+- Public research index caches its query/facet payload via `Cache::remember` to absorb traffic spikes.
+- Laravel Scout configured with `SCOUT_DRIVER=null` by default; MeiliSearch is a documented opt-in switch.
+- Queue worker runbook + Redis and MeiliSearch swap-in playbooks added to `Backend/cris-backend/DEPLOYMENT.md`.
+- `ResearchProposal` model gained derived helpers (display year, normalized keywords, etc.) used by the public archive.
+
+### Phase 4 — Frontend Engineering
+
+- Split the three oversized React surfaces into focused children, no behavior changes:
+    - `Pages/Research/Show.jsx` (986 → ~220 LOC) → `Show/{ResearchHeader, WorkflowProgress, EditPermissionRequests, PdfViewer, ResearchTimeline, StudentLockSection, RejectModal}.jsx`
+    - `Pages/Research/PublicIndex.jsx` (1042 → ~330 LOC) → `PublicIndex/{SearchHero, FilterSummary, ResultsList, SaveSearchModal}.jsx`
+    - `Components/Navbar.jsx` (814 → ~120 LOC) → `Navbar/{DesktopNav, MobileNav, NotificationsDropdown, UserMenu}.jsx` + `useNavItems` and `useNotifications` hooks.
+- Expanded Vitest coverage with colocated `__tests__/` suites for the new children and hooks.
+- Accessibility polish: `aria-label` on primary and public navigation landmarks.
+- TypeScript foundation: strict `tsconfig.json` with `allowJs: true` (existing `.jsx` works untouched), `npm run typecheck` script, and the three pure utilities (`date`, `reviewRemarkTemplates`, `citations`) converted to `.ts`. Migration plan and conventions live in [Backend/cris-backend/docs/typescript-migration.md](Backend/cris-backend/docs/typescript-migration.md).
+
+## Reliability and Security (May 2026)
 
 - Hardened request headers and CSP behavior through centralized middleware.
 - Removed `unsafe-eval` from CSP and kept environment-aware policy behavior (local development vs production-style security).
@@ -102,7 +136,8 @@ These updates are focused on readability, scalability, and mobile usability for 
 - Laravel 11
 - Inertia.js
 - React 18
-- Vite
+- Vite (esbuild handles `.ts`/`.tsx` natively)
+- TypeScript (incremental adoption — utilities first)
 - Ant Design
 - Tailwind CSS
 - Laravel Sanctum
@@ -114,6 +149,10 @@ These updates are focused on readability, scalability, and mobile usability for 
 - CSV export for history
 - Security middleware for HTTP headers and CSP
 - Scan-time proxy/sanitizer workflow for ZAP verification
+- Laravel Scout (driver-pluggable; defaults to `null` / DB `LIKE`, MeiliSearch is opt-in)
+- Sentry monitoring for backend (PHP) and frontend (React)
+- Action classes + a shared `InteractsWithProposalMutations` trait for proposal write paths
+- Queue worker (DB driver by default, Redis-ready) with a documented failed-job runbook
 
 ## Repository Structure
 
@@ -158,7 +197,8 @@ For local installation and day-to-day commands, go directly to [Backend/cris-bac
 ## Testing Status
 
 - Backend test suite is operational with Laravel PHPUnit.
-- Frontend unit tests are available through Vitest.
+- Frontend unit tests are available through Vitest, with coverage targeting the new split subcomponents and Navbar hooks.
+- TypeScript type-checking is wired up via `npm run typecheck` (no emit — esbuild still handles transforms).
 - Browser-level checks are available through Playwright.
 
 See [Backend/cris-backend/README.md](Backend/cris-backend/README.md) for exact commands.

@@ -120,16 +120,56 @@ This README is operations-focused for this app folder (setup, commands, routes, 
 - Shared empty states and standardized confirmation dialogs
 - CHED HEI importer with institution-first creation and CSV audit output
 
+## Engineering Phases (May 2026)
+
+A four-phase pass shipped as independent, reviewable commits. None are breaking changes.
+
+| Phase | Theme | Highlights |
+|---|---|---|
+| 1 | Tooling & Code Quality | Pint, ESLint, Prettier, Husky + `lint-staged`, GitHub Actions `quality.yml`, a11y bug fixes, repo-wide format pass |
+| 2 | Backend Refactor | `SubmitProposalAction`, `UpdateProposalAction`, `ReviewProposalAction`, `InteractsWithProposalMutations` trait; controller slimmed to a thin HTTP layer |
+| 3 | Production Readiness | Sentry (PHP + React), search-indexes migration, public-index caching, Scout (`null` default, MeiliSearch opt-in), queue runbook + Redis swap docs in `DEPLOYMENT.md` |
+| 4 | Frontend Engineering | Show / Navbar / PublicIndex split into focused children + hooks; Vitest expansion; a11y landmarks; TypeScript foundation (`tsconfig.json`, `npm run typecheck`, three utilities converted) |
+
+See `docs/typescript-migration.md` for the TS migration plan and `DEPLOYMENT.md` for the production runbook.
+
 ## Stack
 
 - PHP 8.2+
 - Laravel 11
 - React 18
 - Inertia.js
-- Vite
+- Vite (esbuild handles `.ts`/`.tsx` natively)
+- TypeScript (incremental adoption — see `docs/typescript-migration.md`)
 - Ant Design
 - Tailwind CSS
 - MySQL or MariaDB
+
+## Frontend Architecture Notes
+
+- Page-level components are split into focused subcomponents:
+    - `resources/js/Pages/Research/Show/` — `ResearchHeader`, `WorkflowProgress`, `EditPermissionRequests`, `PdfViewer`, `ResearchTimeline`, `StudentLockSection`, `RejectModal`
+    - `resources/js/Pages/Research/PublicIndex/` — `SearchHero`, `FilterSummary`, `ResultsList`, `SaveSearchModal`
+    - `resources/js/Components/Navbar/` — `DesktopNav`, `MobileNav`, `NotificationsDropdown`, `UserMenu`, plus `useNavItems` and `useNotifications` hooks
+- Vitest coverage targets the extracted children directly (one `__tests__/` directory per page/component group).
+- Pure utilities under `resources/js/utils/` are migrating to TypeScript first (`date.ts`, `reviewRemarkTemplates.ts`, `citations.ts`); existing `.jsx` files keep working via `allowJs: true`.
+
+## Backend Architecture Notes
+
+- Proposal write paths live in dedicated action classes: `app/Actions/Research/{SubmitProposalAction, UpdateProposalAction, ReviewProposalAction}.php`.
+- Shared mutation concerns (file handling, audit/history writes, notification dispatch) live in `app/Http/Concerns/InteractsWithProposalMutations.php`.
+- `ResearchProposalController` is a thin HTTP layer that delegates to those actions.
+- Public research index responses are cached via `Cache::remember`; cache is invalidated on relevant proposal writes.
+- Hot research-table columns are covered by a dedicated search-indexes migration.
+- Sentry is initialized for PHP (`config/sentry.php`) and the React entry (`resources/js/sentry.js`).
+
+## Tooling & Code Quality
+
+- **PHP:** Laravel Pint (`composer pint` / `vendor/bin/pint`).
+- **JS/TS:** ESLint (`eslint.config.js`) + Prettier (`.prettierrc.json`) — `npm run lint`, `npm run format`.
+- **Pre-commit:** Husky + `lint-staged` runs Pint and Prettier on staged files (`.husky/pre-commit`).
+- **CI:** `.github/workflows/quality.yml` runs lint + format checks on every push and PR.
+- **TypeScript:** `npm run typecheck` (`tsc --noEmit`) — see `docs/typescript-migration.md`.
 
 ## Local Setup
 
@@ -221,6 +261,12 @@ Frontend unit tests (Vitest):
 npm run test:unit
 npm run test:unit:watch
 npm run test:unit:coverage
+```
+
+Type-check (TypeScript, no emit):
+
+```bash
+npm run typecheck
 ```
 
 Browser tests (Playwright):
