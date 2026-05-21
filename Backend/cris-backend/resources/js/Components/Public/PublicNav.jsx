@@ -12,6 +12,7 @@ export default function PublicNav({ canLogin, canRegister }) {
 
     return (
         <nav
+            aria-label="Public site navigation"
             className={`sticky top-0 z-40 border-b backdrop-blur-md ${
                 D ? 'bg-[#0a0f1e]/90 border-[#1e2d47]' : 'bg-white/90 border-slate-200'
             }`}
