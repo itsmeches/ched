@@ -1,21 +1,27 @@
-// Generate citation strings for an approved research proposal.
-// Pure functions — no DOM access — so they're easy to test or reuse.
+export interface CitationProposal {
+    title?: string | null;
+    authors?: string | null;
+    year?: number | string | null;
+    keywords?: string | null;
+    abstract?: string | null;
+    institution?: { name?: string | null } | null;
+}
 
-function splitAuthors(authors) {
+function splitAuthors(authors: string | null | undefined): string[] {
     return String(authors || '')
         .split(/[,;]/)
         .map((s) => s.trim())
         .filter(Boolean);
 }
 
-export function buildBibtex(proposal) {
+export function buildBibtex(proposal: CitationProposal): string {
     const firstAuthorLast = (splitAuthors(proposal.authors)[0] || 'anon')
         .split(/\s+/)
-        .pop()
+        .pop()!
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '');
     const key = `${firstAuthorLast}${proposal.year || ''}`;
-    const lines = [
+    const lines: (string | null)[] = [
         `@article{${key},`,
         `  title   = {${proposal.title || ''}},`,
         `  author  = {${splitAuthors(proposal.authors).join(' and ') || 'Anonymous'}},`,
@@ -24,12 +30,12 @@ export function buildBibtex(proposal) {
         proposal.keywords ? `  keywords = {${proposal.keywords}},` : null,
         proposal.abstract ? `  abstract = {${proposal.abstract.replace(/[{}]/g, '')}},` : null,
         `}`,
-    ].filter(Boolean);
-    return lines.join('\n');
+    ];
+    return lines.filter((line): line is string => Boolean(line)).join('\n');
 }
 
-export function buildRis(proposal) {
-    const lines = ['TY  - JOUR'];
+export function buildRis(proposal: CitationProposal): string {
+    const lines: string[] = ['TY  - JOUR'];
     splitAuthors(proposal.authors).forEach((a) => lines.push(`AU  - ${a}`));
     lines.push(`TI  - ${proposal.title || ''}`);
     if (proposal.year) lines.push(`PY  - ${proposal.year}`);
@@ -46,14 +52,14 @@ export function buildRis(proposal) {
     return lines.join('\r\n') + '\r\n';
 }
 
-export function buildApa(proposal) {
+export function buildApa(proposal: CitationProposal): string {
     const authors = splitAuthors(proposal.authors);
     const authorStr =
         authors.length > 0
             ? authors
                   .map((a) => {
                       const parts = a.split(/\s+/);
-                      const last = parts.pop();
+                      const last = parts.pop()!;
                       const initials = parts.map((p) => `${p[0]?.toUpperCase()}.`).join(' ');
                       return `${last}, ${initials}`.trim();
                   })
@@ -64,7 +70,7 @@ export function buildApa(proposal) {
     return `${authorStr}${year}. ${proposal.title}${inst}.`;
 }
 
-export function downloadText(filename, contents, mime = 'text/plain') {
+export function downloadText(filename: string, contents: string, mime = 'text/plain'): void {
     const blob = new Blob([contents], { type: `${mime};charset=utf-8` });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
