@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Keyword;
 use App\Models\ResearchProposal;
+use App\Models\User;
 use App\Services\SimpleNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -36,7 +37,7 @@ class ResearchProposalController extends Controller
             'created_at',
             'updated_at',
         ];
-        
+
         if ($user->isSuperAdmin() || $user->isCHED()) {
             // Admin/CHED can see all proposals
             $proposals = ResearchProposal::query()
@@ -55,13 +56,13 @@ class ResearchProposalController extends Controller
                 ->whereHas('submitter', fn ($inner) => $inner->where('faculty_id', $user->id))
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
-        } elseif ($user->role === \App\Models\User::ROLE_HEI) {
+        } elseif ($user->role === User::ROLE_HEI) {
             // HEI sees student proposals where student -> faculty -> HEI matches current user.
             $proposals = ResearchProposal::query()
                 ->select($selectColumns)
                 ->with(['institution:id,name,code'])
                 ->whereHas('submitter', fn ($inner) => $inner
-                    ->where('role', \App\Models\User::ROLE_STUDENT)
+                    ->where('role', User::ROLE_STUDENT)
                     ->whereHas('faculty', fn ($faculty) => $faculty->where('hei_id', $user->id))
                 )
                 ->orderBy('created_at', 'desc')
@@ -75,7 +76,7 @@ class ResearchProposalController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
         }
-        
+
         return response()->json($proposals);
     }
 
@@ -261,7 +262,7 @@ class ResearchProposalController extends Controller
         if ($validated['status'] === 'approved') {
             if ($reviewer->isFaculty()) {
                 $approvedByFacultyAt = now();
-            } elseif ($reviewer->role === \App\Models\User::ROLE_HEI) {
+            } elseif ($reviewer->role === User::ROLE_HEI) {
                 $approvedByHeiAt = now();
             } elseif ($reviewer->isCHED()) {
                 $approvedByChedAt = now();
@@ -377,12 +378,13 @@ class ResearchProposalController extends Controller
     }
 
     /**
-     * @param array<int, string> $keywordNames
+     * @param  array<int, string>  $keywordNames
      */
     private function syncKeywords(ResearchProposal $proposal, array $keywordNames): void
     {
         if ($keywordNames === []) {
             $proposal->keywordItems()->sync([]);
+
             return;
         }
 
@@ -421,7 +423,7 @@ class ResearchProposalController extends Controller
 
         if ($missing !== []) {
             throw ValidationException::withMessages([
-                'role_linkage' => ['Your student account is missing required role linkage: ' . implode(', ', $missing) . '.'],
+                'role_linkage' => ['Your student account is missing required role linkage: '.implode(', ', $missing).'.'],
             ]);
         }
     }

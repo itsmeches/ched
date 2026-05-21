@@ -1,6 +1,13 @@
 import { Card, Col, Row, Statistic, Tag } from 'antd';
 import { router } from '@inertiajs/react';
-import { BankOutlined, CrownOutlined, FileTextOutlined, SafetyCertificateOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import {
+    BankOutlined,
+    CrownOutlined,
+    FileTextOutlined,
+    SafetyCertificateOutlined,
+    TeamOutlined,
+    UserOutlined,
+} from '@ant-design/icons';
 import { useTheme } from '@/utils/ThemeContext';
 
 export default function SuperAdminStats({ stats, filters = {} }) {
@@ -22,15 +29,84 @@ export default function SuperAdminStats({ stats, filters = {} }) {
     const proposalFiltered = !!(hasInstitution || hasYear || hasDiscipline || hasStatus);
 
     const statCards = [
-        { key: 'proposals', label: 'Research Records', icon: <FileTextOutlined />, routeName: 'research.index', color: accentPrimary, filtered: proposalFiltered },
-        { key: 'rejected', label: 'Rejected Papers', icon: <FileTextOutlined />, routeName: 'research.index', params: { status: 'rejected' }, color: '#dc2626', filtered: proposalFiltered },
-        { key: 'institutions', label: 'Institution', icon: <BankOutlined />, routeName: 'admin.institutions.index', color: '#d97706', filtered: false },
-        { key: 'users', label: 'Total Users', icon: <TeamOutlined />, routeName: 'admin.users.index', color: accentPrimary, filtered: userFiltered },
-        { key: 'heiUsers', label: 'Hei Accounts', icon: <BankOutlined />, routeName: 'admin.users.index', params: { role: 'hei' }, color: accentSecondary, filtered: userFiltered },
-        { key: 'facultyUsers', label: 'Faculty Accounts', icon: <UserOutlined />, routeName: 'admin.users.index', params: { role: 'faculty' }, color: accentDark, filtered: userFiltered },
-        { key: 'studentUsers', label: 'Student Accounts', icon: <UserOutlined />, routeName: 'admin.users.index', params: { role: 'student' }, color: accentSecondary, filtered: userFiltered },
-        { key: 'chedUsers', label: 'Ched Accounts', icon: <SafetyCertificateOutlined />, routeName: 'admin.users.index', params: { role: 'ched' }, color: accentPrimary, filtered: userFiltered },
-        { key: 'admins', label: 'Super Admins', icon: <CrownOutlined />, routeName: 'admin.users.index', params: { role: 'super_admin' }, color: accentDark, filtered: userFiltered },
+        {
+            key: 'proposals',
+            label: 'Research Records',
+            icon: <FileTextOutlined />,
+            routeName: 'research.index',
+            color: accentPrimary,
+            filtered: proposalFiltered,
+        },
+        {
+            key: 'rejected',
+            label: 'Rejected Papers',
+            icon: <FileTextOutlined />,
+            routeName: 'research.index',
+            params: { status: 'rejected' },
+            color: '#dc2626',
+            filtered: proposalFiltered,
+        },
+        {
+            key: 'institutions',
+            label: 'Institution',
+            icon: <BankOutlined />,
+            routeName: 'admin.institutions.index',
+            color: '#d97706',
+            filtered: false,
+        },
+        {
+            key: 'users',
+            label: 'Total Users',
+            icon: <TeamOutlined />,
+            routeName: 'admin.users.index',
+            color: accentPrimary,
+            filtered: userFiltered,
+        },
+        {
+            key: 'heiUsers',
+            label: 'Hei Accounts',
+            icon: <BankOutlined />,
+            routeName: 'admin.users.index',
+            params: { role: 'hei' },
+            color: accentSecondary,
+            filtered: userFiltered,
+        },
+        {
+            key: 'facultyUsers',
+            label: 'Faculty Accounts',
+            icon: <UserOutlined />,
+            routeName: 'admin.users.index',
+            params: { role: 'faculty' },
+            color: accentDark,
+            filtered: userFiltered,
+        },
+        {
+            key: 'studentUsers',
+            label: 'Student Accounts',
+            icon: <UserOutlined />,
+            routeName: 'admin.users.index',
+            params: { role: 'student' },
+            color: accentSecondary,
+            filtered: userFiltered,
+        },
+        {
+            key: 'chedUsers',
+            label: 'Ched Accounts',
+            icon: <SafetyCertificateOutlined />,
+            routeName: 'admin.users.index',
+            params: { role: 'ched' },
+            color: accentPrimary,
+            filtered: userFiltered,
+        },
+        {
+            key: 'admins',
+            label: 'Super Admins',
+            icon: <CrownOutlined />,
+            routeName: 'admin.users.index',
+            params: { role: 'super_admin' },
+            color: accentDark,
+            filtered: userFiltered,
+        },
     ];
     const openRoute = (item) => {
         router.visit(route(item.routeName, item.params ?? {}));
@@ -61,7 +137,18 @@ export default function SuperAdminStats({ stats, filters = {} }) {
                             title={
                                 <span className="flex items-center gap-2">
                                     {item.label}
-                                    {item.filtered && <Tag color="blue" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px' }}>Filtered</Tag>}
+                                    {item.filtered && (
+                                        <Tag
+                                            color="blue"
+                                            style={{
+                                                fontSize: 10,
+                                                lineHeight: '16px',
+                                                padding: '0 4px',
+                                            }}
+                                        >
+                                            Filtered
+                                        </Tag>
+                                    )}
                                 </span>
                             }
                             value={stats[item.key]}

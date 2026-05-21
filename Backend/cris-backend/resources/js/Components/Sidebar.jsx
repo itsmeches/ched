@@ -21,7 +21,14 @@ function getNavGroupsByRole(userRole) {
             label: 'Dashboard',
             href: route('dashboard'),
             icon: AppstoreOutlined,
-            activePatterns: ['dashboard', 'admin.dashboard', 'ched.dashboard', 'hei.dashboard', 'faculty.dashboard', 'student.dashboard'],
+            activePatterns: [
+                'dashboard',
+                'admin.dashboard',
+                'ched.dashboard',
+                'hei.dashboard',
+                'faculty.dashboard',
+                'student.dashboard',
+            ],
         },
     ];
 
@@ -103,7 +110,14 @@ function getNavGroupsByRole(userRole) {
                         label: 'Approvals',
                         href: route('research.index'),
                         icon: FileDoneOutlined,
-                        activePatterns: ['research.index', 'research.show', 'research.file', 'research.edit', 'research.update', 'research.destroy'],
+                        activePatterns: [
+                            'research.index',
+                            'research.show',
+                            'research.file',
+                            'research.edit',
+                            'research.update',
+                            'research.destroy',
+                        ],
                     },
                     {
                         key: 'analytics',
@@ -157,7 +171,13 @@ function getNavGroupsByRole(userRole) {
                         label: 'My Research',
                         href: route('research.index', { tab: 'mine' }),
                         icon: BookOutlined,
-                        activePatterns: ['research.index', 'research.show', 'research.edit', 'research.update', 'research.destroy'],
+                        activePatterns: [
+                            'research.index',
+                            'research.show',
+                            'research.edit',
+                            'research.update',
+                            'research.destroy',
+                        ],
                         tab: 'mine',
                     },
                     {
@@ -205,7 +225,13 @@ function getNavGroupsByRole(userRole) {
                         label: 'My Research',
                         href: route('research.index', { tab: 'mine' }),
                         icon: BookOutlined,
-                        activePatterns: ['research.index', 'research.show', 'research.edit', 'research.update', 'research.destroy'],
+                        activePatterns: [
+                            'research.index',
+                            'research.show',
+                            'research.edit',
+                            'research.update',
+                            'research.destroy',
+                        ],
                         tab: 'mine',
                     },
                     {
@@ -231,7 +257,13 @@ function getNavGroupsByRole(userRole) {
                         label: 'My Research',
                         href: route('research.index', { tab: 'mine' }),
                         icon: BookOutlined,
-                        activePatterns: ['research.index', 'research.show', 'research.edit', 'research.update', 'research.destroy'],
+                        activePatterns: [
+                            'research.index',
+                            'research.show',
+                            'research.edit',
+                            'research.update',
+                            'research.destroy',
+                        ],
                         tab: 'mine',
                     },
                     {
@@ -290,10 +322,16 @@ export default function Sidebar({ collapsed = false, mobileOpen = false, onClose
                 <div className="pointer-events-none absolute -top-14 left-8 h-40 w-40 rounded-full bg-cyan-300/15 blur-3xl" />
                 <div className="pointer-events-none absolute bottom-8 right-0 h-36 w-36 rounded-full bg-blue-300/15 blur-3xl" />
 
-                <div className={`relative border-b border-blue-800/50 ${collapsed ? 'h-[76px] px-2 py-2' : 'h-[76px] px-4 py-2'}`}>
+                <div
+                    className={`relative border-b border-blue-800/50 ${collapsed ? 'h-[76px] px-2 py-2' : 'h-[76px] px-4 py-2'}`}
+                >
                     {collapsed ? (
                         <div className="hidden h-full items-center justify-center lg:flex">
-                            <Link href={route('dashboard')} className="inline-flex" onClick={onCloseMobile}>
+                            <Link
+                                href={route('dashboard')}
+                                className="inline-flex"
+                                onClick={onCloseMobile}
+                            >
                                 <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur">
                                     <img src="/cris-mark.svg" alt="CRIS" className="h-5.5 w-5.5" />
                                 </span>
@@ -301,13 +339,21 @@ export default function Sidebar({ collapsed = false, mobileOpen = false, onClose
                         </div>
                     ) : (
                         <div className="flex h-full items-center gap-2">
-                            <Link href={route('dashboard')} className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden" onClick={onCloseMobile}>
+                            <Link
+                                href={route('dashboard')}
+                                className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden"
+                                onClick={onCloseMobile}
+                            >
                                 <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur">
                                     <img src="/cris-mark.svg" alt="CRIS" className="h-6 w-6" />
                                 </span>
                                 <div className="min-w-0">
-                                    <p className="truncate text-[15px] font-semibold leading-[1.03] tracking-wide text-white">CRIS Workspace</p>
-                                    <p className="-mt-0.5 truncate text-[10.5px] leading-[1.02] text-blue-100/85">Research Management</p>
+                                    <p className="truncate text-[15px] font-semibold leading-[1.03] tracking-wide text-white">
+                                        CRIS Workspace
+                                    </p>
+                                    <p className="-mt-0.5 truncate text-[10.5px] leading-[1.02] text-blue-100/85">
+                                        Research Management
+                                    </p>
                                 </div>
                             </Link>
                         </div>
@@ -315,7 +361,11 @@ export default function Sidebar({ collapsed = false, mobileOpen = false, onClose
                 </div>
 
                 <div className="sidebar-scroll relative flex-1 overflow-y-auto px-3 py-4">
-                    {!collapsed && <p className="mb-2 px-2 text-[11px] uppercase tracking-[0.14em] text-blue-100/65">Navigation</p>}
+                    {!collapsed && (
+                        <p className="mb-2 px-2 text-[11px] uppercase tracking-[0.14em] text-blue-100/65">
+                            Navigation
+                        </p>
+                    )}
 
                     {navGroups.map((group) => (
                         <div key={group.key} className="space-y-1.5">
@@ -349,7 +399,9 @@ export default function Sidebar({ collapsed = false, mobileOpen = false, onClose
                                         >
                                             <Icon className="text-[15px]" />
                                         </span>
-                                        {!collapsed && <span className="truncate">{item.label}</span>}
+                                        {!collapsed && (
+                                            <span className="truncate">{item.label}</span>
+                                        )}
                                     </Link>
                                 );
                             })}
@@ -360,7 +412,9 @@ export default function Sidebar({ collapsed = false, mobileOpen = false, onClose
                 {!collapsed && user && (
                     <div className="relative border-t border-blue-800/50 px-4 py-3">
                         <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-blue-100/80 backdrop-blur-sm">
-                            <p className="truncate text-sm font-semibold leading-tight text-white">{user.name}</p>
+                            <p className="truncate text-sm font-semibold leading-tight text-white">
+                                {user.name}
+                            </p>
                             <p className="truncate text-xs leading-tight">{user.email}</p>
                         </div>
                     </div>

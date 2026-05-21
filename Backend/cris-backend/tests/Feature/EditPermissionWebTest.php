@@ -153,7 +153,7 @@ class EditPermissionWebTest extends TestCase
     }
 
     /**
-     * @return array{0: User, 1: ResearchProposal, 2: User}  [student, proposal, ched]
+     * @return array{0: User, 1: ResearchProposal, 2: User} [student, proposal, ched]
      */
     private function lockedScenario(string $status): array
     {

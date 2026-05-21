@@ -9,7 +9,12 @@ import PublicSectionCard from '@/Components/Public/PublicSectionCard';
 import PublicNav from '@/Components/Public/PublicNav';
 import { StatusBadge } from '@/Components/StatusBadge';
 
-export default function PublicResearchShow({ proposal, relatedProposals = [], canLogin, canRegister }) {
+export default function PublicResearchShow({
+    proposal,
+    relatedProposals = [],
+    canLogin,
+    canRegister,
+}) {
     const { dark } = useTheme();
     const [pdfOpen, setPdfOpen] = useState(false);
     const [pdfLoading, setPdfLoading] = useState(false);
@@ -54,13 +59,20 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
             title: 'Authors',
             rows: [
                 { label: 'Author', value: proposal.authors, sub: proposal.author_email },
-                { label: 'Co-Authors', value: proposal.co_authors || '—', sub: proposal.co_author_emails },
+                {
+                    label: 'Co-Authors',
+                    value: proposal.co_authors || '—',
+                    sub: proposal.co_author_emails,
+                },
             ],
         },
         {
             title: 'Classification',
             rows: [
-                { label: 'Category', value: proposal.research_category || proposal.category || '—' },
+                {
+                    label: 'Category',
+                    value: proposal.research_category || proposal.category || '—',
+                },
                 { label: 'Discipline', value: formatDisciplineLabel(proposal.discipline_label) },
             ],
         },
@@ -88,13 +100,23 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                 <meta property="og:type" content="article" />
                 <meta property="og:title" content={proposal.title} />
                 <meta property="og:description" content={(proposal.abstract || '').slice(0, 200)} />
-                <meta property="og:site_name" content="CRIS — CALABARZON Research Information System" />
+                <meta
+                    property="og:site_name"
+                    content="CRIS — CALABARZON Research Information System"
+                />
                 <meta name="twitter:card" content="summary" />
                 <meta name="twitter:title" content={proposal.title} />
-                <meta name="twitter:description" content={(proposal.abstract || '').slice(0, 200)} />
+                <meta
+                    name="twitter:description"
+                    content={(proposal.abstract || '').slice(0, 200)}
+                />
                 {proposal.authors && <meta name="citation_authors" content={proposal.authors} />}
-                {proposal.year && <meta name="citation_publication_date" content={String(proposal.year)} />}
-                {proposal.institution?.name && <meta name="citation_publisher" content={proposal.institution.name} />}
+                {proposal.year && (
+                    <meta name="citation_publication_date" content={String(proposal.year)} />
+                )}
+                {proposal.institution?.name && (
+                    <meta name="citation_publisher" content={proposal.institution.name} />
+                )}
                 <meta name="citation_title" content={proposal.title} />
                 <script type="application/ld+json">
                     {JSON.stringify({
@@ -108,7 +130,9 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                             .map((name) => name.trim())
                             .filter(Boolean)
                             .map((name) => ({ '@type': 'Person', name })),
-                        datePublished: proposal.approved_at || (proposal.year ? `${proposal.year}-01-01` : undefined),
+                        datePublished:
+                            proposal.approved_at ||
+                            (proposal.year ? `${proposal.year}-01-01` : undefined),
                         publisher: proposal.institution?.name
                             ? { '@type': 'Organization', name: proposal.institution.name }
                             : undefined,
@@ -118,17 +142,25 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                 </script>
             </Head>
 
-            <div className={`min-h-screen transition-colors duration-300 ${dark ? 'bg-[#0a0f1e]' : ''}`}
-                style={dark ? undefined : {
-                    background: 'radial-gradient(circle at 0% 0%, rgba(14, 116, 144, 0.18), transparent 28%), radial-gradient(circle at 100% 0%, rgba(217, 119, 6, 0.16), transparent 30%), linear-gradient(180deg, #f8fbfd 0%, #edf4f7 100%)',
-                }}
+            <div
+                className={`min-h-screen transition-colors duration-300 ${dark ? 'bg-[#0a0f1e]' : ''}`}
+                style={
+                    dark
+                        ? undefined
+                        : {
+                              background:
+                                  'radial-gradient(circle at 0% 0%, rgba(14, 116, 144, 0.18), transparent 28%), radial-gradient(circle at 100% 0%, rgba(217, 119, 6, 0.16), transparent 30%), linear-gradient(180deg, #f8fbfd 0%, #edf4f7 100%)',
+                          }
+                }
             >
                 <PublicNav canLogin={canLogin} canRegister={canRegister} />
 
                 <div className="mx-auto max-w-5xl px-4 pb-8 pt-4 sm:px-6 lg:px-8">
                     <div style={{ marginBottom: 8 }}>
                         <Link href={route('research.public.index')}>
-                            <Button size="small" icon={<ArrowLeftOutlined />}>Back to Archive</Button>
+                            <Button size="small" icon={<ArrowLeftOutlined />}>
+                                Back to Archive
+                            </Button>
                         </Link>
                     </div>
 
@@ -140,21 +172,43 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                     >
                         <div className="flex flex-wrap items-start justify-between gap-4">
                             <div className="min-w-0 flex-1 space-y-2">
-                                <Typography.Title level={3} className="!m-0 dark:!text-slate-100" style={{ color: '#0f172a', lineHeight: 1.25 }}>
+                                <Typography.Title
+                                    level={3}
+                                    className="!m-0 dark:!text-slate-100"
+                                    style={{ color: '#0f172a', lineHeight: 1.25 }}
+                                >
                                     {proposal.title}
                                 </Typography.Title>
                                 <Space wrap size={[6, 6]}>
                                     {proposal.year && <Tag color="blue">Year {proposal.year}</Tag>}
-                                    {(proposal.research_category || proposal.category) && <Tag color="geekblue">{proposal.research_category || proposal.category}</Tag>}
-                                    {proposal.discipline_label && <Tag color="cyan">{formatDisciplineLabel(proposal.discipline_label)}</Tag>}
+                                    {(proposal.research_category || proposal.category) && (
+                                        <Tag color="geekblue">
+                                            {proposal.research_category || proposal.category}
+                                        </Tag>
+                                    )}
+                                    {proposal.discipline_label && (
+                                        <Tag color="cyan">
+                                            {formatDisciplineLabel(proposal.discipline_label)}
+                                        </Tag>
+                                    )}
                                     <StatusBadge status={proposal.status || 'approved'} />
                                 </Space>
-                                <Typography.Text className="dark:!text-slate-300" style={{ display: 'block', color: '#475569', fontSize: 13 }}>
+                                <Typography.Text
+                                    className="dark:!text-slate-300"
+                                    style={{ display: 'block', color: '#475569', fontSize: 13 }}
+                                >
                                     by <span style={{ fontWeight: 600 }}>{proposal.authors}</span>
                                     {proposal.institution?.name && (
                                         <>
-                                            {' '}·{' '}
-                                            <Link href={route('research.public.institution', proposal.institution.id)} className="font-semibold text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                                            {' '}
+                                            ·{' '}
+                                            <Link
+                                                href={route(
+                                                    'research.public.institution',
+                                                    proposal.institution.id
+                                                )}
+                                                className="font-semibold text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline"
+                                            >
                                                 {proposal.institution.name}
                                             </Link>
                                         </>
@@ -180,8 +234,15 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                     >
                                         {pdfOpen ? 'Hide PDF' : 'View PDF'}
                                     </Button>
-                                    <a href={route('research.public.file', { proposal: proposal.id, download: 1 })}>
-                                        <Button size="middle" icon={<FilePdfOutlined />}>Download PDF</Button>
+                                    <a
+                                        href={route('research.public.file', {
+                                            proposal: proposal.id,
+                                            download: 1,
+                                        })}
+                                    >
+                                        <Button size="middle" icon={<FilePdfOutlined />}>
+                                            Download PDF
+                                        </Button>
                                     </a>
                                 </Space>
                             )}
@@ -192,8 +253,17 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                             <div className="lg:col-span-2 space-y-6">
                                 <section>
-                                    <Typography.Title level={5} className="!mb-1 dark:!text-slate-100" style={{ color: '#0f172a' }}>Abstract</Typography.Title>
-                                    <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 10, fontSize: 12 }}>
+                                    <Typography.Title
+                                        level={5}
+                                        className="!mb-1 dark:!text-slate-100"
+                                        style={{ color: '#0f172a' }}
+                                    >
+                                        Abstract
+                                    </Typography.Title>
+                                    <Typography.Text
+                                        type="secondary"
+                                        style={{ display: 'block', marginBottom: 10, fontSize: 12 }}
+                                    >
                                         Research summary and key findings
                                     </Typography.Text>
                                     <Typography.Paragraph
@@ -206,14 +276,31 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                             marginBottom: 0,
                                         }}
                                     >
-                                        {proposal.abstract || <span style={{ color: '#94a3b8' }}>No abstract provided.</span>}
+                                        {proposal.abstract || (
+                                            <span style={{ color: '#94a3b8' }}>
+                                                No abstract provided.
+                                            </span>
+                                        )}
                                     </Typography.Paragraph>
                                 </section>
 
                                 {keywordList.length > 0 && (
                                     <section>
-                                        <Typography.Title level={5} className="!mb-1 dark:!text-slate-100" style={{ color: '#0f172a' }}>Keywords</Typography.Title>
-                                        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
+                                        <Typography.Title
+                                            level={5}
+                                            className="!mb-1 dark:!text-slate-100"
+                                            style={{ color: '#0f172a' }}
+                                        >
+                                            Keywords
+                                        </Typography.Title>
+                                        <Typography.Text
+                                            type="secondary"
+                                            style={{
+                                                display: 'block',
+                                                marginBottom: 8,
+                                                fontSize: 12,
+                                            }}
+                                        >
                                             Click a keyword to browse related papers
                                         </Typography.Text>
                                         <Space wrap size={[6, 6]}>
@@ -223,7 +310,11 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                                     href={`${route('research.public.index')}?search=${encodeURIComponent(kw)}`}
                                                 >
                                                     <Tag
-                                                        style={{ borderRadius: 999, padding: '2px 10px', cursor: 'pointer' }}
+                                                        style={{
+                                                            borderRadius: 999,
+                                                            padding: '2px 10px',
+                                                            cursor: 'pointer',
+                                                        }}
                                                         className="transition-colors text-[#0b3ea9] hover:text-[#001f66] dark:text-blue-300 dark:hover:text-blue-100"
                                                     >
                                                         {kw}
@@ -235,26 +326,49 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                 )}
 
                                 <section>
-                                    <Typography.Title level={5} className="!mb-1 dark:!text-slate-100" style={{ color: '#0f172a' }}>Cite this paper</Typography.Title>
-                                    <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 10, fontSize: 12 }}>
+                                    <Typography.Title
+                                        level={5}
+                                        className="!mb-1 dark:!text-slate-100"
+                                        style={{ color: '#0f172a' }}
+                                    >
+                                        Cite this paper
+                                    </Typography.Title>
+                                    <Typography.Text
+                                        type="secondary"
+                                        style={{ display: 'block', marginBottom: 10, fontSize: 12 }}
+                                    >
                                         Copy or download the citation in your preferred format.
                                     </Typography.Text>
                                     <Space wrap>
                                         <Button
                                             onClick={async () => {
-                                                await navigator.clipboard.writeText(buildApa(proposal));
+                                                await navigator.clipboard.writeText(
+                                                    buildApa(proposal)
+                                                );
                                                 message.success('APA citation copied');
                                             }}
                                         >
                                             Copy APA
                                         </Button>
                                         <Button
-                                            onClick={() => downloadText(`${proposal.id}.bib`, buildBibtex(proposal), 'application/x-bibtex')}
+                                            onClick={() =>
+                                                downloadText(
+                                                    `${proposal.id}.bib`,
+                                                    buildBibtex(proposal),
+                                                    'application/x-bibtex'
+                                                )
+                                            }
                                         >
                                             Download BibTeX
                                         </Button>
                                         <Button
-                                            onClick={() => downloadText(`${proposal.id}.ris`, buildRis(proposal), 'application/x-research-info-systems')}
+                                            onClick={() =>
+                                                downloadText(
+                                                    `${proposal.id}.ris`,
+                                                    buildRis(proposal),
+                                                    'application/x-research-info-systems'
+                                                )
+                                            }
                                         >
                                             Download RIS
                                         </Button>
@@ -271,15 +385,28 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                         <dl className="space-y-2">
                                             {section.rows.map((row) => (
                                                 <div key={row.label}>
-                                                    <dt className="text-[11px] text-slate-500 dark:text-slate-400">{row.label}</dt>
+                                                    <dt className="text-[11px] text-slate-500 dark:text-slate-400">
+                                                        {row.label}
+                                                    </dt>
                                                     <dd className="break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">
-                                                        {row.label === 'Institution' && proposal.institution?.id ? (
-                                                            <Link href={route('research.public.institution', proposal.institution.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                                                        {row.label === 'Institution' &&
+                                                        proposal.institution?.id ? (
+                                                            <Link
+                                                                href={route(
+                                                                    'research.public.institution',
+                                                                    proposal.institution.id
+                                                                )}
+                                                                className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline"
+                                                            >
                                                                 {row.value}
                                                             </Link>
-                                                        ) : row.value}
+                                                        ) : (
+                                                            row.value
+                                                        )}
                                                         {row.sub && (
-                                                            <span className="block text-[11px] text-slate-500 dark:text-slate-400">{row.sub}</span>
+                                                            <span className="block text-[11px] text-slate-500 dark:text-slate-400">
+                                                                {row.sub}
+                                                            </span>
                                                         )}
                                                     </dd>
                                                 </div>
@@ -317,7 +444,11 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                 }
                             >
                                 {pdfLoading && (
-                                    <div className="mb-3 flex items-center gap-2 text-slate-600 dark:text-slate-300" role="status" aria-live="polite">
+                                    <div
+                                        className="mb-3 flex items-center gap-2 text-slate-600 dark:text-slate-300"
+                                        role="status"
+                                        aria-live="polite"
+                                    >
                                         <Spin size="small" />
                                         <span>Loading PDF preview...</span>
                                     </div>
@@ -330,7 +461,7 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                         showIcon
                                         message="Preview unavailable"
                                         description="The PDF could not be displayed right now. You can retry the preview or use Download PDF."
-                                        action={(
+                                        action={
                                             <Button
                                                 size="small"
                                                 onClick={() => {
@@ -341,7 +472,7 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                                             >
                                                 Retry
                                             </Button>
-                                        )}
+                                        }
                                     />
                                 )}
 
@@ -377,15 +508,23 @@ export default function PublicResearchShow({ proposal, relatedProposals = [], ca
                         >
                             <div className="space-y-3">
                                 {relatedProposals.map((item) => (
-                                    <div key={item.id} className="rounded-xl border border-slate-200 px-4 py-3 dark:border-[#1e2d47]">
+                                    <div
+                                        key={item.id}
+                                        className="rounded-xl border border-slate-200 px-4 py-3 dark:border-[#1e2d47]"
+                                    >
                                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                             <div className="min-w-0 flex-1">
-                                                <Link href={route('research.public.show', item.id)} className="text-sm font-semibold text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                                                <Link
+                                                    href={route('research.public.show', item.id)}
+                                                    className="text-sm font-semibold text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline"
+                                                >
                                                     {item.title}
                                                 </Link>
                                                 <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                                     {item.authors || 'Unknown author'}
-                                                    {item.institution?.name && <> · {item.institution.name}</>}
+                                                    {item.institution?.name && (
+                                                        <> · {item.institution.name}</>
+                                                    )}
                                                     {item.year && <> · {item.year}</>}
                                                 </div>
                                             </div>

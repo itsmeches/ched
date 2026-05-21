@@ -1,22 +1,26 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\LogApiRequests;
 use App\Http\Middleware\SecureHeaders;
 use App\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
-use Inertia\Inertia;
+use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,24 +31,24 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+            'role' => EnsureUserHasRole::class,
         ]);
 
         $middleware->web(append: [
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            AddLinkHeadersForPreloadedAssets::class,
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
+            HandleInertiaRequests::class,
         ]);
 
         $middleware->web(replace: [
-            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class => VerifyCsrfToken::class,
+            Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class => VerifyCsrfToken::class,
             ValidateCsrfToken::class => VerifyCsrfToken::class,
         ]);
 
         $middleware->api(prepend: [
-            \Illuminate\Http\Middleware\HandleCors::class,
+            HandleCors::class,
         ]);
         $middleware->api(append: [
             LogApiRequests::class,
@@ -59,7 +63,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->shouldRenderJsonWhen(function (Request $request, \Throwable $exception) {
+        $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $exception) {
             return $request->is('api/*') || $request->expectsJson();
         });
 
@@ -119,7 +123,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 404);
         });
 
-        $exceptions->render(function (\Throwable $exception, Request $request) {
+        $exceptions->render(function (Throwable $exception, Request $request) {
             if (! ($request->is('api/*') || $request->expectsJson())) {
                 return null;
             }
@@ -140,7 +144,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ], $status);
         });
 
-        $exceptions->respond(function (SymfonyResponse $response, \Throwable $exception, Request $request) {
+        $exceptions->respond(function (SymfonyResponse $response, Throwable $exception, Request $request) {
             $applySecurityHeaders = function (SymfonyResponse $targetResponse) use ($request): SymfonyResponse {
                 $targetResponse->headers->set('X-Frame-Options', 'SAMEORIGIN');
                 $targetResponse->headers->set('X-Content-Type-Options', 'nosniff');
@@ -151,15 +155,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 Vite::useCspNonce();
                 $nonce = Vite::cspNonce();
                 $isLocal = app()->environment('local');
-                $viteOrigins = " http://127.0.0.1:5173 http://localhost:5173";
-                $viteConnect = " ws://127.0.0.1:5173 ws://localhost:5173";
+                $viteOrigins = ' http://127.0.0.1:5173 http://localhost:5173';
+                $viteConnect = ' ws://127.0.0.1:5173 ws://localhost:5173';
                 $scriptSrc = $isLocal
                     ? "'self' 'unsafe-inline' 'unsafe-eval'{$viteOrigins}"
                     : "'self' 'nonce-{$nonce}'";
                 $styleSrc = $isLocal
                     ? "'self' 'unsafe-inline' https://fonts.bunny.net{$viteOrigins}"
                     : "'self' 'nonce-{$nonce}' https://fonts.bunny.net";
-                $connectSrc = "'self'" . ($isLocal ? $viteOrigins . $viteConnect : '');
+                $connectSrc = "'self'".($isLocal ? $viteOrigins.$viteConnect : '');
                 $targetResponse->headers->set(
                     'Content-Security-Policy',
                     "default-src 'self'; script-src {$scriptSrc}; style-src {$styleSrc}; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.bunny.net data:; img-src 'self' data: blob:; connect-src {$connectSrc}; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"

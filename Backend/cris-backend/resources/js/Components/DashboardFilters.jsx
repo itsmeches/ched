@@ -20,7 +20,9 @@ const DEBOUNCE_MS = 500;
 
 function cleanFilterPayload(values) {
     return Object.fromEntries(
-        Object.entries(values).filter(([, value]) => value !== '' && value !== null && value !== undefined),
+        Object.entries(values).filter(
+            ([, value]) => value !== '' && value !== null && value !== undefined
+        )
     );
 }
 
@@ -44,7 +46,9 @@ export default function DashboardFilters({
     const userRole = auth?.user?.role;
     const isSyncingFromServer = useRef(false);
 
-    const [localFilters, setLocalFilters] = useState(() => normalizeFilters({ ...EMPTY_FILTERS, ...filters }));
+    const [localFilters, setLocalFilters] = useState(() =>
+        normalizeFilters({ ...EMPTY_FILTERS, ...filters })
+    );
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -59,28 +63,38 @@ export default function DashboardFilters({
         setLocalFilters(nextFromServer);
     }, [filters.year, filters.hei_id, filters.discipline_code, filters.status]);
 
-    const showInstitutionFilter = userRole === 'super_admin' || userRole === 'ched' || userRole === 'faculty';
+    const showInstitutionFilter =
+        userRole === 'super_admin' || userRole === 'ched' || userRole === 'faculty';
 
-    const yearOptions = useMemo(() => [
-        { value: '', label: 'All years' },
-        ...years.map((year) => ({ value: String(year), label: String(year) })),
-    ], [years]);
+    const yearOptions = useMemo(
+        () => [
+            { value: '', label: 'All years' },
+            ...years.map((year) => ({ value: String(year), label: String(year) })),
+        ],
+        [years]
+    );
 
-    const institutionOptions = useMemo(() => [
-        { value: '', label: 'All institutions' },
-        ...institutions.map((item) => ({
-            value: String(item.id),
-            label: item.code ? `${item.code} - ${item.name}` : item.name,
-        })),
-    ], [institutions]);
+    const institutionOptions = useMemo(
+        () => [
+            { value: '', label: 'All institutions' },
+            ...institutions.map((item) => ({
+                value: String(item.id),
+                label: item.code ? `${item.code} - ${item.name}` : item.name,
+            })),
+        ],
+        [institutions]
+    );
 
-    const disciplineOptions = useMemo(() => [
-        { value: '', label: 'All disciplines' },
-        ...disciplines.map((item) => ({
-            value: item.code,
-            label: `${item.code} - ${item.name}`,
-        })),
-    ], [disciplines]);
+    const disciplineOptions = useMemo(
+        () => [
+            { value: '', label: 'All disciplines' },
+            ...disciplines.map((item) => ({
+                value: item.code,
+                label: `${item.code} - ${item.name}`,
+            })),
+        ],
+        [disciplines]
+    );
 
     const serverPayloadSignature = useMemo(() => {
         const fromServer = normalizeFilters(filters);
@@ -132,13 +146,23 @@ export default function DashboardFilters({
         }
 
         if (showInstitutionFilter && localFilters.hei_id) {
-            const institution = institutionOptions.find((item) => item.value === localFilters.hei_id);
-            chips.push({ key: 'hei_id', label: `Institution: ${institution?.label ?? localFilters.hei_id}` });
+            const institution = institutionOptions.find(
+                (item) => item.value === localFilters.hei_id
+            );
+            chips.push({
+                key: 'hei_id',
+                label: `Institution: ${institution?.label ?? localFilters.hei_id}`,
+            });
         }
 
         if (localFilters.discipline_code) {
-            const discipline = disciplineOptions.find((item) => item.value === localFilters.discipline_code);
-            chips.push({ key: 'discipline_code', label: `Discipline: ${discipline?.label ?? localFilters.discipline_code}` });
+            const discipline = disciplineOptions.find(
+                (item) => item.value === localFilters.discipline_code
+            );
+            chips.push({
+                key: 'discipline_code',
+                label: `Discipline: ${discipline?.label ?? localFilters.discipline_code}`,
+            });
         }
 
         if (localFilters.status) {
@@ -162,49 +186,51 @@ export default function DashboardFilters({
                 </div>
 
                 <div className="dashboard-filter-toolbar">
-                <Select
-                    size="middle"
-                    className="dashboard-filter-control dashboard-filter-year"
-                    value={localFilters.year || ''}
-                    options={yearOptions}
-                    onChange={(value) => updateFilter('year', value)}
-                    aria-label="Filter dashboard by year"
-                />
-
-                {showInstitutionFilter && (
                     <Select
                         size="middle"
-                        className="dashboard-filter-control dashboard-filter-institution"
-                        value={localFilters.hei_id || ''}
-                        options={institutionOptions}
-                        onChange={(value) => updateFilter('hei_id', value)}
-                        aria-label="Filter dashboard by institution"
+                        className="dashboard-filter-control dashboard-filter-year"
+                        value={localFilters.year || ''}
+                        options={yearOptions}
+                        onChange={(value) => updateFilter('year', value)}
+                        aria-label="Filter dashboard by year"
+                    />
+
+                    {showInstitutionFilter && (
+                        <Select
+                            size="middle"
+                            className="dashboard-filter-control dashboard-filter-institution"
+                            value={localFilters.hei_id || ''}
+                            options={institutionOptions}
+                            onChange={(value) => updateFilter('hei_id', value)}
+                            aria-label="Filter dashboard by institution"
+                            showSearch
+                            optionFilterProp="label"
+                        />
+                    )}
+
+                    <Select
+                        size="middle"
+                        className="dashboard-filter-control dashboard-filter-discipline"
+                        value={localFilters.discipline_code || ''}
+                        options={disciplineOptions}
+                        onChange={(value) => updateFilter('discipline_code', value)}
+                        aria-label="Filter dashboard by discipline"
                         showSearch
                         optionFilterProp="label"
                     />
-                )}
 
-                <Select
-                    size="middle"
-                    className="dashboard-filter-control dashboard-filter-discipline"
-                    value={localFilters.discipline_code || ''}
-                    options={disciplineOptions}
-                    onChange={(value) => updateFilter('discipline_code', value)}
-                    aria-label="Filter dashboard by discipline"
-                    showSearch
-                    optionFilterProp="label"
-                />
+                    <Select
+                        size="middle"
+                        className="dashboard-filter-control dashboard-filter-status"
+                        value={localFilters.status || ''}
+                        options={STATUS_OPTIONS}
+                        onChange={(value) => updateFilter('status', value)}
+                        aria-label="Filter dashboard by status"
+                    />
 
-                <Select
-                    size="middle"
-                    className="dashboard-filter-control dashboard-filter-status"
-                    value={localFilters.status || ''}
-                    options={STATUS_OPTIONS}
-                    onChange={(value) => updateFilter('status', value)}
-                    aria-label="Filter dashboard by status"
-                />
-
-                    <Button className="dashboard-filter-reset" onClick={resetFilters}>Reset</Button>
+                    <Button className="dashboard-filter-reset" onClick={resetFilters}>
+                        Reset
+                    </Button>
                 </div>
 
                 {activeFilterChips.length > 0 && (

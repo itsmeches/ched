@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ResearchProposal>
+ * @extends Factory<ResearchProposal>
  */
 class ResearchProposalFactory extends Factory
 {

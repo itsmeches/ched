@@ -74,7 +74,7 @@ class LoginRequest extends FormRequest
     // If the user has not exceeded the limit, the method simply returns and allows the authentication process to proceed.
     // The throttleKey method generates a unique key for rate limiting based on the user's email and IP address. This key is used to track login attempts for that specific user and IP combination.
     // The ensureIsNotRateLimited method checks if the user has made too many login attempts by using the RateLimiter facade. If the user has exceeded the limit, it triggers a Lockout event and calculates how long they need to wait before trying again. It then throws a ValidationException with a message that includes the number of seconds and minutes they need to wait.
-    
+
     // reduce to 20 but keep it 5 in production
     public function ensureIsNotRateLimited(): void
     {

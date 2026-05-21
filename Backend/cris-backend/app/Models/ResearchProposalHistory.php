@@ -19,8 +19,8 @@ class ResearchProposalHistory extends Model
     ];
 
     protected $casts = [
-        'old_values'  => 'array',
-        'new_values'  => 'array',
+        'old_values' => 'array',
+        'new_values' => 'array',
         'performed_at' => 'datetime',
     ];
 

@@ -31,17 +31,16 @@ class UserManagementController extends Controller
                 'target' => fn ($query) => $query->withTrashed()->select('id', 'name', 'email', 'role', 'deleted_at'),
             ])
             ->when($action !== '', fn ($q) => $q->where('action', $action))
-            ->when($search !== '', fn ($q) =>
-                $q->where(function ($inner) use ($search) {
-                    $inner->whereHas('actor', function ($sub) use ($search) {
-                        $sub->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
-                    })->orWhereHas('target', function ($sub) use ($search) {
-                        $sub->withTrashed()
-                            ->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
-                    });
-                })
+            ->when($search !== '', fn ($q) => $q->where(function ($inner) use ($search) {
+                $inner->whereHas('actor', function ($sub) use ($search) {
+                    $sub->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })->orWhereHas('target', function ($sub) use ($search) {
+                    $sub->withTrashed()
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
             )
             ->when($from !== '', fn ($q) => $q->whereDate('performed_at', '>=', $from))
             ->when($to !== '', fn ($q) => $q->whereDate('performed_at', '<=', $to))
@@ -84,11 +83,10 @@ class UserManagementController extends Controller
             ->pluck('total', 'role');
 
         $users = $baseQuery->with('institution:id,name')
-            ->when($search !== '', fn ($q) =>
-                $q->where(function ($inner) use ($search) {
-                    $inner->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                })
+            ->when($search !== '', fn ($q) => $q->where(function ($inner) use ($search) {
+                $inner->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            })
             )
             ->when($role !== '', fn ($q) => $q->where('role', $role))
             ->when($institutionId > 0, fn ($q) => $q->where('institution_id', $institutionId))
@@ -99,9 +97,9 @@ class UserManagementController extends Controller
             ->withQueryString();
 
         return Inertia::render('Admin/Users/Index', [
-            'users'        => $users,
+            'users' => $users,
             'institutions' => Institution::select('id', 'name')->get(),
-            'filters'      => [
+            'filters' => [
                 'search' => $search,
                 'role' => $role,
                 'institution_id' => $institutionId > 0 ? $institutionId : '',
@@ -109,7 +107,7 @@ class UserManagementController extends Controller
                 'to' => $to,
                 'deactivated' => $showDeactivated,
             ],
-            'roleCounts'   => [
+            'roleCounts' => [
                 'all' => User::count(),
                 'pending' => (int) ($roleCounts['pending'] ?? 0),
                 'super_admin' => (int) ($roleCounts['super_admin'] ?? 0),
@@ -133,11 +131,10 @@ class UserManagementController extends Controller
         $baseQuery = $showDeactivated ? User::onlyTrashed() : User::query();
 
         $query = $baseQuery->with('institution:id,name')
-            ->when($search !== '', fn ($q) =>
-                $q->where(function ($inner) use ($search) {
-                    $inner->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                })
+            ->when($search !== '', fn ($q) => $q->where(function ($inner) use ($search) {
+                $inner->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            })
             )
             ->when($role !== '', fn ($q) => $q->where('role', $role))
             ->when($institutionId > 0, fn ($q) => $q->where('institution_id', $institutionId))
@@ -145,7 +142,7 @@ class UserManagementController extends Controller
             ->when($to !== '', fn ($q) => $q->whereDate('created_at', '<=', $to))
             ->orderByDesc('created_at');
 
-        $fileName = 'users-' . now()->format('Ymd-His') . '.csv';
+        $fileName = 'users-'.now()->format('Ymd-His').'.csv';
 
         return response()->streamDownload(function () use ($query) {
             $handle = fopen('php://output', 'w');
@@ -175,7 +172,7 @@ class UserManagementController extends Controller
     {
         return Inertia::render('Admin/Users/Create', [
             'institutions' => Institution::select('id', 'name')->get(),
-            'roles'        => [
+            'roles' => [
                 ['value' => 'pending',     'label' => 'Pending Approval'],
                 ['value' => 'hei',         'label' => 'HEI'],
                 ['value' => 'faculty',     'label' => 'Faculty'],
@@ -189,12 +186,12 @@ class UserManagementController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'name'           => ['required', 'string', 'max:255'],
-            'email'          => ['required', 'email', 'unique:users,email'],
-            'password'       => ['required', 'confirmed', Password::defaults()],
-            'role'           => ['required', Rule::in(User::ROLES)],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'confirmed', Password::defaults()],
+            'role' => ['required', Rule::in(User::ROLES)],
             'institution_id' => [Rule::requiredIf(fn () => User::requiresInstitutionForRole((string) $request->input('role'))), 'nullable', 'exists:institutions,id'],
-            'redirect_to'    => ['nullable', 'in:dashboard,index'],
+            'redirect_to' => ['nullable', 'in:dashboard,index'],
         ]);
 
         $institutionId = User::requiresInstitutionForRole($data['role'])
@@ -208,10 +205,10 @@ class UserManagementController extends Controller
         }
 
         User::create([
-            'name'           => $data['name'],
-            'email'          => $data['email'],
-            'password'       => Hash::make($data['password']),
-            'role'           => $data['role'],
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role' => $data['role'],
             'institution_id' => $institutionId,
         ]);
 
@@ -226,9 +223,9 @@ class UserManagementController extends Controller
     public function edit(User $user): Response
     {
         return Inertia::render('Admin/Users/Edit', [
-            'user'         => $user->only(['id', 'name', 'email', 'role', 'institution_id']),
+            'user' => $user->only(['id', 'name', 'email', 'role', 'institution_id']),
             'institutions' => Institution::select('id', 'name')->get(),
-            'roles'        => [
+            'roles' => [
                 ['value' => 'pending',     'label' => 'Pending Approval'],
                 ['value' => 'hei',         'label' => 'HEI'],
                 ['value' => 'faculty',     'label' => 'Faculty'],
@@ -244,11 +241,11 @@ class UserManagementController extends Controller
         $oldValues = $user->only(['name', 'email', 'role', 'institution_id']);
 
         $data = $request->validate([
-            'name'           => ['required', 'string', 'max:255'],
-            'email'          => ['required', 'email', "unique:users,email,{$user->id}"],
-            'role'           => ['required', Rule::in(User::ROLES)],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', "unique:users,email,{$user->id}"],
+            'role' => ['required', Rule::in(User::ROLES)],
             'institution_id' => [Rule::requiredIf(fn () => User::requiresInstitutionForRole((string) $request->input('role'))), 'nullable', 'exists:institutions,id'],
-            'password'       => ['nullable', 'confirmed', Password::defaults()],
+            'password' => ['nullable', 'confirmed', Password::defaults()],
         ]);
 
         $institutionId = User::requiresInstitutionForRole($data['role'])
@@ -268,9 +265,9 @@ class UserManagementController extends Controller
         }
 
         $user->update([
-            'name'           => $data['name'],
-            'email'          => $data['email'],
-            'role'           => $data['role'],
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'role' => $data['role'],
             'institution_id' => $institutionId,
             ...($data['password'] ? ['password' => Hash::make($data['password'])] : []),
         ]);
@@ -349,7 +346,7 @@ class UserManagementController extends Controller
             $processed = $this->deactivateMany($request, $targets);
 
             return redirect()->route('admin.users.index')
-                ->with('success', $processed . ' user' . ($processed === 1 ? '' : 's') . ' deactivated.');
+                ->with('success', $processed.' user'.($processed === 1 ? '' : 's').' deactivated.');
         }
 
         $targets = User::onlyTrashed()
@@ -359,7 +356,7 @@ class UserManagementController extends Controller
         $processed = $this->restoreMany($request, $targets);
 
         return redirect()->route('admin.users.index', ['deactivated' => 1])
-            ->with('success', $processed . ' user' . ($processed === 1 ? '' : 's') . ' reactivated.');
+            ->with('success', $processed.' user'.($processed === 1 ? '' : 's').' reactivated.');
     }
 
     private function deactivateMany(Request $request, Collection $targets): int

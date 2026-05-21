@@ -2,12 +2,25 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import EmptyState from '@/Components/EmptyState';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Alert, Button, Card, Popconfirm, Space, Table, Tabs, Tag, Typography, message } from 'antd';
+import {
+    Alert,
+    Button,
+    Card,
+    Popconfirm,
+    Space,
+    Table,
+    Tabs,
+    Tag,
+    Typography,
+    message,
+} from 'antd';
 import { useEffect } from 'react';
 import { formatDateTime } from '@/utils/date';
 
 function roleLabel(role) {
-    return String(role || '').replace('_', ' ').toUpperCase();
+    return String(role || '')
+        .replace('_', ' ')
+        .toUpperCase();
 }
 
 export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
@@ -25,7 +38,11 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
             render: (value, row) => (
                 <span style={{ opacity: row.deleted_at ? 0.45 : 1 }}>
                     {value}
-                    {row.deleted_at && <Tag color="red" style={{ marginLeft: 6 }}>Deactivated</Tag>}
+                    {row.deleted_at && (
+                        <Tag color="red" style={{ marginLeft: 6 }}>
+                            Deactivated
+                        </Tag>
+                    )}
                 </span>
             ),
         },
@@ -108,7 +125,9 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
                                 router.delete(route('accounts.deactivate', { user: row.id }))
                             }
                         >
-                            <Button type="link" danger>Deactivate</Button>
+                            <Button type="link" danger>
+                                Deactivate
+                            </Button>
                         </Popconfirm>
                     </Space>
                 );
@@ -117,9 +136,7 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
     ];
 
     return (
-        <AuthenticatedLayout
-            header={<AdminPageHeader title="Account Hierarchy" />}
-        >
+        <AuthenticatedLayout header={<AdminPageHeader title="Account Hierarchy" />}>
             <Head title="Account Hierarchy" />
 
             <div className="space-y-4">
@@ -130,49 +147,80 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
                             <Tag color="geekblue">Track who is under who</Tag>
                         </Space>
                         <Typography.Text type="secondary">
-                            Use these tabs to audit HEI, Faculty, and Student linkages for your account scope.
-                            You can only manage accounts you personally created.
+                            Use these tabs to audit HEI, Faculty, and Student linkages for your
+                            account scope. You can only manage accounts you personally created.
                         </Typography.Text>
                     </Space>
                 </Card>
 
                 <Card className="admin-dashboard-shell" bordered={false}>
                     {tabs.length === 0 ? (
-                        <Alert type="info" showIcon message="No hierarchy data is available for this account." />
+                        <Alert
+                            type="info"
+                            showIcon
+                            message="No hierarchy data is available for this account."
+                        />
                     ) : (
                         <Tabs
                             items={tabs.map((tab) => {
                                 const rows = tab.rows || [];
                                 const total = rows.length;
                                 const deactivated = rows.filter((r) => r.deleted_at).length;
-                                const label = deactivated > 0
-                                    ? `${tab.label} (${total} · ${deactivated} deactivated)`
-                                    : `${tab.label} (${total})`;
+                                const label =
+                                    deactivated > 0
+                                        ? `${tab.label} (${total} · ${deactivated} deactivated)`
+                                        : `${tab.label} (${total})`;
                                 return {
                                     key: tab.key,
                                     label,
                                     children: (
-                                    <Space direction="vertical" size={10} style={{ width: '100%' }}>
-                                        <Typography.Text type="secondary">{tab.description}</Typography.Text>
-                                        <Table
-                                            rowKey="id"
-                                            columns={columns}
-                                            dataSource={tab.rows || []}
-                                            pagination={tab.pagination ? {
-                                                current: tab.pagination.current_page,
-                                                pageSize: tab.pagination.per_page,
-                                                total: tab.pagination.total,
-                                                onChange: (page) => router.get(
-                                                    route('accounts.hierarchy'),
-                                                    { [tab.pagination.page_param]: page },
-                                                    { preserveState: true, replace: true }
-                                                ),
-                                            } : { pageSize: 15 }}
-                                            scroll={{ x: 900 }}
-                                            locale={{ emptyText: <EmptyState title={`No ${tab.label.toLowerCase()} accounts found`} description="This scope has no linked records yet." /> }}
-                                            rowClassName={(row) => row.deleted_at ? 'opacity-50' : ''}
-                                        />
-                                    </Space>
+                                        <Space
+                                            direction="vertical"
+                                            size={10}
+                                            style={{ width: '100%' }}
+                                        >
+                                            <Typography.Text type="secondary">
+                                                {tab.description}
+                                            </Typography.Text>
+                                            <Table
+                                                rowKey="id"
+                                                columns={columns}
+                                                dataSource={tab.rows || []}
+                                                pagination={
+                                                    tab.pagination
+                                                        ? {
+                                                              current: tab.pagination.current_page,
+                                                              pageSize: tab.pagination.per_page,
+                                                              total: tab.pagination.total,
+                                                              onChange: (page) =>
+                                                                  router.get(
+                                                                      route('accounts.hierarchy'),
+                                                                      {
+                                                                          [tab.pagination
+                                                                              .page_param]: page,
+                                                                      },
+                                                                      {
+                                                                          preserveState: true,
+                                                                          replace: true,
+                                                                      }
+                                                                  ),
+                                                          }
+                                                        : { pageSize: 15 }
+                                                }
+                                                scroll={{ x: 900 }}
+                                                locale={{
+                                                    emptyText: (
+                                                        <EmptyState
+                                                            title={`No ${tab.label.toLowerCase()} accounts found`}
+                                                            description="This scope has no linked records yet."
+                                                        />
+                                                    ),
+                                                }}
+                                                rowClassName={(row) =>
+                                                    row.deleted_at ? 'opacity-50' : ''
+                                                }
+                                            />
+                                        </Space>
                                     ),
                                 };
                             })}
@@ -183,4 +231,3 @@ export default function AccountsHierarchy({ viewerRole, tabs = [] }) {
         </AuthenticatedLayout>
     );
 }
-

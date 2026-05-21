@@ -17,7 +17,7 @@ class ResearchProposalApiTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Laguna State College',
-            'code' => 'LSC-' . fake()->unique()->numerify('###'),
+            'code' => 'LSC-'.fake()->unique()->numerify('###'),
         ]);
 
         $ched = User::factory()->create([
@@ -76,12 +76,12 @@ class ResearchProposalApiTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Cavite Research University',
-            'code' => 'CRU-' . fake()->unique()->numerify('###'),
+            'code' => 'CRU-'.fake()->unique()->numerify('###'),
         ]);
 
         $otherInstitution = Institution::query()->create([
             'name' => 'Batangas Science Institute',
-            'code' => 'BSI-' . fake()->unique()->numerify('###'),
+            'code' => 'BSI-'.fake()->unique()->numerify('###'),
         ]);
 
         $hei = User::factory()->create([
@@ -153,7 +153,7 @@ class ResearchProposalApiTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Rizal Innovation University',
-            'code' => 'RIU-' . fake()->unique()->numerify('###'),
+            'code' => 'RIU-'.fake()->unique()->numerify('###'),
         ]);
 
         $hei = User::factory()->create([
@@ -198,7 +198,7 @@ class ResearchProposalApiTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Laguna Policy University',
-            'code' => 'LPU-' . fake()->unique()->numerify('###'),
+            'code' => 'LPU-'.fake()->unique()->numerify('###'),
         ]);
 
         $hei = User::factory()->create([
@@ -233,7 +233,7 @@ class ResearchProposalApiTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Batangas Review College',
-            'code' => 'BRC-' . fake()->unique()->numerify('###'),
+            'code' => 'BRC-'.fake()->unique()->numerify('###'),
         ]);
 
         $hei = User::factory()->create([

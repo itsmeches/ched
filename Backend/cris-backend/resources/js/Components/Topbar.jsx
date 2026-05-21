@@ -1,5 +1,12 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { BellOutlined, MenuFoldOutlined, MenuUnfoldOutlined, MoonOutlined, SunOutlined, UserOutlined } from '@ant-design/icons';
+import {
+    BellOutlined,
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
+    MoonOutlined,
+    SunOutlined,
+    UserOutlined,
+} from '@ant-design/icons';
 import { Dropdown } from 'antd';
 import { useTheme } from '@/utils/ThemeContext';
 import { useEffect, useRef, useState } from 'react';
@@ -21,7 +28,12 @@ function getRoleLabel(role) {
     }
 }
 
-export default function Topbar({ title, sidebarCollapsed = false, onToggleSidebar, onOpenMobileSidebar }) {
+export default function Topbar({
+    title,
+    sidebarCollapsed = false,
+    onToggleSidebar,
+    onOpenMobileSidebar,
+}) {
     const { auth, notifications = [] } = usePage().props;
     const user = auth?.user;
     const { dark, toggleDark } = useTheme();
@@ -78,7 +90,9 @@ export default function Topbar({ title, sidebarCollapsed = false, onToggleSideba
                         {title ? (
                             <div className="min-w-0">{title}</div>
                         ) : (
-                            <h1 className="truncate text-lg font-semibold text-slate-900 dark:text-white">Dashboard</h1>
+                            <h1 className="truncate text-lg font-semibold text-slate-900 dark:text-white">
+                                Dashboard
+                            </h1>
                         )}
                     </div>
                 </div>
@@ -94,91 +108,108 @@ export default function Topbar({ title, sidebarCollapsed = false, onToggleSideba
                     </button>
 
                     <div className="relative" ref={notifRef}>
-                            <button
-                                type="button"
-                                aria-label={`Notifications${notifications.length > 0 ? `, ${notifications.length} unread` : ''}`}
-                                className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 dark:bg-[#1a2540] dark:text-slate-200 dark:hover:bg-[#243054]"
-                                onClick={() => setNotifOpen((open) => !open)}
-                            >
-                                <BellOutlined />
-                                {notifications.length > 0 && (
-                                    <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-[#0033a0] px-1 text-center text-[11px] font-semibold text-white">
-                                        {notifications.length > 9 ? '9+' : notifications.length}
-                                    </span>
-                                )}
-                            </button>
+                        <button
+                            type="button"
+                            aria-label={`Notifications${notifications.length > 0 ? `, ${notifications.length} unread` : ''}`}
+                            className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 dark:bg-[#1a2540] dark:text-slate-200 dark:hover:bg-[#243054]"
+                            onClick={() => setNotifOpen((open) => !open)}
+                        >
+                            <BellOutlined />
+                            {notifications.length > 0 && (
+                                <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-[#0033a0] px-1 text-center text-[11px] font-semibold text-white">
+                                    {notifications.length > 9 ? '9+' : notifications.length}
+                                </span>
+                            )}
+                        </button>
 
-                            {notifOpen && (
-                                <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-[#1e2d47] dark:bg-[#111827]">
-                                    <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-[#1e2d47]">
-                                        <span className="text-sm font-semibold text-slate-900 dark:text-white">
-                                            Notifications
-                                            {notifications.length > 0 && (
-                                                <span className="ml-2 inline-flex items-center justify-center rounded-full bg-[#0033a0] px-1.5 py-0.5 text-xs font-bold text-white">
-                                                    {notifications.length}
-                                                </span>
-                                            )}
-                                        </span>
-
+                        {notifOpen && (
+                            <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-[#1e2d47] dark:bg-[#111827]">
+                                <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-[#1e2d47]">
+                                    <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                                        Notifications
                                         {notifications.length > 0 && (
-                                            <button
-                                                type="button"
-                                                className="text-xs font-medium text-[#0033a0] hover:underline dark:text-blue-300"
-                                                onClick={() => {
-                                                    router.post(route('notifications.read-all'), {}, {
+                                            <span className="ml-2 inline-flex items-center justify-center rounded-full bg-[#0033a0] px-1.5 py-0.5 text-xs font-bold text-white">
+                                                {notifications.length}
+                                            </span>
+                                        )}
+                                    </span>
+
+                                    {notifications.length > 0 && (
+                                        <button
+                                            type="button"
+                                            className="text-xs font-medium text-[#0033a0] hover:underline dark:text-blue-300"
+                                            onClick={() => {
+                                                router.post(
+                                                    route('notifications.read-all'),
+                                                    {},
+                                                    {
                                                         preserveScroll: true,
                                                         onSuccess: () => setNotifOpen(false),
-                                                    });
-                                                }}
-                                            >
-                                                Mark all as read
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    <div className="max-h-80 divide-y divide-slate-100 overflow-y-auto dark:divide-[#1e2d47]">
-                                        {notifications.length === 0 ? (
-                                            <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
-                                                No new notifications.
-                                            </div>
-                                        ) : (
-                                            notifications.map((item) => (
-                                                item.link_url ? (
-                                                    <button
-                                                        key={item.id}
-                                                        type="button"
-                                                        className="w-full px-4 py-3 text-left transition-colors hover:bg-blue-50 dark:hover:bg-[#1a2540]"
-                                                        onClick={() => {
-                                                            setNotifOpen(false);
-                                                            router.post(
-                                                                route('notifications.read-one', { id: item.id }),
-                                                                { redirect: item.link_url },
-                                                                { preserveScroll: false },
-                                                            );
-                                                        }}
-                                                    >
-                                                        <p className="text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
-                                                        <p className="mt-1 text-xs text-[#0033a0] dark:text-blue-300">{formatNotifDate(item.created_at)}</p>
-                                                    </button>
-                                                ) : (
-                                                    <div key={item.id} className="px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-[#1a2540]">
-                                                        <p className="text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
-                                                        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{formatNotifDate(item.created_at)}</p>
-                                                    </div>
-                                                )
-                                            ))
-                                        )}
-                                    </div>
-                                    <div className="border-t border-slate-200 px-4 py-2 text-center dark:border-[#1e2d47]">
-                                        <Link
-                                            href={route('notifications.index')}
-                                            className="text-xs font-medium text-[#0033a0] hover:underline dark:text-blue-300"
+                                                    }
+                                                );
+                                            }}
                                         >
-                                            View all notifications
-                                        </Link>
-                                    </div>
+                                            Mark all as read
+                                        </button>
+                                    )}
                                 </div>
-                            )}
+
+                                <div className="max-h-80 divide-y divide-slate-100 overflow-y-auto dark:divide-[#1e2d47]">
+                                    {notifications.length === 0 ? (
+                                        <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                                            No new notifications.
+                                        </div>
+                                    ) : (
+                                        notifications.map((item) =>
+                                            item.link_url ? (
+                                                <button
+                                                    key={item.id}
+                                                    type="button"
+                                                    className="w-full px-4 py-3 text-left transition-colors hover:bg-blue-50 dark:hover:bg-[#1a2540]"
+                                                    onClick={() => {
+                                                        setNotifOpen(false);
+                                                        router.post(
+                                                            route('notifications.read-one', {
+                                                                id: item.id,
+                                                            }),
+                                                            { redirect: item.link_url },
+                                                            { preserveScroll: false }
+                                                        );
+                                                    }}
+                                                >
+                                                    <p className="text-sm leading-snug text-slate-700 dark:text-slate-200">
+                                                        {item.message}
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-[#0033a0] dark:text-blue-300">
+                                                        {formatNotifDate(item.created_at)}
+                                                    </p>
+                                                </button>
+                                            ) : (
+                                                <div
+                                                    key={item.id}
+                                                    className="px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-[#1a2540]"
+                                                >
+                                                    <p className="text-sm leading-snug text-slate-700 dark:text-slate-200">
+                                                        {item.message}
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                                                        {formatNotifDate(item.created_at)}
+                                                    </p>
+                                                </div>
+                                            )
+                                        )
+                                    )}
+                                </div>
+                                <div className="border-t border-slate-200 px-4 py-2 text-center dark:border-[#1e2d47]">
+                                    <Link
+                                        href={route('notifications.index')}
+                                        className="text-xs font-medium text-[#0033a0] hover:underline dark:text-blue-300"
+                                    >
+                                        View all notifications
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <Dropdown
@@ -187,9 +218,15 @@ export default function Topbar({ title, sidebarCollapsed = false, onToggleSideba
                         dropdownRender={() => (
                             <div className="min-w-[200px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-[#1e2d47] dark:bg-[#111827]">
                                 <div className="border-b border-slate-200 px-4 py-2.5 dark:border-[#1e2d47]">
-                                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.name || 'User'}</p>
-                                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">{user?.email || ''}</p>
-                                    <p className="mt-0.5 text-xs font-medium text-[#0033a0] dark:text-blue-300">{roleLabel}</p>
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                                        {user?.name || 'User'}
+                                    </p>
+                                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                                        {user?.email || ''}
+                                    </p>
+                                    <p className="mt-0.5 text-xs font-medium text-[#0033a0] dark:text-blue-300">
+                                        {roleLabel}
+                                    </p>
                                 </div>
                                 <div className="py-1">
                                     <Link
@@ -217,7 +254,9 @@ export default function Topbar({ title, sidebarCollapsed = false, onToggleSideba
                             <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#0033a0] text-xs font-semibold text-white">
                                 {user?.name?.charAt(0)?.toUpperCase() || <UserOutlined />}
                             </span>
-                            <span className="hidden max-w-28 truncate sm:inline">{user?.name || 'User'}</span>
+                            <span className="hidden max-w-28 truncate sm:inline">
+                                {user?.name || 'User'}
+                            </span>
                         </button>
                     </Dropdown>
                 </div>

@@ -87,7 +87,7 @@ class InstitutionApiTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Laguna Technology College',
-            'code' => 'LTC-' . fake()->unique()->numerify('###'),
+            'code' => 'LTC-'.fake()->unique()->numerify('###'),
         ]);
 
         $admin = User::factory()->create([

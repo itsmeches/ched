@@ -1,6 +1,13 @@
 import { Card, Typography } from 'antd';
 
-export default function PublicSectionCard({ title, subtitle, extra = null, children, className = '', bodyStyle = {} }) {
+export default function PublicSectionCard({
+    title,
+    subtitle,
+    extra = null,
+    children,
+    className = '',
+    bodyStyle = {},
+}) {
     return (
         <Card
             className={`admin-dashboard-shell ${className}`.trim()}
@@ -11,7 +18,10 @@ export default function PublicSectionCard({ title, subtitle, extra = null, child
             styles={{ body: { padding: 18, ...bodyStyle } }}
         >
             {subtitle && (
-                <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 14, fontSize: 12 }}>
+                <Typography.Text
+                    type="secondary"
+                    style={{ display: 'block', marginBottom: 14, fontSize: 12 }}
+                >
                     {subtitle}
                 </Typography.Text>
             )}

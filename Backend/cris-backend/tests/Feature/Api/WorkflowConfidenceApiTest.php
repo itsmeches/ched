@@ -159,7 +159,7 @@ class WorkflowConfidenceApiTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Laguna Workflow University',
-            'code' => 'LWU-' . fake()->unique()->numerify('###'),
+            'code' => 'LWU-'.fake()->unique()->numerify('###'),
         ]);
 
         $ched = User::factory()->create([
@@ -191,7 +191,7 @@ class WorkflowConfidenceApiTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $overrides
+     * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
      */
     private function proposalPayload(array $overrides = []): array

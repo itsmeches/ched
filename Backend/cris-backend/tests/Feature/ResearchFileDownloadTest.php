@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Discipline;
 use App\Models\Institution;
+use App\Models\ResearchCategory;
 use App\Models\ResearchProposal;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -132,13 +134,13 @@ class ResearchFileDownloadTest extends TestCase
         Storage::fake('public');
 
         // Seed required taxonomy rows the StoreRequest validates against
-        \App\Models\ResearchCategory::query()->create([
+        ResearchCategory::query()->create([
             'type' => 'general',
             'value' => 'technology',
             'label' => 'Technology',
             'is_active' => true,
         ]);
-        \App\Models\Discipline::query()->create([
+        Discipline::query()->create([
             'code' => 'CS',
             'name' => 'Computer Science',
             'is_active' => true,
@@ -198,7 +200,7 @@ class ResearchFileDownloadTest extends TestCase
             'institution_id' => $institution->id,
         ]);
 
-        $relativePath = 'research_papers/' . fake()->unique()->slug() . '.pdf';
+        $relativePath = 'research_papers/'.fake()->unique()->slug().'.pdf';
         Storage::disk($disk)->put($relativePath, $contents);
 
         return ResearchProposal::factory()->create([

@@ -11,7 +11,11 @@ const mockUseForm = vi.fn();
 
 vi.mock('@inertiajs/react', () => ({
     Head: () => null,
-    Link: ({ href, children, ...props }) => <a href={href} {...props}>{children}</a>,
+    Link: ({ href, children, ...props }) => (
+        <a href={href} {...props}>
+            {children}
+        </a>
+    ),
     useForm: () => mockUseForm(),
 }));
 
@@ -39,8 +43,14 @@ describe('Login page', () => {
         renderWithProviders(<Login canResetPassword />);
 
         expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
-        expect(screen.getByRole('link', { name: 'Forgot password?' })).toHaveAttribute('href', '/forgot-password');
-        expect(screen.getByRole('link', { name: 'Register here' })).toHaveAttribute('href', '/register');
+        expect(screen.getByRole('link', { name: 'Forgot password?' })).toHaveAttribute(
+            'href',
+            '/forgot-password'
+        );
+        expect(screen.getByRole('link', { name: 'Register here' })).toHaveAttribute(
+            'href',
+            '/register'
+        );
     });
 
     it('submits credentials and resets the password field on finish', async () => {
@@ -56,7 +66,10 @@ describe('Login page', () => {
         await user.type(screen.getByPlaceholderText('••••••••'), 'password');
         await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
-        expect(mockPost).toHaveBeenCalledWith('/login', expect.objectContaining({ onFinish: expect.any(Function) }));
+        expect(mockPost).toHaveBeenCalledWith(
+            '/login',
+            expect.objectContaining({ onFinish: expect.any(Function) })
+        );
         expect(mockReset).toHaveBeenCalledWith('password');
     });
 });

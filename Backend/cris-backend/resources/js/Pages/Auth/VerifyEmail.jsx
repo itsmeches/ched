@@ -16,23 +16,32 @@ export default function VerifyEmail({ status }) {
             <Head title="Email Verification" />
 
             <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Verify your email</h2>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                    Verify your email
+                </h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Please verify your email address by clicking the link we sent.
-                    If you did not receive it, we can send another one.
+                    Please verify your email address by clicking the link we sent. If you did not
+                    receive it, we can send another one.
                 </p>
             </div>
 
             {status === 'verification-link-sent' && (
                 <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
+                    A new verification link has been sent to the email address you provided during
+                    registration.
                 </div>
             )}
 
             <form onSubmit={submit}>
                 <div className="space-y-3">
-                    <Button htmlType="submit" type="primary" block size="large" loading={processing} disabled={processing}>
+                    <Button
+                        htmlType="submit"
+                        type="primary"
+                        block
+                        size="large"
+                        loading={processing}
+                        disabled={processing}
+                    >
                         {processing ? 'Sending verification…' : 'Resend verification email'}
                     </Button>
 

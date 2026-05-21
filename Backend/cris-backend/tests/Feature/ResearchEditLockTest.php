@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Institution;
 use App\Models\ResearchProposal;
-use App\Models\ResearchProposalHistory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -20,7 +19,7 @@ class ResearchEditLockTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Laguna Polytechnic Institute',
-            'code' => 'LPI-' . fake()->unique()->numerify('###'),
+            'code' => 'LPI-'.fake()->unique()->numerify('###'),
         ]);
 
         /** @var User $hei */
@@ -52,7 +51,7 @@ class ResearchEditLockTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Batangas State Research Institute',
-            'code' => 'BSRI-' . fake()->unique()->numerify('###'),
+            'code' => 'BSRI-'.fake()->unique()->numerify('###'),
         ]);
 
         /** @var User $hei */

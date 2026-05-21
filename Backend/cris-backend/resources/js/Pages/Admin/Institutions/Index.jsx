@@ -19,7 +19,10 @@ function getInstitutionAcronym(name, fallbackCode) {
 
     const significantWords = words.filter((word) => !acronymStopWords.has(word.toLowerCase()));
     const sourceWords = significantWords.length > 0 ? significantWords : words;
-    const acronym = sourceWords.map((word) => word[0]).join('').toUpperCase();
+    const acronym = sourceWords
+        .map((word) => word[0])
+        .join('')
+        .toUpperCase();
 
     return acronym || fallbackCode || '—';
 }
@@ -42,45 +45,74 @@ export default function InstitutionsIndex({ institutions, filters }) {
         }
     }, [flash?.success, flash?.error]);
 
-    const columns = useMemo(() => [
-        {
-            title: 'Institution',
-            key: 'institution',
-            render: (_, institution) => (
-                <div>
-                    <div style={{ fontWeight: 600 }}>{institution.name}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">{institution.contact_email ?? 'No email provided'}</div>
-                </div>
-            ),
-        },
-        {
-            title: 'Acronym',
-            dataIndex: 'code',
-            key: 'code',
-            render: (value, institution) => (
-                <Tag color="blue" title={value || institution.name}>
-                    {getInstitutionAcronym(institution.name, value)}
-                </Tag>
-            ),
-        },
-        { title: 'Address', dataIndex: 'address', key: 'address', responsive: ['sm'], render: (value) => value || '—' },
-        { title: 'Users', dataIndex: 'users_count', key: 'users_count', responsive: ['md'] },
-        {
-            title: 'Action',
-            key: 'action',
-            align: 'center',
-            onHeaderCell: () => ({ style: { textAlign: 'center' } }),
-            render: (_, institution) => (
-                <Space>
-                    <Button type="link" className="edit-action-btn" onClick={() => router.visit(route('admin.institutions.edit', institution.id))}>Edit</Button>
-                    <Button danger type="link" onClick={() => deleteInstitution(institution.id)}>Delete</Button>
-                </Space>
-            ),
-        },
-    ], []);
+    const columns = useMemo(
+        () => [
+            {
+                title: 'Institution',
+                key: 'institution',
+                render: (_, institution) => (
+                    <div>
+                        <div style={{ fontWeight: 600 }}>{institution.name}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                            {institution.contact_email ?? 'No email provided'}
+                        </div>
+                    </div>
+                ),
+            },
+            {
+                title: 'Acronym',
+                dataIndex: 'code',
+                key: 'code',
+                render: (value, institution) => (
+                    <Tag color="blue" title={value || institution.name}>
+                        {getInstitutionAcronym(institution.name, value)}
+                    </Tag>
+                ),
+            },
+            {
+                title: 'Address',
+                dataIndex: 'address',
+                key: 'address',
+                responsive: ['sm'],
+                render: (value) => value || '—',
+            },
+            { title: 'Users', dataIndex: 'users_count', key: 'users_count', responsive: ['md'] },
+            {
+                title: 'Action',
+                key: 'action',
+                align: 'center',
+                onHeaderCell: () => ({ style: { textAlign: 'center' } }),
+                render: (_, institution) => (
+                    <Space>
+                        <Button
+                            type="link"
+                            className="edit-action-btn"
+                            onClick={() =>
+                                router.visit(route('admin.institutions.edit', institution.id))
+                            }
+                        >
+                            Edit
+                        </Button>
+                        <Button
+                            danger
+                            type="link"
+                            onClick={() => deleteInstitution(institution.id)}
+                        >
+                            Delete
+                        </Button>
+                    </Space>
+                ),
+            },
+        ],
+        []
+    );
 
     function applyFilter() {
-        router.get(route('admin.institutions.index'), { search }, { preserveState: true, replace: true });
+        router.get(
+            route('admin.institutions.index'),
+            { search },
+            { preserveState: true, replace: true }
+        );
     }
 
     function deleteInstitution(id) {
@@ -110,12 +142,16 @@ export default function InstitutionsIndex({ institutions, filters }) {
 
     return (
         <AuthenticatedLayout
-            header={(
+            header={
                 <AdminPageHeader
                     title="Institution Management"
-                    actions={(
+                    actions={
                         <Space>
-                            <a href={route('admin.institutions.export', { search: search || undefined })}>
+                            <a
+                                href={route('admin.institutions.export', {
+                                    search: search || undefined,
+                                })}
+                            >
                                 <Button size="large" icon={<DownloadOutlined />}>
                                     Export CSV
                                 </Button>
@@ -126,46 +162,78 @@ export default function InstitutionsIndex({ institutions, filters }) {
                                 </Button>
                             </Link>
                         </Space>
-                    )}
+                    }
                 />
-            )}
+            }
         >
             <Head title="Institutions" />
 
             <div className="space-y-4">
-                    {flash?.success && <Alert type="success" showIcon message={flash.success} />}
-                    {flash?.error && <Alert type="error" showIcon message={flash.error} />}
+                {flash?.success && <Alert type="success" showIcon message={flash.success} />}
+                {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
-                    <AdminFilterCard
-                        title="Manage institution records"
-                        description="Maintain school profiles before assigning HEI accounts and tracking research ownership."
-                        controls={(
-                            <Row gutter={[12, 12]}>
-                                <Col xs={24} md={18}>
-                                    <Input
-                                        size="large"
-                                        aria-label="Search institutions by name or acronym"
-                                        value={search}
-                                        placeholder="Search by name or acronym"
-                                        prefix={<SearchOutlined />}
-                                        onChange={(event) => setSearch(event.target.value)}
-                                        onPressEnter={applyFilter}
-                                    />
-                                </Col>
-                                <Col xs={24} md={6}>
-                                    <Button size="large" block type="primary" onClick={applyFilter} icon={<BankOutlined />}>
-                                        Apply
-                                    </Button>
-                                </Col>
-                            </Row>
-                        )}
+                <AdminFilterCard
+                    title="Manage institution records"
+                    description="Maintain school profiles before assigning HEI accounts and tracking research ownership."
+                    controls={
+                        <Row gutter={[12, 12]}>
+                            <Col xs={24} md={18}>
+                                <Input
+                                    size="large"
+                                    aria-label="Search institutions by name or acronym"
+                                    value={search}
+                                    placeholder="Search by name or acronym"
+                                    prefix={<SearchOutlined />}
+                                    onChange={(event) => setSearch(event.target.value)}
+                                    onPressEnter={applyFilter}
+                                />
+                            </Col>
+                            <Col xs={24} md={6}>
+                                <Button
+                                    size="large"
+                                    block
+                                    type="primary"
+                                    onClick={applyFilter}
+                                    icon={<BankOutlined />}
+                                >
+                                    Apply
+                                </Button>
+                            </Col>
+                        </Row>
+                    }
+                />
+
+                <AdminTableCard
+                    summary={`${institutions.total} institution${institutions.total === 1 ? '' : 's'} found`}
+                >
+                    <Table
+                        rowKey="id"
+                        size="middle"
+                        columns={columns}
+                        dataSource={tableData}
+                        pagination={{
+                            current: institutions.current_page,
+                            pageSize: institutions.per_page,
+                            total: institutions.total,
+                            onChange: (page) =>
+                                router.get(
+                                    route('admin.institutions.index'),
+                                    { search, page },
+                                    { preserveState: true, replace: true }
+                                ),
+                        }}
+                        scroll={{ x: 860 }}
+                        locale={{
+                            emptyText: (
+                                <EmptyState
+                                    title="No institutions found"
+                                    description="Try a different keyword or add a new institution."
+                                />
+                            ),
+                        }}
                     />
-
-                    <AdminTableCard summary={`${institutions.total} institution${institutions.total === 1 ? '' : 's'} found`}>
-                        <Table rowKey="id" size="middle" columns={columns} dataSource={tableData} pagination={{ current: institutions.current_page, pageSize: institutions.per_page, total: institutions.total, onChange: (page) => router.get(route('admin.institutions.index'), { search, page }, { preserveState: true, replace: true }) }} scroll={{ x: 860 }} locale={{ emptyText: <EmptyState title="No institutions found" description="Try a different keyword or add a new institution." /> }} />
-                    </AdminTableCard>
+                </AdminTableCard>
             </div>
         </AuthenticatedLayout>
     );
 }
-

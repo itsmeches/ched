@@ -148,7 +148,7 @@ class Phase6RejectionRevisionLoopApiTest extends TestCase
 
         $otherInstitution = Institution::query()->create([
             'name' => 'Quezon External Institute',
-            'code' => 'QEI-' . fake()->unique()->numerify('###'),
+            'code' => 'QEI-'.fake()->unique()->numerify('###'),
         ]);
 
         $otherHei = User::factory()->create([
@@ -199,7 +199,7 @@ class Phase6RejectionRevisionLoopApiTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Laguna Polytechnic Institute',
-            'code' => 'LPI-' . fake()->unique()->numerify('###'),
+            'code' => 'LPI-'.fake()->unique()->numerify('###'),
         ]);
 
         $ched = User::factory()->create([

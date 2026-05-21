@@ -20,7 +20,9 @@ export default function ConfirmPassword() {
             <Head title="Confirm Password" />
 
             <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Confirm password</h2>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                    Confirm password
+                </h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     For security, please confirm your password before continuing.
                 </p>
@@ -44,7 +46,14 @@ export default function ConfirmPassword() {
                     </Form.Item>
                 </Form>
 
-                <Button htmlType="submit" type="primary" block size="large" loading={processing} disabled={processing}>
+                <Button
+                    htmlType="submit"
+                    type="primary"
+                    block
+                    size="large"
+                    loading={processing}
+                    disabled={processing}
+                >
                     {processing ? 'Confirming…' : 'Confirm'}
                 </Button>
             </form>

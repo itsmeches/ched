@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 
 export default forwardRef(function TextInput(
     { type = 'text', className = '', isFocused = false, error = false, ...props },
-    ref,
+    ref
 ) {
     const localRef = useRef(null);
 
@@ -27,7 +27,12 @@ export default forwardRef(function TextInput(
             {...props}
             type={type}
             aria-invalid={error || undefined}
-            className={base + borderCls + ' focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-[#0a0f1e] ' + className}
+            className={
+                base +
+                borderCls +
+                ' focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-[#0a0f1e] ' +
+                className
+            }
             ref={localRef}
         />
     );

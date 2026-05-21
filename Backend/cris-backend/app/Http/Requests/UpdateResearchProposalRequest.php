@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 class UpdateResearchProposalRequest extends FormRequest
 {
     private const PHONE_PATTERN = '/^\d{11}$/';
+
     private const PHONE_LIST_PATTERN = '/^\d{11}(?:\s*,\s*\d{11})*$/';
 
     public function authorize(): bool
@@ -36,21 +37,21 @@ class UpdateResearchProposalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'           => ['required', 'string', 'max:255', 'regex:/\\S/'],
-            'authors'         => ['required', 'string', 'max:500'],
-            'author_email'    => ['nullable', 'email', 'max:255'],
-            'author_phone'    => ['nullable', 'string', 'size:11', 'regex:' . self::PHONE_PATTERN],
-            'co_authors'      => ['nullable', 'string', 'max:500'],
+            'title' => ['required', 'string', 'max:255', 'regex:/\\S/'],
+            'authors' => ['required', 'string', 'max:500'],
+            'author_email' => ['nullable', 'email', 'max:255'],
+            'author_phone' => ['nullable', 'string', 'size:11', 'regex:'.self::PHONE_PATTERN],
+            'co_authors' => ['nullable', 'string', 'max:500'],
             'co_author_emails' => ['nullable', 'string', 'max:1000'],
-            'co_author_phones' => ['nullable', 'string', 'max:500', 'regex:' . self::PHONE_LIST_PATTERN],
-            'abstract'   => ['required', 'string'],
-            'keywords'   => ['nullable', 'string', 'max:500'],
+            'co_author_phones' => ['nullable', 'string', 'max:500', 'regex:'.self::PHONE_LIST_PATTERN],
+            'abstract' => ['required', 'string'],
+            'keywords' => ['nullable', 'string', 'max:500'],
             'research_category' => ['required', 'string', Rule::exists('research_categories', 'value')->where('is_active', true)],
             'category_type' => ['nullable', 'string'],
             'discipline' => ['required', 'string', Rule::exists('disciplines', 'code')->where('is_active', true)],
-            'school'     => ['required', 'string', 'max:255'],
-            'year'       => ['required', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
-            'pdf_file'   => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'school' => ['required', 'string', 'max:255'],
+            'year' => ['required', 'integer', 'min:1900', 'max:'.(date('Y') + 1)],
+            'pdf_file' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ];
     }
 

@@ -22,12 +22,12 @@ class NotificationFlowWebTest extends TestCase
         $notification = SimpleNotification::query()->create([
             'user_id' => $user->id,
             'message' => 'Review this proposal update.',
-            'link_url' => route('research.index') . '#review-decision',
+            'link_url' => route('research.index').'#review-decision',
             'type' => 'review_action_needed',
             'is_read' => false,
         ]);
 
-        $target = route('research.index', ['tab' => 'mine']) . '#review-decision';
+        $target = route('research.index', ['tab' => 'mine']).'#review-decision';
 
         $response = $this->actingAs($user)
             ->post(route('notifications.read-one', ['id' => $notification->id]), ['redirect' => $target]);
@@ -152,7 +152,7 @@ class NotificationFlowWebTest extends TestCase
         SimpleNotification::query()->create([
             'user_id' => $user->id,
             'message' => 'Approval decision received.',
-            'link_url' => route('research.index') . '#research-actions',
+            'link_url' => route('research.index').'#research-actions',
             'type' => 'research_approved',
             'is_read' => false,
         ]);
@@ -164,7 +164,7 @@ class NotificationFlowWebTest extends TestCase
             ->component('Profile/Edit')
             ->has('notifications', 1)
             ->where('notifications.0.type', 'research_approved')
-            ->where('notifications.0.link_url', route('research.index') . '#research-actions')
+            ->where('notifications.0.link_url', route('research.index').'#research-actions')
         );
     }
 
@@ -199,7 +199,7 @@ class NotificationFlowWebTest extends TestCase
         $this->assertDatabaseHas('notifications', [
             'user_id' => $actors['hei']->id,
             'type' => 'review_action_needed',
-            'link_url' => route('research.show', $proposal->id) . '#review-decision',
+            'link_url' => route('research.show', $proposal->id).'#review-decision',
             'is_read' => false,
         ]);
     }
@@ -211,7 +211,7 @@ class NotificationFlowWebTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Laguna Notification University',
-            'code' => 'LNU-' . fake()->unique()->numerify('###'),
+            'code' => 'LNU-'.fake()->unique()->numerify('###'),
         ]);
 
         /** @var User $ched */

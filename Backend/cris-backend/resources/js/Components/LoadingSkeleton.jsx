@@ -6,11 +6,7 @@
  *   <LoadingSkeleton className="h-6 w-40" />
  *   <LoadingSkeleton lines={3} />
  */
-export default function LoadingSkeleton({
-    className = '',
-    lines = 1,
-    gap = 'gap-2',
-}) {
+export default function LoadingSkeleton({ className = '', lines = 1, gap = 'gap-2' }) {
     if (lines > 1) {
         return (
             <div className={`flex flex-col ${gap}`}>

@@ -165,7 +165,7 @@ class HierarchicalAccountController extends Controller
         ]);
 
         return redirect()->route('accounts.create')
-            ->with('success', $this->roleLabel($targetRole) . ' account created successfully.');
+            ->with('success', $this->roleLabel($targetRole).' account created successfully.');
     }
 
     private function roleLabel(string $role): string
@@ -194,6 +194,7 @@ class HierarchicalAccountController extends Controller
             $paginator->getCollection()->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', 'CHED');
                 $row->setAttribute('can_manage', $row->created_by === $creator->id);
+
                 return $row;
             });
 
@@ -204,16 +205,16 @@ class HierarchicalAccountController extends Controller
                 'rows' => $paginator->items(),
                 'pagination' => [
                     'current_page' => $paginator->currentPage(),
-                    'per_page'     => $paginator->perPage(),
-                    'total'        => $paginator->total(),
-                    'page_param'   => 'hei_page',
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'page_param' => 'hei_page',
                 ],
             ]];
         }
 
         if ($creator->role === User::ROLE_HEI) {
-            $facultyPage  = (int) ($request?->input('faculty_page', 1));
-            $studentPage  = (int) ($request?->input('student_page', 1));
+            $facultyPage = (int) ($request?->input('faculty_page', 1));
+            $studentPage = (int) ($request?->input('student_page', 1));
 
             $facultyPaginator = User::withTrashed()
                 ->with('institution:id,name')
@@ -225,6 +226,7 @@ class HierarchicalAccountController extends Controller
             $facultyPaginator->getCollection()->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', 'HEI');
                 $row->setAttribute('can_manage', $row->created_by === $creator->id);
+
                 return $row;
             });
 
@@ -241,6 +243,7 @@ class HierarchicalAccountController extends Controller
             $studentPaginator->getCollection()->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', $row->faculty?->name ?? 'Unknown Faculty');
                 $row->setAttribute('can_manage', $row->created_by === $creator->id);
+
                 return $row;
             });
 
@@ -252,9 +255,9 @@ class HierarchicalAccountController extends Controller
                     'rows' => $facultyPaginator->items(),
                     'pagination' => [
                         'current_page' => $facultyPaginator->currentPage(),
-                        'per_page'     => $facultyPaginator->perPage(),
-                        'total'        => $facultyPaginator->total(),
-                        'page_param'   => 'faculty_page',
+                        'per_page' => $facultyPaginator->perPage(),
+                        'total' => $facultyPaginator->total(),
+                        'page_param' => 'faculty_page',
                     ],
                 ],
                 [
@@ -264,9 +267,9 @@ class HierarchicalAccountController extends Controller
                     'rows' => $studentPaginator->items(),
                     'pagination' => [
                         'current_page' => $studentPaginator->currentPage(),
-                        'per_page'     => $studentPaginator->perPage(),
-                        'total'        => $studentPaginator->total(),
-                        'page_param'   => 'student_page',
+                        'per_page' => $studentPaginator->perPage(),
+                        'total' => $studentPaginator->total(),
+                        'page_param' => 'student_page',
                     ],
                 ],
             ];
@@ -284,6 +287,7 @@ class HierarchicalAccountController extends Controller
             $paginator->getCollection()->transform(function (User $row) use ($creator) {
                 $row->setAttribute('parent_label', $creator->name);
                 $row->setAttribute('can_manage', $row->created_by === $creator->id);
+
                 return $row;
             });
 
@@ -294,9 +298,9 @@ class HierarchicalAccountController extends Controller
                 'rows' => $paginator->items(),
                 'pagination' => [
                     'current_page' => $paginator->currentPage(),
-                    'per_page'     => $paginator->perPage(),
-                    'total'        => $paginator->total(),
-                    'page_param'   => 'student_page',
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'page_param' => 'student_page',
                 ],
             ]];
         }
@@ -335,7 +339,7 @@ class HierarchicalAccountController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email,' . $target->id],
+            'email' => ['required', 'email', 'unique:users,email,'.$target->id],
         ]);
 
         $target->update($data);

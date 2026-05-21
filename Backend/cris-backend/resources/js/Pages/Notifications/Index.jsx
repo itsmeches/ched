@@ -2,7 +2,18 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import EmptyState from '@/Components/EmptyState';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Alert, Badge, Button, Card, Pagination, Segmented, Select, Space, Tag, Typography } from 'antd';
+import {
+    Alert,
+    Badge,
+    Button,
+    Card,
+    Pagination,
+    Segmented,
+    Select,
+    Space,
+    Tag,
+    Typography,
+} from 'antd';
 import {
     BellOutlined,
     CheckCircleOutlined,
@@ -23,15 +34,27 @@ export default function NotificationsIndex({ notifications, filters, typeOptions
     const items = notifications?.data ?? [];
 
     const setFilter = (filter) => {
-        router.get(route('notifications.index'), { ...filters, filter }, { preserveState: true, replace: true });
+        router.get(
+            route('notifications.index'),
+            { ...filters, filter },
+            { preserveState: true, replace: true }
+        );
     };
 
     const setType = (type) => {
-        router.get(route('notifications.index'), { ...filters, type: type || '' }, { preserveState: true, replace: true });
+        router.get(
+            route('notifications.index'),
+            { ...filters, type: type || '' },
+            { preserveState: true, replace: true }
+        );
     };
 
     const goPage = (page) => {
-        router.get(route('notifications.index'), { ...filters, page }, { preserveState: true, replace: true });
+        router.get(
+            route('notifications.index'),
+            { ...filters, page },
+            { preserveState: true, replace: true }
+        );
     };
 
     const markRead = (id) => {
@@ -49,13 +72,18 @@ export default function NotificationsIndex({ notifications, filters, typeOptions
 
     return (
         <AuthenticatedLayout
-            header={(
+            header={
                 <AdminPageHeader
                     title="Notifications"
                     subtitle="Your activity feed across submissions, reviews, and account updates."
-                    actions={(
+                    actions={
                         <Space>
-                            <Button icon={<ReloadOutlined />} onClick={() => router.reload({ only: ['notifications', 'unreadCount'] })}>
+                            <Button
+                                icon={<ReloadOutlined />}
+                                onClick={() =>
+                                    router.reload({ only: ['notifications', 'unreadCount'] })
+                                }
+                            >
                                 Refresh
                             </Button>
                             <Button
@@ -67,9 +95,9 @@ export default function NotificationsIndex({ notifications, filters, typeOptions
                                 Mark all read
                             </Button>
                         </Space>
-                    )}
+                    }
                 />
-            )}
+            }
         >
             <Head title="Notifications" />
 
@@ -86,7 +114,12 @@ export default function NotificationsIndex({ notifications, filters, typeOptions
                                 {
                                     label: (
                                         <span>
-                                            Unread <Badge count={unreadCount} size="small" offset={[6, -2]} />
+                                            Unread{' '}
+                                            <Badge
+                                                count={unreadCount}
+                                                size="small"
+                                                offset={[6, -2]}
+                                            />
                                         </span>
                                     ),
                                     value: 'unread',
@@ -102,7 +135,10 @@ export default function NotificationsIndex({ notifications, filters, typeOptions
                                 style={{ minWidth: 220 }}
                                 value={filters.type || undefined}
                                 onChange={(v) => setType(v ?? '')}
-                                options={typeOptions.map((opt) => ({ value: opt.value, label: opt.label }))}
+                                options={typeOptions.map((opt) => ({
+                                    value: opt.value,
+                                    label: opt.label,
+                                }))}
                             />
                         )}
                     </div>
@@ -116,7 +152,10 @@ export default function NotificationsIndex({ notifications, filters, typeOptions
                             description="You're all caught up. New activity will appear here."
                         />
                     ) : (
-                        <ul className="divide-y divide-gray-200 dark:divide-gray-700" aria-label="Notifications">
+                        <ul
+                            className="divide-y divide-gray-200 dark:divide-gray-700"
+                            aria-label="Notifications"
+                        >
                             {items.map((n) => (
                                 <li key={n.id} className="py-3 flex items-start gap-3">
                                     <BellOutlined
@@ -126,7 +165,9 @@ export default function NotificationsIndex({ notifications, filters, typeOptions
                                     <div className="flex-1 min-w-0">
                                         <div className="flex flex-wrap items-center gap-2 mb-1">
                                             {!n.is_read && <Tag color="blue">New</Tag>}
-                                            {n.type && <Tag>{String(n.type).replace(/_/g, ' ')}</Tag>}
+                                            {n.type && (
+                                                <Tag>{String(n.type).replace(/_/g, ' ')}</Tag>
+                                            )}
                                             <Text type="secondary" className="text-xs">
                                                 {formatDate(n.created_at, 'MMM D, YYYY h:mm A')}
                                             </Text>
@@ -141,17 +182,27 @@ export default function NotificationsIndex({ notifications, filters, typeOptions
                                                     {n.message}
                                                 </Link>
                                             ) : (
-                                                <span className={n.is_read ? '' : 'font-semibold'}>{n.message}</span>
+                                                <span className={n.is_read ? '' : 'font-semibold'}>
+                                                    {n.message}
+                                                </span>
                                             )}
                                         </Text>
                                     </div>
                                     <Space size="small">
                                         {n.is_read ? (
-                                            <Button size="small" onClick={() => markUnread(n.id)} aria-label="Mark as unread">
+                                            <Button
+                                                size="small"
+                                                onClick={() => markUnread(n.id)}
+                                                aria-label="Mark as unread"
+                                            >
                                                 Unread
                                             </Button>
                                         ) : (
-                                            <Button size="small" onClick={() => markRead(n.id)} aria-label="Mark as read">
+                                            <Button
+                                                size="small"
+                                                onClick={() => markRead(n.id)}
+                                                aria-label="Mark as read"
+                                            >
                                                 Read
                                             </Button>
                                         )}

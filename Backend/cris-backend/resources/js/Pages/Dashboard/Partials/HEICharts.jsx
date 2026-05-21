@@ -21,7 +21,12 @@ function truncateName(value) {
     return value.length > 16 ? `${value.slice(0, 16)}...` : value;
 }
 
-export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends = [], facultyBreakdown = [] }) {
+export default function HEICharts({
+    stats = {},
+    stageCounts = {},
+    monthlyTrends = [],
+    facultyBreakdown = [],
+}) {
     const { dark } = useTheme();
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     const surfaceColor = dark ? '#0f172a' : '#f8fafc';
@@ -51,7 +56,9 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
     };
 
     const noData = (
-        <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div
+            style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
             <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                 description={<Typography.Text type="secondary">No data available</Typography.Text>}
@@ -90,26 +97,83 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
         <div className="space-y-4 dashboard-charts-grid">
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={16}>
-                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Institution Submission Trend" extra={<Typography.Text type="secondary">Last 12 months</Typography.Text>} style={{ animationDelay: '100ms' }}>
+                    <Card
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        title="Institution Submission Trend"
+                        extra={<Typography.Text type="secondary">Last 12 months</Typography.Text>}
+                        style={{ animationDelay: '100ms' }}
+                    >
                         {monthlyTrends.length > 0 ? (
                             <ResponsiveContainer width="100%" height={300}>
                                 <AreaChart data={monthlyTrends}>
                                     <defs>
-                                        <linearGradient id="heiSubmissions" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor={accentPrimary} stopOpacity={0.45} />
-                                            <stop offset="95%" stopColor={accentPrimary} stopOpacity={0} />
+                                        <linearGradient
+                                            id="heiSubmissions"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="5%"
+                                                stopColor={accentPrimary}
+                                                stopOpacity={0.45}
+                                            />
+                                            <stop
+                                                offset="95%"
+                                                stopColor={accentPrimary}
+                                                stopOpacity={0}
+                                            />
                                         </linearGradient>
-                                        <linearGradient id="heiApproved" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#16a34a" stopOpacity={0.35} />
-                                            <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+                                        <linearGradient
+                                            id="heiApproved"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="5%"
+                                                stopColor="#16a34a"
+                                                stopOpacity={0.35}
+                                            />
+                                            <stop
+                                                offset="95%"
+                                                stopColor="#16a34a"
+                                                stopOpacity={0}
+                                            />
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke={borderColor} />
                                     <XAxis dataKey="month" stroke={axisColor} />
                                     <YAxis stroke={axisColor} allowDecimals={false} />
-                                    <Tooltip contentStyle={{ backgroundColor: surfaceColor, border: `1px solid ${borderColor}`, borderRadius: 8 }} labelStyle={{ fontWeight: 600 }} />
-                                    <Area type="monotone" dataKey="submissions" stroke={accentPrimary} strokeWidth={2} fill="url(#heiSubmissions)" name="Submissions" onClick={onMonthClick} />
-                                    <Area type="monotone" dataKey="approved" stroke="#16a34a" strokeWidth={2} fill="url(#heiApproved)" name="Approved" onClick={onMonthClick} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: surfaceColor,
+                                            border: `1px solid ${borderColor}`,
+                                            borderRadius: 8,
+                                        }}
+                                        labelStyle={{ fontWeight: 600 }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="submissions"
+                                        stroke={accentPrimary}
+                                        strokeWidth={2}
+                                        fill="url(#heiSubmissions)"
+                                        name="Submissions"
+                                        onClick={onMonthClick}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="approved"
+                                        stroke="#16a34a"
+                                        strokeWidth={2}
+                                        fill="url(#heiApproved)"
+                                        name="Approved"
+                                        onClick={onMonthClick}
+                                    />
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
@@ -119,20 +183,47 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
                 </Col>
 
                 <Col xs={24} xl={8}>
-                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Status Distribution" extra={<Typography.Text type="secondary">Click to filter</Typography.Text>} style={{ animationDelay: '145ms' }}>
+                    <Card
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        title="Status Distribution"
+                        extra={<Typography.Text type="secondary">Click to filter</Typography.Text>}
+                        style={{ animationDelay: '145ms' }}
+                    >
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
-                                <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} onClick={onStatusClick}>
+                                <Pie
+                                    data={statusData}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={100}
+                                    paddingAngle={3}
+                                    onClick={onStatusClick}
+                                >
                                     {statusData.map((entry) => (
                                         <Cell key={entry.name} fill={entry.fill} />
                                     ))}
                                 </Pie>
-                                <Tooltip contentStyle={{ backgroundColor: surfaceColor, border: `1px solid ${borderColor}`, borderRadius: 8 }} labelStyle={{ fontWeight: 600 }} />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: surfaceColor,
+                                        border: `1px solid ${borderColor}`,
+                                        borderRadius: 8,
+                                    }}
+                                    labelStyle={{ fontWeight: 600 }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="flex flex-wrap justify-center gap-2 pt-3">
                             {statusData.map((item) => (
-                                <Tag key={item.name} color={item.fill} style={{ paddingInline: 10, paddingBlock: 4 }}>
+                                <Tag
+                                    key={item.name}
+                                    color={item.fill}
+                                    style={{ paddingInline: 10, paddingBlock: 4 }}
+                                >
                                     {item.name}: {item.value}
                                 </Tag>
                             ))}
@@ -143,13 +234,26 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
 
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={12}>
-                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Review Stage Pipeline" extra={<Typography.Text type="secondary">Open by stage</Typography.Text>} style={{ animationDelay: '190ms' }}>
+                    <Card
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        title="Review Stage Pipeline"
+                        extra={<Typography.Text type="secondary">Open by stage</Typography.Text>}
+                        style={{ animationDelay: '190ms' }}
+                    >
                         <ResponsiveContainer width="100%" height={280}>
                             <BarChart data={stageFlow}>
                                 <CartesianGrid strokeDasharray="3 3" stroke={borderColor} />
                                 <XAxis dataKey="stage" stroke={axisColor} />
                                 <YAxis stroke={axisColor} allowDecimals={false} />
-                                <Tooltip contentStyle={{ backgroundColor: surfaceColor, border: `1px solid ${borderColor}`, borderRadius: 8 }} labelStyle={{ fontWeight: 600 }} />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: surfaceColor,
+                                        border: `1px solid ${borderColor}`,
+                                        borderRadius: 8,
+                                    }}
+                                    labelStyle={{ fontWeight: 600 }}
+                                />
                                 <Bar
                                     dataKey="count"
                                     fill={accentPrimary}
@@ -167,14 +271,35 @@ export default function HEICharts({ stats = {}, stageCounts = {}, monthlyTrends 
                 </Col>
 
                 <Col xs={24} xl={12}>
-                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Faculty Submission Breakdown" extra={<Typography.Text type="secondary">By volume</Typography.Text>} style={{ animationDelay: '235ms' }}>
+                    <Card
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        title="Faculty Submission Breakdown"
+                        extra={<Typography.Text type="secondary">By volume</Typography.Text>}
+                        style={{ animationDelay: '235ms' }}
+                    >
                         {facultyBreakdown.length > 0 ? (
                             <ResponsiveContainer width="100%" height={280}>
                                 <BarChart data={facultyBreakdown}>
                                     <CartesianGrid strokeDasharray="3 3" stroke={borderColor} />
-                                    <XAxis dataKey="faculty" tickFormatter={truncateName} stroke={axisColor} angle={-25} textAnchor="end" height={80} interval={0} />
+                                    <XAxis
+                                        dataKey="faculty"
+                                        tickFormatter={truncateName}
+                                        stroke={axisColor}
+                                        angle={-25}
+                                        textAnchor="end"
+                                        height={80}
+                                        interval={0}
+                                    />
                                     <YAxis stroke={axisColor} allowDecimals={false} />
-                                    <Tooltip contentStyle={{ backgroundColor: surfaceColor, border: `1px solid ${borderColor}`, borderRadius: 8 }} labelStyle={{ fontWeight: 600 }} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: surfaceColor,
+                                            border: `1px solid ${borderColor}`,
+                                            borderRadius: 8,
+                                        }}
+                                        labelStyle={{ fontWeight: 600 }}
+                                    />
                                     <Bar
                                         dataKey="submissions"
                                         fill="#d97706"

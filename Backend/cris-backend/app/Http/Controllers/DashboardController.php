@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ResearchProposal;
-use App\Models\User;
-use App\Models\EditPermissionRequest;
 use App\Models\Discipline;
+use App\Models\EditPermissionRequest;
 use App\Models\Institution;
+use App\Models\ResearchProposal;
 use App\Models\SimpleNotification;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Response;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
@@ -34,11 +34,11 @@ class DashboardController extends Controller
 
         return match ($user->role) {
             'super_admin' => redirect()->route('admin.dashboard'),
-            'ched'        => redirect()->route('ched.dashboard'),
-            'hei'         => redirect()->route('hei.dashboard'),
-            'faculty'     => redirect()->route('faculty.dashboard'),
-            'student'     => redirect()->route('student.dashboard'),
-            default       => redirect()->route('hei.dashboard'),
+            'ched' => redirect()->route('ched.dashboard'),
+            'hei' => redirect()->route('hei.dashboard'),
+            'faculty' => redirect()->route('faculty.dashboard'),
+            'student' => redirect()->route('student.dashboard'),
+            default => redirect()->route('hei.dashboard'),
         };
     }
 
@@ -57,10 +57,10 @@ class DashboardController extends Controller
         $totalCount = (clone $base)->count();
 
         $stats = [
-            'total'        => $totalCount,
-            'pending'      => (clone $base)->whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
-            'approved'     => $approvedCount,
-            'rejected'     => (clone $base)->where('status', 'rejected')->count(),
+            'total' => $totalCount,
+            'pending' => (clone $base)->whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
+            'approved' => $approvedCount,
+            'rejected' => (clone $base)->where('status', 'rejected')->count(),
             'uploadedThisMonth' => (clone $base)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count(),
             'approvalRate' => $totalCount > 0 ? round(($approvedCount / $totalCount) * 100, 1) : 0,
         ];
@@ -95,7 +95,7 @@ class DashboardController extends Controller
             ->groupBy('month_key')
             ->map(function ($group, $monthKey) {
                 return [
-                    'month' => date('M Y', strtotime($monthKey . '-01')),
+                    'month' => date('M Y', strtotime($monthKey.'-01')),
                     'uploads' => $group->sum('count'),
                     'approved' => $group->where('status', ResearchProposal::STATUS_APPROVED)->sum('count'),
                     'pending' => $group->whereIn('status', ResearchProposal::PENDING_STATUSES)->sum('count'),
@@ -105,12 +105,12 @@ class DashboardController extends Controller
             ->values();
 
         return Inertia::render('Dashboard/Student', [
-            'stats'         => $stats,
-            'stageCounts'   => $stageCounts,
+            'stats' => $stats,
+            'stageCounts' => $stageCounts,
             'recentUploads' => $recentUploads,
-            'pendingQueue'  => $pendingQueue,
+            'pendingQueue' => $pendingQueue,
             'monthlyActivity' => $monthlyActivity,
-            'filters'       => $filters,
+            'filters' => $filters,
             'filterOptions' => $filterOptions,
         ]);
     }
@@ -178,7 +178,7 @@ class DashboardController extends Controller
             ->groupBy('month_key')
             ->map(function ($group, $monthKey) {
                 return [
-                    'month' => date('M Y', strtotime($monthKey . '-01')),
+                    'month' => date('M Y', strtotime($monthKey.'-01')),
                     'submissions' => $group->sum('count'),
                     'approved' => $group->where('status', ResearchProposal::STATUS_APPROVED)->sum('count'),
                     'pending' => $group->whereIn('status', ResearchProposal::PENDING_STATUSES)->sum('count'),
@@ -270,7 +270,7 @@ class DashboardController extends Controller
             ->groupBy('month_key')
             ->map(function ($group, $monthKey) {
                 return [
-                    'month' => date('M Y', strtotime($monthKey . '-01')),
+                    'month' => date('M Y', strtotime($monthKey.'-01')),
                     'submissions' => $group->sum('count'),
                     'approved' => $group->where('status', ResearchProposal::STATUS_APPROVED)->sum('count'),
                     'pending' => $group->whereIn('status', ResearchProposal::PENDING_STATUSES)->sum('count'),
@@ -389,7 +389,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * @param array{year:string, hei_id:string, discipline_code:string, status:string} $filters
+     * @param  array{year:string, hei_id:string, discipline_code:string, status:string}  $filters
      */
     private function applyDashboardFilters($query, array $filters): void
     {
@@ -402,6 +402,7 @@ class DashboardController extends Controller
         $query->when($filters['status'] !== '', function (Builder $inner) use ($filters) {
             if ($filters['status'] === 'pending') {
                 $inner->whereIn('status', ResearchProposal::PENDING_STATUSES);
+
                 return;
             }
 
@@ -424,12 +425,12 @@ class DashboardController extends Controller
         $resolvedCount = (clone $base)->whereIn('status', [ResearchProposal::STATUS_APPROVED, ResearchProposal::STATUS_REJECTED])->count();
 
         $stats = [
-            'pending'       => (clone $base)->whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
-            'approved'      => $approvedCount,
-            'rejected'      => (clone $base)->where('status', ResearchProposal::STATUS_REJECTED)->count(),
-            'total'         => (clone $base)->count(),
+            'pending' => (clone $base)->whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
+            'approved' => $approvedCount,
+            'rejected' => (clone $base)->where('status', ResearchProposal::STATUS_REJECTED)->count(),
+            'total' => (clone $base)->count(),
             'reviewedToday' => (clone $base)->whereDate('reviewed_at', now()->toDateString())->count(),
-            'approvalRate'  => $resolvedCount > 0 ? round(($approvedCount / $resolvedCount) * 100, 1) : 0,
+            'approvalRate' => $resolvedCount > 0 ? round(($approvedCount / $resolvedCount) * 100, 1) : 0,
         ];
 
         $stageCounts = [
@@ -450,9 +451,9 @@ class DashboardController extends Controller
             ->get(['id', 'title', 'authors', 'year', 'school', 'status', 'remarks', 'submitted_by', 'institution_id', 'submitted_at', 'created_at', 'updated_at']);
 
         $editRequests = EditPermissionRequest::with([
-                'requester:id,name',
-                'proposal:id,title',
-            ])
+            'requester:id,name',
+            'proposal:id,title',
+        ])
             ->where('status', 'pending')
             ->latest()
             ->get();
@@ -466,7 +467,7 @@ class DashboardController extends Controller
             ->get()
             ->groupBy('month_key')
             ->map(fn ($group, $monthKey) => [
-                'month' => date('M Y', strtotime($monthKey . '-01')),
+                'month' => date('M Y', strtotime($monthKey.'-01')),
                 'submitted' => $group->where('status', 'submitted')->sum('count'),
                 'approved' => $group->where('status', 'approved')->sum('count'),
                 'rejected' => $group->where('status', 'rejected')->sum('count'),
@@ -497,15 +498,15 @@ class DashboardController extends Controller
         ];
 
         return Inertia::render('Dashboard/CHED', [
-            'stats'               => $stats,
-            'stageCounts'         => $stageCounts,
-            'forReview'           => $forReview,
-            'editRequests'        => $editRequests,
-            'monthlyTrends'       => $monthlyTrends,
+            'stats' => $stats,
+            'stageCounts' => $stageCounts,
+            'forReview' => $forReview,
+            'editRequests' => $editRequests,
+            'monthlyTrends' => $monthlyTrends,
             'disciplineBreakdown' => $disciplineBreakdown,
-            'approvalFunnel'      => $approvalFunnel,
-            'filters'             => $filters,
-            'filterOptions'       => $filterOptions,
+            'approvalFunnel' => $approvalFunnel,
+            'filters' => $filters,
+            'filterOptions' => $filterOptions,
         ]);
     }
 
@@ -542,17 +543,17 @@ class DashboardController extends Controller
         }
 
         $stats = [
-            'users'        => (clone $userBase)->count(),
+            'users' => (clone $userBase)->count(),
             'institutions' => Institution::count(),
-            'proposals'    => $proposalTotal,
-            'approved'     => $approvedTotal,
-            'pending'      => (clone $base)->whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
-            'rejected'     => (clone $base)->where('status', ResearchProposal::STATUS_REJECTED)->count(),
-            'heiUsers'     => (clone $userBase)->where('role', 'hei')->count(),
+            'proposals' => $proposalTotal,
+            'approved' => $approvedTotal,
+            'pending' => (clone $base)->whereIn('status', ResearchProposal::PENDING_STATUSES)->count(),
+            'rejected' => (clone $base)->where('status', ResearchProposal::STATUS_REJECTED)->count(),
+            'heiUsers' => (clone $userBase)->where('role', 'hei')->count(),
             'facultyUsers' => (clone $userBase)->where('role', 'faculty')->count(),
             'studentUsers' => (clone $userBase)->where('role', 'student')->count(),
-            'chedUsers'    => (clone $userBase)->where('role', 'ched')->count(),
-            'admins'       => (clone $userBase)->where('role', 'super_admin')->count(),
+            'chedUsers' => (clone $userBase)->where('role', 'ched')->count(),
+            'admins' => (clone $userBase)->where('role', 'super_admin')->count(),
             'approvalRate' => $proposalTotal > 0 ? round(($approvedTotal / $proposalTotal) * 100, 1) : 0,
         ];
 
@@ -594,7 +595,7 @@ class DashboardController extends Controller
             ->groupBy('month_key')
             ->map(function ($group, $monthKey) {
                 return [
-                    'month' => date('M Y', strtotime($monthKey . '-01')),
+                    'month' => date('M Y', strtotime($monthKey.'-01')),
                     'submissions' => $group->sum('count'),
                     'approved' => $group->where('status', ResearchProposal::STATUS_APPROVED)->sum('count'),
                     'pending' => $group->whereIn('status', ResearchProposal::PENDING_STATUSES)->sum('count'),
@@ -644,24 +645,24 @@ class DashboardController extends Controller
             ->values();
 
         return Inertia::render('Dashboard/SuperAdmin', [
-            'stats'               => $stats,
-            'recentUsers'         => $recentUsers,
-            'recentProposals'     => $recentProposals,
+            'stats' => $stats,
+            'recentUsers' => $recentUsers,
+            'recentProposals' => $recentProposals,
             'institutionOverview' => $institutionOverview,
-            'monthlyTrends'       => $monthlyTrends,
-            'roleDistribution'    => $roleDistribution,
+            'monthlyTrends' => $monthlyTrends,
+            'roleDistribution' => $roleDistribution,
             'disciplineBreakdown' => $disciplineBreakdown,
             'institutionPerformance' => $institutionPerformance,
-            'institutions'        => Institution::orderBy('name')->get(['id', 'name', 'code']),
-            'roles'               => [
+            'institutions' => Institution::orderBy('name')->get(['id', 'name', 'code']),
+            'roles' => [
                 ['value' => 'hei', 'label' => 'HEI'],
                 ['value' => 'faculty', 'label' => 'Faculty'],
                 ['value' => 'student', 'label' => 'Student'],
                 ['value' => 'ched', 'label' => 'CHED'],
                 ['value' => 'super_admin', 'label' => 'Super Admin'],
             ],
-            'filters'            => $filters,
-            'filterOptions'      => $filterOptions,
+            'filters' => $filters,
+            'filterOptions' => $filterOptions,
         ]);
     }
 
@@ -741,11 +742,11 @@ class DashboardController extends Controller
             $normalized = $parts['path'] ?? '/';
 
             if (isset($parts['query'])) {
-                $normalized .= '?' . $parts['query'];
+                $normalized .= '?'.$parts['query'];
             }
 
             if (isset($parts['fragment'])) {
-                $normalized .= '#' . $parts['fragment'];
+                $normalized .= '#'.$parts['fragment'];
             }
 
             return $normalized;

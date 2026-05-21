@@ -47,15 +47,17 @@ export default function AccountEdit({ account, breadcrumbs = [] }) {
 
     const handleReactivate = () => {
         setReactivating(true);
-        router.post(route('accounts.reactivate', { user: account.id }), {}, {
-            onFinish: () => setReactivating(false),
-        });
+        router.post(
+            route('accounts.reactivate', { user: account.id }),
+            {},
+            {
+                onFinish: () => setReactivating(false),
+            }
+        );
     };
 
     return (
-        <AuthenticatedLayout
-            header={<AdminPageHeader title="Edit Account" />}
-        >
+        <AuthenticatedLayout header={<AdminPageHeader title="Edit Account" />}>
             <Head title="Edit Account" />
             {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
 
@@ -67,7 +69,10 @@ export default function AccountEdit({ account, breadcrumbs = [] }) {
                                 Editing: {account.name}
                             </Typography.Title>
                             <Typography.Text type="secondary">
-                                Role: {String(account.role || '').replace('_', ' ').toUpperCase()}
+                                Role:{' '}
+                                {String(account.role || '')
+                                    .replace('_', ' ')
+                                    .toUpperCase()}
                             </Typography.Text>
                         </div>
 
@@ -189,7 +194,9 @@ export default function AccountEdit({ account, breadcrumbs = [] }) {
                             >
                                 <Input.Password
                                     value={passwordData.password_confirmation}
-                                    onChange={(e) => setPasswordData('password_confirmation', e.target.value)}
+                                    onChange={(e) =>
+                                        setPasswordData('password_confirmation', e.target.value)
+                                    }
                                     placeholder="Re-enter password"
                                     disabled={isDeactivated}
                                 />

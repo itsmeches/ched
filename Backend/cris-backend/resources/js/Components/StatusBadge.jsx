@@ -29,7 +29,8 @@ const statusLabels = {
 };
 
 export function StatusBadge({ status }) {
-    const cls = statusColors[status] ?? 'bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-200';
+    const cls =
+        statusColors[status] ?? 'bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-200';
     const dot = statusDotColors[status] ?? 'bg-slate-400';
     const label = statusLabels[status] ?? status?.replaceAll('_', ' ');
     return (

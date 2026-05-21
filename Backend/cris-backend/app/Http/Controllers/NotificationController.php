@@ -42,9 +42,9 @@ class NotificationController extends Controller
 
         return Inertia::render('Notifications/Index', [
             'notifications' => $notifications,
-            'filters'       => ['filter' => $filter, 'type' => $type],
-            'typeOptions'   => $typeOptions,
-            'unreadCount'   => $unreadCount,
+            'filters' => ['filter' => $filter, 'type' => $type],
+            'typeOptions' => $typeOptions,
+            'unreadCount' => $unreadCount,
         ]);
     }
 

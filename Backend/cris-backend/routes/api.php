@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ResearchProposalController;
 use App\Http\Controllers\Api\InstitutionController;
+use App\Http\Controllers\Api\ResearchProposalController;
+use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:api-login');

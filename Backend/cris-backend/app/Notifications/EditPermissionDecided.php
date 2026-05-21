@@ -24,7 +24,7 @@ class EditPermissionDecided extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $status  = strtoupper($this->editRequest->status);
+        $status = strtoupper($this->editRequest->status);
         $message = $this->editRequest->isApproved()
             ? 'Your edit permission request has been approved. You may now edit your submission.'
             : 'Your edit permission request has been denied.';

@@ -11,7 +11,11 @@ const mockUseForm = vi.fn();
 
 vi.mock('@inertiajs/react', () => ({
     Head: () => null,
-    Link: ({ href, children, ...props }) => <a href={href} {...props}>{children}</a>,
+    Link: ({ href, children, ...props }) => (
+        <a href={href} {...props}>
+            {children}
+        </a>
+    ),
     useForm: () => mockUseForm(),
 }));
 
@@ -53,11 +57,17 @@ describe('ResetPassword page', () => {
 
         renderWithProviders(<ResetPassword token="reset-token" email="user@example.com" />);
 
-        await user.type(screen.getByPlaceholderText('Create a strong password'), 'new-password-123');
+        await user.type(
+            screen.getByPlaceholderText('Create a strong password'),
+            'new-password-123'
+        );
         await user.type(screen.getByPlaceholderText('Re-enter your password'), 'new-password-123');
         await user.click(screen.getByRole('button', { name: 'Reset password' }));
 
-        expect(mockPost).toHaveBeenCalledWith('/reset-password', expect.objectContaining({ onFinish: expect.any(Function) }));
+        expect(mockPost).toHaveBeenCalledWith(
+            '/reset-password',
+            expect.objectContaining({ onFinish: expect.any(Function) })
+        );
         expect(mockReset).toHaveBeenCalledWith('password', 'password_confirmation');
     });
 });

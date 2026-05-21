@@ -10,7 +10,11 @@ const mockUseForm = vi.fn();
 
 vi.mock('@inertiajs/react', () => ({
     Head: () => null,
-    Link: ({ href, children, ...props }) => <a href={href} {...props}>{children}</a>,
+    Link: ({ href, children, ...props }) => (
+        <a href={href} {...props}>
+            {children}
+        </a>
+    ),
     useForm: () => mockUseForm(),
 }));
 
@@ -34,7 +38,10 @@ describe('ForgotPassword page', () => {
         renderWithProviders(<ForgotPassword status="Reset link sent" />);
 
         expect(screen.getByText('Reset link sent')).toBeVisible();
-        expect(screen.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute('href', '/login');
+        expect(screen.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute(
+            'href',
+            '/login'
+        );
     });
 
     it('submits the email to the password email endpoint', async () => {

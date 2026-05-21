@@ -11,9 +11,7 @@ class ResearchProposalReviewed extends Notification
 {
     use Queueable;
 
-    public function __construct(private readonly ResearchProposal $proposal)
-    {
-    }
+    public function __construct(private readonly ResearchProposal $proposal) {}
 
     public function via(object $notifiable): array
     {
@@ -34,7 +32,7 @@ class ResearchProposalReviewed extends Notification
             ->line("Title: {$this->proposal->title}")
             ->line("Status: {$status}");
 
-        if (!empty($this->proposal->comments)) {
+        if (! empty($this->proposal->comments)) {
             $mail->line('Reviewer comments:')
                 ->line($this->proposal->comments);
         }

@@ -24,7 +24,9 @@ export default function Login({ status, canResetPassword }) {
 
             <div className="mb-8">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome back</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign in to your account to continue</p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Sign in to your account to continue
+                </p>
             </div>
 
             {status && (
@@ -88,18 +90,30 @@ export default function Login({ status, canResetPassword }) {
                             checked={data.remember}
                             onChange={(e) => setData('remember', e.target.checked)}
                         />
-                        <span className="text-sm text-slate-600 dark:text-slate-300">Remember me</span>
+                        <span className="text-sm text-slate-600 dark:text-slate-300">
+                            Remember me
+                        </span>
                     </label>
                 </div>
 
-                <Button htmlType="submit" type="primary" block size="large" loading={processing} disabled={processing}>
+                <Button
+                    htmlType="submit"
+                    type="primary"
+                    block
+                    size="large"
+                    loading={processing}
+                    disabled={processing}
+                >
                     {processing ? 'Signing in…' : 'Sign in'}
                 </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 Don&apos;t have an account?{' '}
-                <Link href={route('register')} className="font-medium text-[#0b3ea9] transition-colors hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                <Link
+                    href={route('register')}
+                    className="font-medium text-[#0b3ea9] transition-colors hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline"
+                >
                     Register here
                 </Link>
             </p>

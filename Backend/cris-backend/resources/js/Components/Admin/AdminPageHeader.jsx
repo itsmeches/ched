@@ -13,7 +13,9 @@ export default function AdminPageHeader({ title, subtitle, actions = null }) {
                     </Typography.Text>
                 )}
             </Space>
-            {actions ? <div className="admin-page-header-actions w-full sm:w-auto">{actions}</div> : null}
+            {actions ? (
+                <div className="admin-page-header-actions w-full sm:w-auto">{actions}</div>
+            ) : null}
         </div>
     );
 }
