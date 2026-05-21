@@ -59,6 +59,17 @@ Re-run after every deploy.
 - [ ] Copy `deployment/supervisor/cris-worker.conf` to `/etc/supervisor/conf.d/`.
 - [ ] `supervisorctl reread && supervisorctl update && supervisorctl start cris-worker:*`.
 
+### Failed-job runbook
+
+Mail/notification jobs use `tries=3` with backoff. After exhausting retries they land in `failed_jobs` (table created by the standard jobs migration).
+
+- Inspect: `php artisan queue:failed`
+- Retry one: `php artisan queue:retry <uuid>`
+- Retry all: `php artisan queue:retry all`
+- Discard: `php artisan queue:flush`
+
+A sudden spike in `failed_jobs` usually means SMTP credentials expired or the mail provider is rate-limiting. Worth alerting on.
+
 ## 8. Scheduler (cron)
 
 Add to `www-data`'s crontab:

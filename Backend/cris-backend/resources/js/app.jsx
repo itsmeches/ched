@@ -1,6 +1,7 @@
 import '../css/app.css';
 import 'antd/dist/reset.css';
 import './bootstrap';
+import './sentry';
 
 import { ThemeProvider } from '@/utils/ThemeContext';
 import { createInertiaApp } from '@inertiajs/react';
