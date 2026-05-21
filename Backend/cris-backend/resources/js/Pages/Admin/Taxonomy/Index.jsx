@@ -83,7 +83,7 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
                 ? true
                 : categoryStatusFilter === 'active'
                     ? Boolean(item.is_active)
-                    : !Boolean(item.is_active);
+                    : !item.is_active;
 
             const searchMatch = search === ''
                 ? true
@@ -103,7 +103,7 @@ export default function TaxonomyIndex({ categories = [], disciplines = [], categ
                 ? true
                 : disciplineStatusFilter === 'active'
                     ? Boolean(item.is_active)
-                    : !Boolean(item.is_active);
+                    : !item.is_active;
 
             const searchMatch = search === ''
                 ? true

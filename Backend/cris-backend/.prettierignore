@@ -1,0 +1,13 @@
+public/build/
+public/hot
+vendor/
+node_modules/
+storage/
+bootstrap/cache/
+coverage/
+test-results/
+resources/js/ziggy.js
+*.min.js
+*.min.css
+composer.lock
+package-lock.json

@@ -350,8 +350,9 @@ export default function PublicResearchIndex({
                                 <div className={`mt-2 rounded-2xl border p-4 text-left shadow-2xl ${D ? 'bg-[#0d1526]/95 border-[#1e2d47]' : 'bg-white border-slate-200'} backdrop-blur-md`}>
                                     <Row gutter={[12, 12]}>
                                         <Col xs={12} sm={6}>
-                                            <label className={`mb-1 block text-xs ${labelCls}`}>Year From</label>
+                                            <label htmlFor="filter-year-from" className={`mb-1 block text-xs ${labelCls}`}>Year From</label>
                                             <Input
+                                                id="filter-year-from"
                                                 placeholder="2020"
                                                 value={yearFrom}
                                                 size="middle"
@@ -360,8 +361,9 @@ export default function PublicResearchIndex({
                                             />
                                         </Col>
                                         <Col xs={12} sm={6}>
-                                            <label className={`mb-1 block text-xs ${labelCls}`}>Year To</label>
+                                            <label htmlFor="filter-year-to" className={`mb-1 block text-xs ${labelCls}`}>Year To</label>
                                             <Input
+                                                id="filter-year-to"
                                                 placeholder="2026"
                                                 value={yearTo}
                                                 size="middle"
@@ -370,8 +372,9 @@ export default function PublicResearchIndex({
                                             />
                                         </Col>
                                         <Col xs={24} sm={12}>
-                                            <label className={`mb-1 block text-xs ${labelCls}`}>School</label>
+                                            <label htmlFor="filter-school" className={`mb-1 block text-xs ${labelCls}`}>School</label>
                                             <Input
+                                                id="filter-school"
                                                 placeholder="School name"
                                                 value={school}
                                                 size="middle"
@@ -380,20 +383,21 @@ export default function PublicResearchIndex({
                                             />
                                         </Col>
                                         <Col xs={24} sm={12}>
-                                            <label className={`mb-1 block text-xs ${labelCls}`}>Institution</label>
-                                            <Select placeholder="All institutions" value={institutionId || undefined} allowClear showSearch optionFilterProp="label" options={institutionOptions} onChange={(v) => { isLiveFilterEnabled.current = true; setInstitutionId(v ?? ''); }} style={{ width: '100%' }} size="middle" />
+                                            <label htmlFor="filter-institution" className={`mb-1 block text-xs ${labelCls}`}>Institution</label>
+                                            <Select id="filter-institution" placeholder="All institutions" value={institutionId || undefined} allowClear showSearch optionFilterProp="label" options={institutionOptions} onChange={(v) => { isLiveFilterEnabled.current = true; setInstitutionId(v ?? ''); }} style={{ width: '100%' }} size="middle" />
                                         </Col>
                                         <Col xs={24} sm={12}>
-                                            <label className={`mb-1 block text-xs ${labelCls}`}>Category</label>
-                                            <Select placeholder="All categories" value={category || undefined} allowClear options={categoryOptions} onChange={(v) => { isLiveFilterEnabled.current = true; setCategory(v ?? ''); }} style={{ width: '100%' }} size="middle" />
+                                            <label htmlFor="filter-category" className={`mb-1 block text-xs ${labelCls}`}>Category</label>
+                                            <Select id="filter-category" placeholder="All categories" value={category || undefined} allowClear options={categoryOptions} onChange={(v) => { isLiveFilterEnabled.current = true; setCategory(v ?? ''); }} style={{ width: '100%' }} size="middle" />
                                         </Col>
                                         <Col xs={24} sm={12}>
-                                            <label className={`mb-1 block text-xs ${labelCls}`}>Discipline</label>
-                                            <Select placeholder="All disciplines" value={disciplineCode || undefined} allowClear showSearch optionFilterProp="label" options={disciplineOptions} onChange={(v) => { isLiveFilterEnabled.current = true; setDisciplineCode(v ?? ''); }} style={{ width: '100%' }} size="middle" />
+                                            <label htmlFor="filter-discipline" className={`mb-1 block text-xs ${labelCls}`}>Discipline</label>
+                                            <Select id="filter-discipline" placeholder="All disciplines" value={disciplineCode || undefined} allowClear showSearch optionFilterProp="label" options={disciplineOptions} onChange={(v) => { isLiveFilterEnabled.current = true; setDisciplineCode(v ?? ''); }} style={{ width: '100%' }} size="middle" />
                                         </Col>
                                         <Col xs={24} sm={12}>
-                                            <label className={`mb-1 block text-xs ${labelCls}`}>Sort By</label>
+                                            <label htmlFor="filter-sort" className={`mb-1 block text-xs ${labelCls}`}>Sort By</label>
                                             <Select
+                                                id="filter-sort"
                                                 value={sort}
                                                 options={[
                                                     { value: 'recent', label: 'Recently approved' },

@@ -6,11 +6,16 @@
         "build": "vite build && node scripts/sanitize-zap-assets.js",
         "build:zap": "vite build && node scripts/sanitize-zap-assets.js",
         "zap:proxy": "node scripts/zap-proxy.js",
+        "lint": "eslint resources/js",
+        "lint:fix": "eslint resources/js --fix",
+        "format": "prettier --write \"resources/js/**/*.{js,jsx,css,json,md}\"",
+        "format:check": "prettier --check \"resources/js/**/*.{js,jsx,css,json,md}\"",
         "test:unit": "vitest run",
         "test:unit:watch": "vitest",
         "test:unit:coverage": "vitest run --coverage",
         "test:browser": "playwright test",
-        "test:browser:install": "playwright install chromium"
+        "test:browser:install": "playwright install chromium",
+        "prepare": "node scripts/setup-hooks.mjs"
     },
     "dependencies": {
         "@ant-design/icons": "^6.1.1",
@@ -23,6 +28,7 @@
         "ziggy-js": "^2.6.2"
     },
     "devDependencies": {
+        "@eslint/js": "^9.15.0",
         "@playwright/test": "^1.59.1",
         "@tailwindcss/forms": "^0.5.3",
         "@testing-library/jest-dom": "^6.9.1",
@@ -32,9 +38,18 @@
         "@vitest/coverage-v8": "^3.2.4",
         "autoprefixer": "^10.4.12",
         "axios": "^1.6.4",
+        "eslint": "^9.15.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-jsx-a11y": "^6.10.2",
+        "eslint-plugin-react": "^7.37.2",
+        "eslint-plugin-react-hooks": "^5.0.0",
+        "globals": "^15.12.0",
+        "husky": "^9.1.7",
         "jsdom": "^26.1.0",
         "laravel-vite-plugin": "^1.0",
+        "lint-staged": "^15.2.10",
         "postcss": "^8.4.31",
+        "prettier": "^3.3.3",
         "tailwindcss": "^3.2.1",
         "vite": "^6.4.2",
         "vitest": "^3.2.4"

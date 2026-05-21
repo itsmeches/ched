@@ -57,7 +57,7 @@ export default function CategoriesIndex({ categories = [], categoryTypes = [] })
         const q = search.trim().toLowerCase();
         return categories.filter((item) => {
             const typeMatch = typeFilter === 'all' ? true : item.type === typeFilter;
-            const statusMatch = statusFilter === 'all' ? true : statusFilter === 'active' ? Boolean(item.is_active) : !Boolean(item.is_active);
+            const statusMatch = statusFilter === 'all' ? true : statusFilter === 'active' ? Boolean(item.is_active) : !item.is_active;
             const searchMatch = q === '' ? true :
                 String(item.label).toLowerCase().includes(q) ||
                 String(item.value).toLowerCase().includes(q) ||

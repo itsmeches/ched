@@ -1,6 +1,6 @@
 import { Transition } from '@headlessui/react';
 import { Link } from '@inertiajs/react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const DropDownContext = createContext();
 
@@ -10,6 +10,16 @@ const Dropdown = ({ children }) => {
     const toggleOpen = () => {
         setOpen((previousState) => !previousState);
     };
+
+    useEffect(() => {
+        if (!open) return;
+        const onKey = (e) => {
+            if (e.key === 'Escape') setOpen(false);
+        };
+        window.addEventListener('keydown', onKey);
+
+        return () => window.removeEventListener('keydown', onKey);
+    }, [open]);
 
     return (
         <DropDownContext.Provider value={{ open, setOpen, toggleOpen }}>
@@ -23,10 +33,19 @@ const Trigger = ({ children }) => {
 
     return (
         <>
-            <div onClick={toggleOpen}>{children}</div>
+            <button
+                type="button"
+                onClick={toggleOpen}
+                aria-haspopup="menu"
+                aria-expanded={open}
+                className="cursor-pointer bg-transparent p-0"
+            >
+                {children}
+            </button>
 
             {open && (
                 <div
+                    aria-hidden="true"
                     className="fixed inset-0 z-40"
                     onClick={() => setOpen(false)}
                 ></div>
@@ -70,7 +89,12 @@ const Content = ({
             >
                 <div
                     className={`absolute z-50 mt-2 rounded-md shadow-lg ${alignmentClasses} ${widthClasses}`}
+                    role="menu"
+                    tabIndex={-1}
                     onClick={() => setOpen(false)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Escape') setOpen(false);
+                    }}
                 >
                     <div
                         className={

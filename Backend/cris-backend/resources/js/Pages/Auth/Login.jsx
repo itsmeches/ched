@@ -81,8 +81,9 @@ export default function Login({ status, canResetPassword }) {
                 </Form>
 
                 <div className="mb-5 flex items-center justify-between">
-                    <label className="flex cursor-pointer items-center gap-2">
+                    <label htmlFor="remember-me" className="flex cursor-pointer items-center gap-2">
                         <Checkbox
+                            id="remember-me"
                             name="remember"
                             checked={data.remember}
                             onChange={(e) => setData('remember', e.target.checked)}
@@ -97,7 +98,7 @@ export default function Login({ status, canResetPassword }) {
             </form>
 
             <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link href={route('register')} className="font-medium text-[#0b3ea9] transition-colors hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
                     Register here
                 </Link>
