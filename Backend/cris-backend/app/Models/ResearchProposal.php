@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Laravel\Scout\Searchable;
 
 /**
  * @property int $id
@@ -47,6 +48,7 @@ use Illuminate\Support\Carbon;
 class ResearchProposal extends Model
 {
     use HasFactory;
+    use Searchable;
 
     public const STATUS_DRAFT = 'draft';
 
@@ -202,5 +204,35 @@ class ResearchProposal extends Model
     public function editPermissionRequests(): HasMany
     {
         return $this->hasMany(EditPermissionRequest::class, 'research_proposal_id');
+    }
+
+    public function searchableAs(): string
+    {
+        return 'research_proposals';
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => (int) $this->id,
+            'title' => (string) $this->title,
+            'authors' => (string) $this->authors,
+            'co_authors' => (string) ($this->co_authors ?? ''),
+            'abstract' => (string) $this->abstract,
+            'keywords' => (string) ($this->keywords ?? ''),
+            'school' => (string) ($this->school ?? ''),
+            'discipline_code' => (string) ($this->discipline_code ?? ''),
+            'research_category' => (string) ($this->research_category ?? ''),
+            'category_type' => (string) ($this->category_type ?? ''),
+            'status' => (string) $this->status,
+            'institution_id' => $this->institution_id ? (int) $this->institution_id : null,
+            'year' => $this->year ? (int) $this->year : null,
+            'approved_at' => optional($this->approved_at)->getTimestamp(),
+        ];
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return $this->status === self::STATUS_APPROVED;
     }
 }

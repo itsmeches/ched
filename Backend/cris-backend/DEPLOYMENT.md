@@ -99,3 +99,44 @@ Add to `www-data`'s crontab:
 - Deploys: `git pull && composer install --no-dev -o && npm ci && npm run build && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && supervisorctl restart cris-worker:*`
 - Backups: nightly `mysqldump` + `storage/app/private` snapshot.
 - Logs: rotate `storage/logs/laravel.log` (already daily via `LOG_STACK=daily`).
+
+## 12. Redis (optional)
+
+The app runs fine on the database driver for cache / queue / sessions. Switch to Redis when any of the following hurts:
+
+- session reads dominate DB load on a multi-node web tier,
+- the `jobs` table is consistently backlogged,
+- public-page cache lookups (`Cache::remember`) show measurable latency.
+
+**Switch:**
+
+1. Install Redis (`apt install redis-server`) and confirm it binds to localhost only.
+2. Pick a client. The phpredis C extension is faster and is the default (`REDIS_CLIENT=phpredis`). If extensions are off-limits, `composer require predis/predis` and set `REDIS_CLIENT=predis`.
+3. Flip the env entries in `.env` (templates already commented in `.env.production.example`):
+   ```
+   CACHE_STORE=redis
+   QUEUE_CONNECTION=redis
+   SESSION_DRIVER=redis
+   ```
+4. `php artisan config:cache && php artisan cache:clear`.
+5. Restart the queue worker so it picks up the new connection: `php artisan queue:restart` (Supervisor will respawn it).
+
+Sessions migrate naturally — existing DB-backed sessions are simply abandoned and users re-login. Failed jobs already in the DB `failed_jobs` table stay readable; only the live queue moves.
+
+## 13. MeiliSearch (optional)
+
+The default `SCOUT_DRIVER=null` keeps the existing `LIKE`-based search in `ResearchProposalController::applySearchFilters`. Switch to MeiliSearch when result quality (typo tolerance, ranking) matters more than infra simplicity.
+
+**Switch:**
+
+1. Run a MeiliSearch instance (`meilisearch --master-key=...`) reachable from the app server.
+2. Set in `.env`:
+   ```
+   SCOUT_DRIVER=meilisearch
+   MEILISEARCH_HOST=http://127.0.0.1:7700
+   MEILISEARCH_KEY=<master or scoped API key>
+   ```
+3. Backfill the index once: `php artisan scout:import "App\Models\ResearchProposal"`.
+4. Subsequent writes sync via the `Searchable` trait. To re-index after a schema change: `php artisan scout:flush "App\Models\ResearchProposal" && php artisan scout:import ...`.
+
+Rollback is just `SCOUT_DRIVER=null` + `config:cache`.

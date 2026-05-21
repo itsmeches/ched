@@ -331,14 +331,26 @@ class ResearchProposalController extends Controller
         $search = trim((string) $request->input('search', ''));
 
         if ($search !== '') {
-            $query->where(function ($inner) use ($search) {
-                $inner->where('title', 'like', "%{$search}%")
-                    ->orWhere('authors', 'like', "%{$search}%")
-                    ->orWhere('keywords', 'like', "%{$search}%")
-                    ->orWhere('school', 'like', "%{$search}%")
-                    ->orWhereHas('institution', fn ($institutionQuery) => $institutionQuery->where('name', 'like', "%{$search}%"))
-                    ->orWhereHas('keywordItems', fn ($keywordQuery) => $keywordQuery->where('name', 'like', "%{$search}%"));
-            });
+            $scoutDriver = (string) config('scout.driver');
+            $useScout = in_array($scoutDriver, ['meilisearch', 'algolia', 'typesense'], true);
+
+            if ($useScout) {
+                $scoutIds = ResearchProposal::search($search)
+                    ->take(500)
+                    ->keys()
+                    ->all();
+
+                $query->whereIn('id', $scoutIds !== [] ? $scoutIds : [0]);
+            } else {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('title', 'like', "%{$search}%")
+                        ->orWhere('authors', 'like', "%{$search}%")
+                        ->orWhere('keywords', 'like', "%{$search}%")
+                        ->orWhere('school', 'like', "%{$search}%")
+                        ->orWhereHas('institution', fn ($institutionQuery) => $institutionQuery->where('name', 'like', "%{$search}%"))
+                        ->orWhereHas('keywordItems', fn ($keywordQuery) => $keywordQuery->where('name', 'like', "%{$search}%"));
+                });
+            }
         }
 
         $year = (int) $request->input('year');
