@@ -14,7 +14,9 @@ const dateTimeFormatter = new Intl.DateTimeFormat(DATE_LOCALE, {
     minute: '2-digit',
 });
 
-export function formatDate(value) {
+export type DateInput = string | number | Date | null | undefined;
+
+export function formatDate(value: DateInput): string {
     if (!value) {
         return '—';
     }
@@ -22,7 +24,7 @@ export function formatDate(value) {
     return dateFormatter.format(new Date(value));
 }
 
-export function formatDateTime(value) {
+export function formatDateTime(value: DateInput): string {
     if (!value) {
         return '—';
     }
