@@ -77,7 +77,7 @@ class ResearchPolicyWebTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Calamba Research College',
-            'code' => 'CRC-' . fake()->unique()->numerify('###'),
+            'code' => 'CRC-'.fake()->unique()->numerify('###'),
         ]);
 
         $ched = User::factory()->create([
@@ -148,7 +148,7 @@ class ResearchPolicyWebTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Calabarzon State University',
-            'code' => 'CSU-' . fake()->unique()->numerify('###'),
+            'code' => 'CSU-'.fake()->unique()->numerify('###'),
         ]);
 
         $hei = User::factory()->create([

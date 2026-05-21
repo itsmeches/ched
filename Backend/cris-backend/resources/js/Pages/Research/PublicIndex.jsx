@@ -52,32 +52,47 @@ export default function PublicResearchIndex({
     const [savedSearches, setSavedSearches] = useState([]);
 
     const hasActiveFilters = Boolean(
-        search || yearFrom || yearTo || school || institutionId || category || disciplineCode || (sort && sort !== 'recent'),
+        search ||
+        yearFrom ||
+        yearTo ||
+        school ||
+        institutionId ||
+        category ||
+        disciplineCode ||
+        (sort && sort !== 'recent')
     );
-    const hasAdvancedFilters = Boolean(yearFrom || yearTo || school || institutionId || category || disciplineCode || (sort && sort !== 'recent'));
+    const hasAdvancedFilters = Boolean(
+        yearFrom ||
+        yearTo ||
+        school ||
+        institutionId ||
+        category ||
+        disciplineCode ||
+        (sort && sort !== 'recent')
+    );
 
     const isLiveFilterEnabled = useRef(false);
 
     // ── derived options ───────────────────────────────────────────────────────
     const institutionOptions = useMemo(
         () => institutions.map((i) => ({ value: i.id, label: i.name })),
-        [institutions],
+        [institutions]
     );
     const categoryOptions = useMemo(
         () => categories.map((i) => ({ value: i.value, label: i.label })),
-        [categories],
+        [categories]
     );
     const categoryLabelMap = useMemo(
         () => Object.fromEntries(categories.map((i) => [i.value, i.label])),
-        [categories],
+        [categories]
     );
     const disciplineOptions = useMemo(
         () => disciplines.map((i) => ({ value: i.code, label: i.name })),
-        [disciplines],
+        [disciplines]
     );
     const disciplineLabelMap = useMemo(
         () => Object.fromEntries(disciplines.map((i) => [i.code, i.name])),
-        [disciplines],
+        [disciplines]
     );
 
     const selectedInstitutionLabel = useMemo(() => {
@@ -216,8 +231,14 @@ export default function PublicResearchIndex({
     }
 
     function clearAll() {
-        setSearch(''); setYearFrom(''); setYearTo(''); setSchool('');
-        setInstitutionId(''); setCategory(''); setDisciplineCode(''); setSort('recent');
+        setSearch('');
+        setYearFrom('');
+        setYearTo('');
+        setSchool('');
+        setInstitutionId('');
+        setCategory('');
+        setDisciplineCode('');
+        setSort('recent');
         runIndexRequest({});
     }
 
@@ -228,7 +249,7 @@ export default function PublicResearchIndex({
         if (!isLiveFilterEnabled.current) return;
         const id = window.setTimeout(() => applyFilters(1), 450);
         return () => window.clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search, yearFrom, yearTo, school, institutionId, category, disciplineCode, sort]);
 
     useEffect(() => {
@@ -237,20 +258,26 @@ export default function PublicResearchIndex({
 
     // ── theme tokens ──────────────────────────────────────────────────────────
     const D = dark;
-    const bg        = D ? 'bg-[#0a0f1e]'      : 'bg-slate-50';
-    const heroBg    = D ? 'bg-[#0d1526]'      : 'bg-gradient-to-b from-white via-[#f3f8ff] to-white';
-    const cardBg    = D ? 'bg-[#111827]'      : 'bg-white';
-    const cardBorder= D ? 'border-[#1e2d47]'  : 'border-slate-200';
-    const textPrim  = D ? 'text-white'         : 'text-slate-900';
-    const textSecond= D ? 'text-slate-400'     : 'text-slate-500';
-    const textMeta  = D ? 'text-slate-300'     : 'text-slate-600';
-    const hoverCard = D ? 'hover:border-blue-500 hover:shadow-blue-900/30' : 'hover:border-blue-200 hover:shadow-md';
-    const labelCls  = D ? 'text-slate-400'     : 'text-slate-500';
+    const bg = D ? 'bg-[#0a0f1e]' : 'bg-slate-50';
+    const heroBg = D ? 'bg-[#0d1526]' : 'bg-gradient-to-b from-white via-[#f3f8ff] to-white';
+    const cardBg = D ? 'bg-[#111827]' : 'bg-white';
+    const cardBorder = D ? 'border-[#1e2d47]' : 'border-slate-200';
+    const textPrim = D ? 'text-white' : 'text-slate-900';
+    const textSecond = D ? 'text-slate-400' : 'text-slate-500';
+    const textMeta = D ? 'text-slate-300' : 'text-slate-600';
+    const hoverCard = D
+        ? 'hover:border-blue-500 hover:shadow-blue-900/30'
+        : 'hover:border-blue-200 hover:shadow-md';
+    const labelCls = D ? 'text-slate-400' : 'text-slate-500';
 
     return (
         <>
             <Head title="CRIS - CALABARZON Research Information System">
-                <meta head-key="description" name="description" content="Search approved research papers in CRIS, the CALABARZON Research Information System public archive for Region IV-A institutions." />
+                <meta
+                    head-key="description"
+                    name="description"
+                    content="Search approved research papers in CRIS, the CALABARZON Research Information System public archive for Region IV-A institutions."
+                />
             </Head>
 
             <div className={`min-h-screen transition-colors duration-300 ${bg}`}>
@@ -266,36 +293,63 @@ export default function PublicResearchIndex({
                 <section className={`${heroBg} relative overflow-hidden pb-16 pt-20 text-center`}>
                     {/* subtle radial glows */}
                     <div className="pointer-events-none absolute inset-0">
-                        <div className={`absolute left-1/4 top-0 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl ${D ? 'bg-blue-500/10' : 'bg-blue-400/20'}`} />
-                        <div className={`absolute right-1/4 top-10 h-64 w-64 rounded-full blur-3xl ${D ? 'bg-indigo-400/10' : 'bg-sky-300/25'}`} />
-                        <div className={`absolute left-1/2 top-20 h-80 w-80 -translate-x-1/2 rounded-full blur-3xl ${D ? 'bg-blue-900/15' : 'bg-cyan-200/30'}`} />
+                        <div
+                            className={`absolute left-1/4 top-0 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl ${D ? 'bg-blue-500/10' : 'bg-blue-400/20'}`}
+                        />
+                        <div
+                            className={`absolute right-1/4 top-10 h-64 w-64 rounded-full blur-3xl ${D ? 'bg-indigo-400/10' : 'bg-sky-300/25'}`}
+                        />
+                        <div
+                            className={`absolute left-1/2 top-20 h-80 w-80 -translate-x-1/2 rounded-full blur-3xl ${D ? 'bg-blue-900/15' : 'bg-cyan-200/30'}`}
+                        />
                     </div>
 
                     <div className="relative mx-auto max-w-3xl px-4 sm:px-6">
                         {/* badge */}
-                        <div className={`mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium backdrop-blur-sm ${
-                            D ? 'border-white/20 bg-white/10 text-white' : 'border-slate-200 bg-slate-100 text-slate-600'
-                        }`}>
+                        <div
+                            className={`mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium backdrop-blur-sm ${
+                                D
+                                    ? 'border-white/20 bg-white/10 text-white'
+                                    : 'border-slate-200 bg-slate-100 text-slate-600'
+                            }`}
+                        >
                             <BookOutlined style={{ color: D ? '#fde047' : '#0033a0' }} />
-                            <span>{proposals.total.toLocaleString()} Research Papers Available</span>
+                            <span>
+                                {proposals.total.toLocaleString()} Research Papers Available
+                            </span>
                         </div>
 
-                        <h1 className={`mb-4 text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl ${D ? 'text-white' : 'text-slate-900'}`}>
-                            Empowering Research in<br />
-                            <span className={D ? 'text-blue-300' : 'text-[#0033a0]'}>Region 4-A CALABARZON</span>
+                        <h1
+                            className={`mb-4 text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl ${D ? 'text-white' : 'text-slate-900'}`}
+                        >
+                            Empowering Research in
+                            <br />
+                            <span className={D ? 'text-blue-300' : 'text-[#0033a0]'}>
+                                Region 4-A CALABARZON
+                            </span>
                         </h1>
 
-                        <p className={`mb-10 text-base sm:text-lg ${D ? 'text-blue-100/80' : 'text-slate-500'}`}>
-                            The official Higher Education Research Information System. Discover,<br className="hidden sm:block" />
+                        <p
+                            className={`mb-10 text-base sm:text-lg ${D ? 'text-blue-100/80' : 'text-slate-500'}`}
+                        >
+                            The official Higher Education Research Information System. Discover,
+                            <br className="hidden sm:block" />
                             collaborate, and innovate with academic studies from top institutions.
                         </p>
 
                         {/* ── Search bar ─────────────────────────────────── */}
                         <div className="mx-auto max-w-2xl">
-                            <div className={`flex overflow-hidden rounded-2xl p-1.5 shadow-xl backdrop-blur-md ring-1 ${D ? 'bg-white/10 shadow-black/20 ring-white/20' : 'bg-slate-100 shadow-slate-200/80 ring-slate-200'}`}>
+                            <div
+                                className={`flex overflow-hidden rounded-2xl p-1.5 shadow-xl backdrop-blur-md ring-1 ${D ? 'bg-white/10 shadow-black/20 ring-white/20' : 'bg-slate-100 shadow-slate-200/80 ring-slate-200'}`}
+                            >
                                 <div className="flex flex-1 items-center gap-2 rounded-xl bg-white px-4 py-1">
-                                    <SearchOutlined className="flex-shrink-0 text-slate-400" style={{ fontSize: 18 }} />
-                                    <label htmlFor="public-archive-search" className="sr-only">Search approved papers</label>
+                                    <SearchOutlined
+                                        className="flex-shrink-0 text-slate-400"
+                                        style={{ fontSize: 18 }}
+                                    />
+                                    <label htmlFor="public-archive-search" className="sr-only">
+                                        Search approved papers
+                                    </label>
                                     <input
                                         id="public-archive-search"
                                         type="text"
@@ -310,7 +364,14 @@ export default function PublicResearchIndex({
                                         onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
                                     />
                                     {search && (
-                                        <button type="button" onClick={() => { setSearch(''); isLiveFilterEnabled.current = true; }} className="text-slate-400 hover:text-slate-600">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSearch('');
+                                                isLiveFilterEnabled.current = true;
+                                            }}
+                                            className="text-slate-400 hover:text-slate-600"
+                                        >
                                             <CloseOutlined style={{ fontSize: 13 }} />
                                         </button>
                                     )}
@@ -331,8 +392,12 @@ export default function PublicResearchIndex({
                                 onClick={() => setAdvancedOpen((v) => !v)}
                                 className={`mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                                     hasAdvancedFilters
-                                        ? (D ? 'bg-blue-500/30 text-blue-200 ring-1 ring-blue-400/40' : 'bg-blue-50 text-blue-700 ring-1 ring-blue-200')
-                                        : (D ? 'bg-white/10 text-blue-100 hover:bg-white/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')
+                                        ? D
+                                            ? 'bg-blue-500/30 text-blue-200 ring-1 ring-blue-400/40'
+                                            : 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
+                                        : D
+                                          ? 'bg-white/10 text-blue-100 hover:bg-white/20'
+                                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                 }`}
                             >
                                 <ControlOutlined />
@@ -342,79 +407,182 @@ export default function PublicResearchIndex({
                                         Active
                                     </span>
                                 )}
-                                {advancedOpen ? <UpOutlined style={{ fontSize: 10 }} /> : <DownOutlined style={{ fontSize: 10 }} />}
+                                {advancedOpen ? (
+                                    <UpOutlined style={{ fontSize: 10 }} />
+                                ) : (
+                                    <DownOutlined style={{ fontSize: 10 }} />
+                                )}
                             </button>
 
                             {/* ── Advanced search panel ──────────────────── */}
                             {advancedOpen && (
-                                <div className={`mt-2 rounded-2xl border p-4 text-left shadow-2xl ${D ? 'bg-[#0d1526]/95 border-[#1e2d47]' : 'bg-white border-slate-200'} backdrop-blur-md`}>
+                                <div
+                                    className={`mt-2 rounded-2xl border p-4 text-left shadow-2xl ${D ? 'bg-[#0d1526]/95 border-[#1e2d47]' : 'bg-white border-slate-200'} backdrop-blur-md`}
+                                >
                                     <Row gutter={[12, 12]}>
                                         <Col xs={12} sm={6}>
-                                            <label htmlFor="filter-year-from" className={`mb-1 block text-xs ${labelCls}`}>Year From</label>
+                                            <label
+                                                htmlFor="filter-year-from"
+                                                className={`mb-1 block text-xs ${labelCls}`}
+                                            >
+                                                Year From
+                                            </label>
                                             <Input
                                                 id="filter-year-from"
                                                 placeholder="2020"
                                                 value={yearFrom}
                                                 size="middle"
-                                                onChange={(e) => { isLiveFilterEnabled.current = true; setYearFrom(e.target.value.replace(/\D/g, '')); }}
+                                                onChange={(e) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setYearFrom(e.target.value.replace(/\D/g, ''));
+                                                }}
                                                 onPressEnter={() => applyFilters()}
                                             />
                                         </Col>
                                         <Col xs={12} sm={6}>
-                                            <label htmlFor="filter-year-to" className={`mb-1 block text-xs ${labelCls}`}>Year To</label>
+                                            <label
+                                                htmlFor="filter-year-to"
+                                                className={`mb-1 block text-xs ${labelCls}`}
+                                            >
+                                                Year To
+                                            </label>
                                             <Input
                                                 id="filter-year-to"
                                                 placeholder="2026"
                                                 value={yearTo}
                                                 size="middle"
-                                                onChange={(e) => { isLiveFilterEnabled.current = true; setYearTo(e.target.value.replace(/\D/g, '')); }}
+                                                onChange={(e) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setYearTo(e.target.value.replace(/\D/g, ''));
+                                                }}
                                                 onPressEnter={() => applyFilters()}
                                             />
                                         </Col>
                                         <Col xs={24} sm={12}>
-                                            <label htmlFor="filter-school" className={`mb-1 block text-xs ${labelCls}`}>School</label>
+                                            <label
+                                                htmlFor="filter-school"
+                                                className={`mb-1 block text-xs ${labelCls}`}
+                                            >
+                                                School
+                                            </label>
                                             <Input
                                                 id="filter-school"
                                                 placeholder="School name"
                                                 value={school}
                                                 size="middle"
-                                                onChange={(e) => { isLiveFilterEnabled.current = true; setSchool(e.target.value); }}
+                                                onChange={(e) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setSchool(e.target.value);
+                                                }}
                                                 onPressEnter={() => applyFilters()}
                                             />
                                         </Col>
                                         <Col xs={24} sm={12}>
-                                            <label htmlFor="filter-institution" className={`mb-1 block text-xs ${labelCls}`}>Institution</label>
-                                            <Select id="filter-institution" placeholder="All institutions" value={institutionId || undefined} allowClear showSearch optionFilterProp="label" options={institutionOptions} onChange={(v) => { isLiveFilterEnabled.current = true; setInstitutionId(v ?? ''); }} style={{ width: '100%' }} size="middle" />
+                                            <label
+                                                htmlFor="filter-institution"
+                                                className={`mb-1 block text-xs ${labelCls}`}
+                                            >
+                                                Institution
+                                            </label>
+                                            <Select
+                                                id="filter-institution"
+                                                placeholder="All institutions"
+                                                value={institutionId || undefined}
+                                                allowClear
+                                                showSearch
+                                                optionFilterProp="label"
+                                                options={institutionOptions}
+                                                onChange={(v) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setInstitutionId(v ?? '');
+                                                }}
+                                                style={{ width: '100%' }}
+                                                size="middle"
+                                            />
                                         </Col>
                                         <Col xs={24} sm={12}>
-                                            <label htmlFor="filter-category" className={`mb-1 block text-xs ${labelCls}`}>Category</label>
-                                            <Select id="filter-category" placeholder="All categories" value={category || undefined} allowClear options={categoryOptions} onChange={(v) => { isLiveFilterEnabled.current = true; setCategory(v ?? ''); }} style={{ width: '100%' }} size="middle" />
+                                            <label
+                                                htmlFor="filter-category"
+                                                className={`mb-1 block text-xs ${labelCls}`}
+                                            >
+                                                Category
+                                            </label>
+                                            <Select
+                                                id="filter-category"
+                                                placeholder="All categories"
+                                                value={category || undefined}
+                                                allowClear
+                                                options={categoryOptions}
+                                                onChange={(v) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setCategory(v ?? '');
+                                                }}
+                                                style={{ width: '100%' }}
+                                                size="middle"
+                                            />
                                         </Col>
                                         <Col xs={24} sm={12}>
-                                            <label htmlFor="filter-discipline" className={`mb-1 block text-xs ${labelCls}`}>Discipline</label>
-                                            <Select id="filter-discipline" placeholder="All disciplines" value={disciplineCode || undefined} allowClear showSearch optionFilterProp="label" options={disciplineOptions} onChange={(v) => { isLiveFilterEnabled.current = true; setDisciplineCode(v ?? ''); }} style={{ width: '100%' }} size="middle" />
+                                            <label
+                                                htmlFor="filter-discipline"
+                                                className={`mb-1 block text-xs ${labelCls}`}
+                                            >
+                                                Discipline
+                                            </label>
+                                            <Select
+                                                id="filter-discipline"
+                                                placeholder="All disciplines"
+                                                value={disciplineCode || undefined}
+                                                allowClear
+                                                showSearch
+                                                optionFilterProp="label"
+                                                options={disciplineOptions}
+                                                onChange={(v) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setDisciplineCode(v ?? '');
+                                                }}
+                                                style={{ width: '100%' }}
+                                                size="middle"
+                                            />
                                         </Col>
                                         <Col xs={24} sm={12}>
-                                            <label htmlFor="filter-sort" className={`mb-1 block text-xs ${labelCls}`}>Sort By</label>
+                                            <label
+                                                htmlFor="filter-sort"
+                                                className={`mb-1 block text-xs ${labelCls}`}
+                                            >
+                                                Sort By
+                                            </label>
                                             <Select
                                                 id="filter-sort"
                                                 value={sort}
                                                 options={[
                                                     { value: 'recent', label: 'Recently approved' },
                                                     { value: 'oldest', label: 'Oldest approved' },
-                                                    { value: 'year_desc', label: 'Year: newest first' },
-                                                    { value: 'year_asc', label: 'Year: oldest first' },
+                                                    {
+                                                        value: 'year_desc',
+                                                        label: 'Year: newest first',
+                                                    },
+                                                    {
+                                                        value: 'year_asc',
+                                                        label: 'Year: oldest first',
+                                                    },
                                                     { value: 'title_asc', label: 'Title: A → Z' },
                                                     { value: 'title_desc', label: 'Title: Z → A' },
                                                 ]}
-                                                onChange={(v) => { isLiveFilterEnabled.current = true; setSort(v); }}
+                                                onChange={(v) => {
+                                                    isLiveFilterEnabled.current = true;
+                                                    setSort(v);
+                                                }}
                                                 style={{ width: '100%' }}
                                                 size="middle"
                                             />
                                         </Col>
                                     </Row>
                                     <div className="mt-3 flex justify-end gap-2 border-t border-slate-100/10 pt-3">
-                                        <button type="button" onClick={clearAll} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${D ? 'text-slate-400 hover:text-blue-100' : 'text-slate-500 hover:text-slate-800'}`}>
+                                        <button
+                                            type="button"
+                                            onClick={clearAll}
+                                            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${D ? 'text-slate-400 hover:text-blue-100' : 'text-slate-500 hover:text-slate-800'}`}
+                                        >
                                             Clear All
                                         </button>
                                     </div>
@@ -422,7 +590,9 @@ export default function PublicResearchIndex({
                             )}
 
                             {/* ── Popular topics ─────────────────────────── */}
-                            <div className={`mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm ${D ? 'text-slate-300' : 'text-slate-500'}`}>
+                            <div
+                                className={`mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm ${D ? 'text-slate-300' : 'text-slate-500'}`}
+                            >
                                 <span className="font-medium">Popular:</span>
                                 {popularDisciplines.map((item) => (
                                     <button
@@ -456,36 +626,147 @@ export default function PublicResearchIndex({
 
                 {/* ── Results area ────────────────────────────────────────── */}
                 <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-
                     {/* active filter chips + summary */}
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                         <p className={`text-sm ${textSecond}`}>
                             Showing{' '}
-                            <span className={`font-semibold ${textPrim}`}>{proposals.data.length}</span> of{' '}
-                            <span className={`font-semibold ${textPrim}`}>{proposals.total}</span> approved papers
+                            <span className={`font-semibold ${textPrim}`}>
+                                {proposals.data.length}
+                            </span>{' '}
+                            of{' '}
+                            <span className={`font-semibold ${textPrim}`}>{proposals.total}</span>{' '}
+                            approved papers
                         </p>
                         {hasActiveFilters && (
                             <div className="flex flex-wrap gap-1.5">
-                                {search && <Tag color="blue" closable onClose={() => { setSearch(''); applyFilters(); }}>Query: {search}</Tag>}
-                                {yearFrom && <Tag color="gold" closable onClose={() => { setYearFrom(''); applyFilters(); }}>From: {yearFrom}</Tag>}
-                                {yearTo && <Tag color="gold" closable onClose={() => { setYearTo(''); applyFilters(); }}>To: {yearTo}</Tag>}
-                                {school && <Tag color="geekblue" closable onClose={() => { setSchool(''); applyFilters(); }}>School: {school}</Tag>}
-                                {institutionId && selectedInstitutionLabel && <Tag color="cyan" closable onClose={() => { setInstitutionId(''); applyFilters(); }}>Inst: {selectedInstitutionLabel}</Tag>}
-                                {category && selectedCategoryLabel && <Tag color="geekblue" closable onClose={() => { setCategory(''); applyFilters(); }}>Category: {selectedCategoryLabel}</Tag>}
-                                {disciplineCode && selectedDisciplineLabel && <Tag color="cyan" closable onClose={() => { setDisciplineCode(''); applyFilters(); }}>Discipline: {selectedDisciplineLabel}</Tag>}
-                                {sort && sort !== 'recent' && <Tag color="purple" closable onClose={() => { setSort('recent'); applyFilters(); }}>Sort: {sortLabelMap[sort]}</Tag>}
-                                <button type="button" onClick={saveCurrentSearch} className={`text-xs underline ${textSecond} hover:text-blue-500`}>Save search</button>
-                                <button type="button" onClick={clearAll} className={`text-xs underline ${textSecond} hover:text-red-400`}>Clear all</button>
+                                {search && (
+                                    <Tag
+                                        color="blue"
+                                        closable
+                                        onClose={() => {
+                                            setSearch('');
+                                            applyFilters();
+                                        }}
+                                    >
+                                        Query: {search}
+                                    </Tag>
+                                )}
+                                {yearFrom && (
+                                    <Tag
+                                        color="gold"
+                                        closable
+                                        onClose={() => {
+                                            setYearFrom('');
+                                            applyFilters();
+                                        }}
+                                    >
+                                        From: {yearFrom}
+                                    </Tag>
+                                )}
+                                {yearTo && (
+                                    <Tag
+                                        color="gold"
+                                        closable
+                                        onClose={() => {
+                                            setYearTo('');
+                                            applyFilters();
+                                        }}
+                                    >
+                                        To: {yearTo}
+                                    </Tag>
+                                )}
+                                {school && (
+                                    <Tag
+                                        color="geekblue"
+                                        closable
+                                        onClose={() => {
+                                            setSchool('');
+                                            applyFilters();
+                                        }}
+                                    >
+                                        School: {school}
+                                    </Tag>
+                                )}
+                                {institutionId && selectedInstitutionLabel && (
+                                    <Tag
+                                        color="cyan"
+                                        closable
+                                        onClose={() => {
+                                            setInstitutionId('');
+                                            applyFilters();
+                                        }}
+                                    >
+                                        Inst: {selectedInstitutionLabel}
+                                    </Tag>
+                                )}
+                                {category && selectedCategoryLabel && (
+                                    <Tag
+                                        color="geekblue"
+                                        closable
+                                        onClose={() => {
+                                            setCategory('');
+                                            applyFilters();
+                                        }}
+                                    >
+                                        Category: {selectedCategoryLabel}
+                                    </Tag>
+                                )}
+                                {disciplineCode && selectedDisciplineLabel && (
+                                    <Tag
+                                        color="cyan"
+                                        closable
+                                        onClose={() => {
+                                            setDisciplineCode('');
+                                            applyFilters();
+                                        }}
+                                    >
+                                        Discipline: {selectedDisciplineLabel}
+                                    </Tag>
+                                )}
+                                {sort && sort !== 'recent' && (
+                                    <Tag
+                                        color="purple"
+                                        closable
+                                        onClose={() => {
+                                            setSort('recent');
+                                            applyFilters();
+                                        }}
+                                    >
+                                        Sort: {sortLabelMap[sort]}
+                                    </Tag>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={saveCurrentSearch}
+                                    className={`text-xs underline ${textSecond} hover:text-blue-500`}
+                                >
+                                    Save search
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={clearAll}
+                                    className={`text-xs underline ${textSecond} hover:text-red-400`}
+                                >
+                                    Clear all
+                                </button>
                             </div>
                         )}
                     </div>
 
                     {savedSearches.length > 0 && (
-                        <div className={`mb-4 rounded-2xl border px-4 py-3 ${D ? 'border-[#1e2d47] bg-[#111827]' : 'border-slate-200 bg-white'}`}>
+                        <div
+                            className={`mb-4 rounded-2xl border px-4 py-3 ${D ? 'border-[#1e2d47] bg-[#111827]' : 'border-slate-200 bg-white'}`}
+                        >
                             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                                 <div>
-                                    <p className={`text-xs font-semibold uppercase tracking-wide ${textSecond}`}>Saved Searches</p>
-                                    <p className={`text-xs ${textSecond}`}>Quickly reopen your common discovery filters.</p>
+                                    <p
+                                        className={`text-xs font-semibold uppercase tracking-wide ${textSecond}`}
+                                    >
+                                        Saved Searches
+                                    </p>
+                                    <p className={`text-xs ${textSecond}`}>
+                                        Quickly reopen your common discovery filters.
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex flex-wrap gap-2">
@@ -494,7 +775,11 @@ export default function PublicResearchIndex({
                                         key={item.id}
                                         className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${D ? 'border-blue-900/50 bg-blue-950/30 text-blue-100' : 'border-blue-200 bg-blue-50 text-blue-700'}`}
                                     >
-                                        <button type="button" onClick={() => applySavedSearch(item)} className="hover:underline">
+                                        <button
+                                            type="button"
+                                            onClick={() => applySavedSearch(item)}
+                                            className="hover:underline"
+                                        >
                                             {item.name}
                                         </button>
                                         <button
@@ -515,20 +800,38 @@ export default function PublicResearchIndex({
                     <div className="space-y-3">
                         {isFiltering ? (
                             Array.from({ length: 3 }).map((_, idx) => (
-                                <div key={`skeleton-${idx}`} className={`rounded-2xl border px-5 py-4 ${cardBg} ${cardBorder}`}>
-                                    <Skeleton active paragraph={{ rows: 2 }} title={{ width: '65%' }} />
+                                <div
+                                    key={`skeleton-${idx}`}
+                                    className={`rounded-2xl border px-5 py-4 ${cardBg} ${cardBorder}`}
+                                >
+                                    <Skeleton
+                                        active
+                                        paragraph={{ rows: 2 }}
+                                        title={{ width: '65%' }}
+                                    />
                                 </div>
                             ))
                         ) : proposals.data.length === 0 ? (
-                            <div className={`rounded-2xl border px-6 py-16 text-center ${cardBg} ${cardBorder}`}>
-                                <SearchOutlined className={`block mx-auto mb-3 ${textSecond}`} style={{ fontSize: 40 }} />
-                                <p className={textSecond}>No approved papers found for this search.</p>
+                            <div
+                                className={`rounded-2xl border px-6 py-16 text-center ${cardBg} ${cardBorder}`}
+                            >
+                                <SearchOutlined
+                                    className={`block mx-auto mb-3 ${textSecond}`}
+                                    style={{ fontSize: 40 }}
+                                />
+                                <p className={textSecond}>
+                                    No approved papers found for this search.
+                                </p>
                             </div>
                         ) : (
                             proposals.data.map((row) => {
                                 const rawCategory = row.research_category || row.category;
-                                const categoryLabel = rawCategory ? (categoryLabelMap[rawCategory] ?? rawCategory) : null;
-                                const disciplineLabel = row.discipline_label ? formatDisciplineLabel(row.discipline_label) : null;
+                                const categoryLabel = rawCategory
+                                    ? (categoryLabelMap[rawCategory] ?? rawCategory)
+                                    : null;
+                                const disciplineLabel = row.discipline_label
+                                    ? formatDisciplineLabel(row.discipline_label)
+                                    : null;
                                 const keywordTags = String(row.keywords || '')
                                     .split(',')
                                     .map((item) => item.trim())
@@ -551,8 +854,19 @@ export default function PublicResearchIndex({
 
                                                 {(categoryLabel || disciplineLabel) && (
                                                     <div className="flex flex-wrap gap-1.5">
-                                                        {categoryLabel && <Tag color="geekblue" style={{ margin: 0 }}>{categoryLabel}</Tag>}
-                                                        {disciplineLabel && <Tag color="cyan" style={{ margin: 0 }}>{disciplineLabel}</Tag>}
+                                                        {categoryLabel && (
+                                                            <Tag
+                                                                color="geekblue"
+                                                                style={{ margin: 0 }}
+                                                            >
+                                                                {categoryLabel}
+                                                            </Tag>
+                                                        )}
+                                                        {disciplineLabel && (
+                                                            <Tag color="cyan" style={{ margin: 0 }}>
+                                                                {disciplineLabel}
+                                                            </Tag>
+                                                        )}
                                                     </div>
                                                 )}
 
@@ -562,7 +876,10 @@ export default function PublicResearchIndex({
                                                             <Tag
                                                                 key={`${row.id}-tag-${item}`}
                                                                 color="blue"
-                                                                style={{ margin: 0, cursor: 'pointer' }}
+                                                                style={{
+                                                                    margin: 0,
+                                                                    cursor: 'pointer',
+                                                                }}
                                                                 onClick={() => {
                                                                     setSearch(item);
                                                                     isLiveFilterEnabled.current = true;
@@ -571,9 +888,11 @@ export default function PublicResearchIndex({
                                                                         year_from: yearFrom,
                                                                         year_to: yearTo,
                                                                         school,
-                                                                        institution_id: institutionId,
+                                                                        institution_id:
+                                                                            institutionId,
                                                                         category,
-                                                                        discipline_code: disciplineCode,
+                                                                        discipline_code:
+                                                                            disciplineCode,
                                                                         sort,
                                                                         page: 1,
                                                                     });
@@ -585,25 +904,56 @@ export default function PublicResearchIndex({
                                                     </div>
                                                 )}
 
-                                                <div className={`flex flex-wrap gap-x-4 gap-y-0.5 text-xs ${textSecond}`}>
+                                                <div
+                                                    className={`flex flex-wrap gap-x-4 gap-y-0.5 text-xs ${textSecond}`}
+                                                >
                                                     {row.authors && (
-                                                        <span><span className={`font-medium ${textMeta}`}>Author:</span> {row.authors}</span>
+                                                        <span>
+                                                            <span
+                                                                className={`font-medium ${textMeta}`}
+                                                            >
+                                                                Author:
+                                                            </span>{' '}
+                                                            {row.authors}
+                                                        </span>
                                                     )}
                                                     {row.school && (
-                                                        <span><span className={`font-medium ${textMeta}`}>School:</span> {row.school}</span>
+                                                        <span>
+                                                            <span
+                                                                className={`font-medium ${textMeta}`}
+                                                            >
+                                                                School:
+                                                            </span>{' '}
+                                                            {row.school}
+                                                        </span>
                                                     )}
                                                     {row.institution?.name && (
-                                                        <Link href={route('research.public.institution', row.institution.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                                                        <Link
+                                                            href={route(
+                                                                'research.public.institution',
+                                                                row.institution.id
+                                                            )}
+                                                            className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline"
+                                                        >
                                                             {row.institution.name}
                                                         </Link>
                                                     )}
                                                     {row.year && (
-                                                        <span><span className={`font-medium ${textMeta}`}>Year:</span> {row.year}</span>
+                                                        <span>
+                                                            <span
+                                                                className={`font-medium ${textMeta}`}
+                                                            >
+                                                                Year:
+                                                            </span>{' '}
+                                                            {row.year}
+                                                        </span>
                                                     )}
                                                 </div>
 
                                                 {row.abstract_snippet && (
-                                                    <p className={`line-clamp-2 text-xs leading-relaxed ${textSecond}`}>
+                                                    <p
+                                                        className={`line-clamp-2 text-xs leading-relaxed ${textSecond}`}
+                                                    >
                                                         {row.abstract_snippet}
                                                     </p>
                                                 )}
@@ -640,7 +990,8 @@ export default function PublicResearchIndex({
                     )}
 
                     <p className={`mt-10 text-center text-xs ${textSecond}`}>
-                        CRIS is the official public-facing archive for approved CALABARZON research submissions.
+                        CRIS is the official public-facing archive for approved CALABARZON research
+                        submissions.
                     </p>
                 </div>
             </div>
@@ -669,7 +1020,10 @@ export default function PublicResearchIndex({
                 okText="Save"
                 okButtonProps={{ disabled: !saveSearchName.trim() }}
             >
-                <label htmlFor="saved-search-name" className="mb-2 block text-xs font-medium text-slate-500">
+                <label
+                    htmlFor="saved-search-name"
+                    className="mb-2 block text-xs font-medium text-slate-500"
+                >
                     Search Name
                 </label>
                 <Input

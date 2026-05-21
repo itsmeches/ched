@@ -15,9 +15,8 @@ class InstitutionManagementController extends Controller
     public function index(Request $request): Response
     {
         $institutions = Institution::withCount('users')
-            ->when($request->search, fn ($q, $s) =>
-                $q->where('name', 'like', "%{$s}%")
-                  ->orWhere('code', 'like', "%{$s}%")
+            ->when($request->search, fn ($q, $s) => $q->where('name', 'like', "%{$s}%")
+                ->orWhere('code', 'like', "%{$s}%")
             )
             ->orderBy('name')
             ->paginate(20)
@@ -25,7 +24,7 @@ class InstitutionManagementController extends Controller
 
         return Inertia::render('Admin/Institutions/Index', [
             'institutions' => $institutions,
-            'filters'      => $request->only(['search']),
+            'filters' => $request->only(['search']),
         ]);
     }
 
@@ -37,13 +36,12 @@ class InstitutionManagementController extends Controller
     public function export(Request $request): StreamedResponse
     {
         $query = Institution::withCount('users')
-            ->when($request->search, fn ($q, $s) =>
-                $q->where('name', 'like', "%{$s}%")
-                  ->orWhere('code', 'like', "%{$s}%")
+            ->when($request->search, fn ($q, $s) => $q->where('name', 'like', "%{$s}%")
+                ->orWhere('code', 'like', "%{$s}%")
             )
             ->orderBy('name');
 
-        $fileName = 'institutions-' . now()->format('Ymd-His') . '.csv';
+        $fileName = 'institutions-'.now()->format('Ymd-His').'.csv';
 
         return response()->streamDownload(function () use ($query) {
             $handle = fopen('php://output', 'w');
@@ -73,9 +71,9 @@ class InstitutionManagementController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'name'          => ['required', 'string', 'max:255'],
-            'code'          => ['required', 'string', 'max:50', 'unique:institutions,code'],
-            'address'       => ['nullable', 'string', 'max:500'],
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['required', 'string', 'max:50', 'unique:institutions,code'],
+            'address' => ['nullable', 'string', 'max:500'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
         ], [], [
@@ -98,9 +96,9 @@ class InstitutionManagementController extends Controller
     public function update(Request $request, Institution $institution): RedirectResponse
     {
         $data = $request->validate([
-            'name'          => ['required', 'string', 'max:255'],
-            'code'          => ['required', 'string', 'max:50', "unique:institutions,code,{$institution->id}"],
-            'address'       => ['nullable', 'string', 'max:500'],
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['required', 'string', 'max:50', "unique:institutions,code,{$institution->id}"],
+            'address' => ['nullable', 'string', 'max:500'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
         ], [], [

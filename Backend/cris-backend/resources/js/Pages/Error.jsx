@@ -29,14 +29,41 @@ export default function ErrorPage({ status }) {
                 }}
             >
                 <div style={{ maxWidth: 1120, margin: '0 auto' }}>
-                    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
+                    <header
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            gap: 10,
+                            flexWrap: 'wrap',
+                            marginBottom: 14,
+                        }}
+                    >
                         <div>
                             <Space size={10} align="center" style={{ marginBottom: 2 }}>
-                                <img src="/cris-mark.svg" alt="CRIS" style={{ width: 38, height: 38, borderRadius: 10 }} />
+                                <img
+                                    src="/cris-mark.svg"
+                                    alt="CRIS"
+                                    style={{ width: 38, height: 38, borderRadius: 10 }}
+                                />
                                 <div>
                                     <Space size={10} align="center">
-                                        <Tag style={{ borderRadius: 999, fontWeight: 700, marginInlineEnd: 0, backgroundColor: '#0033a0', color: '#fff', border: 'none' }}>CRIS</Tag>
-                                        <Typography.Title level={4} style={{ margin: 0, color: '#0f172a' }}>
+                                        <Tag
+                                            style={{
+                                                borderRadius: 999,
+                                                fontWeight: 700,
+                                                marginInlineEnd: 0,
+                                                backgroundColor: '#0033a0',
+                                                color: '#fff',
+                                                border: 'none',
+                                            }}
+                                        >
+                                            CRIS
+                                        </Tag>
+                                        <Typography.Title
+                                            level={4}
+                                            style={{ margin: 0, color: '#0f172a' }}
+                                        >
                                             CALABARZON Research Information System
                                         </Typography.Title>
                                     </Space>
@@ -59,19 +86,23 @@ export default function ErrorPage({ status }) {
                         </Space>
                     </header>
 
-                    <Card className="admin-dashboard-shell" bordered={false} style={{ borderRadius: 14 }}>
+                    <Card
+                        className="admin-dashboard-shell"
+                        bordered={false}
+                        style={{ borderRadius: 14 }}
+                    >
                         <Result
                             status={status === 403 ? '403' : '404'}
                             title={copy.title}
                             subTitle={copy.subtitle}
-                            extra={(
+                            extra={
                                 <Space wrap>
                                     <Link href="/">
                                         <Button type="primary">Return Home</Button>
                                     </Link>
                                     <Button onClick={() => window.history.back()}>Go Back</Button>
                                 </Space>
-                            )}
+                            }
                         />
                     </Card>
                 </div>

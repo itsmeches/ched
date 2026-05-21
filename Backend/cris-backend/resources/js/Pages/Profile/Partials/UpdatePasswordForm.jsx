@@ -7,15 +7,7 @@ export default function UpdatePasswordForm({ className = '' }) {
     const passwordInput = useRef();
     const currentPasswordInput = useRef();
 
-    const {
-        data,
-        setData,
-        errors,
-        put,
-        reset,
-        processing,
-        recentlySuccessful,
-    } = useForm({
+    const { data, setData, errors, put, reset, processing, recentlySuccessful } = useForm({
         current_password: '',
         password: '',
         password_confirmation: '',
@@ -49,8 +41,7 @@ export default function UpdatePasswordForm({ className = '' }) {
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                    Ensure your account is using a long, random password to stay
-                    secure.
+                    Ensure your account is using a long, random password to stay secure.
                 </p>
             </header>
 
@@ -99,7 +90,14 @@ export default function UpdatePasswordForm({ className = '' }) {
                 </Form>
 
                 <div className="flex items-center gap-4">
-                    <Button htmlType="submit" type="primary" loading={processing} disabled={processing}>Save</Button>
+                    <Button
+                        htmlType="submit"
+                        type="primary"
+                        loading={processing}
+                        disabled={processing}
+                    >
+                        Save
+                    </Button>
 
                     <Transition
                         show={recentlySuccessful}
@@ -108,9 +106,7 @@ export default function UpdatePasswordForm({ className = '' }) {
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                            Saved.
-                        </p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Saved.</p>
                     </Transition>
                 </div>
             </form>

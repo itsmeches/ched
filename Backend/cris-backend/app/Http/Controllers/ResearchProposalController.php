@@ -5,11 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreResearchProposalRequest;
 use App\Http\Requests\UpdateResearchProposalRequest;
 use App\Models\Discipline;
-use App\Models\EditPermissionRequest;
 use App\Models\Institution;
 use App\Models\Keyword;
-use App\Models\ResearchHistory;
 use App\Models\ResearchCategory;
+use App\Models\ResearchHistory;
 use App\Models\ResearchProposal;
 use App\Models\ResearchProposalHistory;
 use App\Models\User;
@@ -17,13 +16,13 @@ use App\Notifications\ResearchProposalReviewed;
 use App\Services\SimpleNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ResearchProposalController extends Controller
 {
@@ -50,6 +49,7 @@ class ResearchProposalController extends Controller
         if (Storage::disk('public')->exists($filePath)) {
             return 'public';
         }
+
         return null;
     }
 
@@ -86,8 +86,8 @@ class ResearchProposalController extends Controller
             $code = (string) ($proposal->discipline_code ?? '');
             $name = $code !== '' ? $disciplineLabels->get($code) : null;
 
-            $proposal->setAttribute('discipline_label', $name ? ($code . ' - ' . $name) : ($code !== '' ? $code : null));
-            $proposal->setAttribute('abstract_snippet', $proposal->abstract ? \Illuminate\Support\Str::limit($proposal->abstract, 220) : null);
+            $proposal->setAttribute('discipline_label', $name ? ($code.' - '.$name) : ($code !== '' ? $code : null));
+            $proposal->setAttribute('abstract_snippet', $proposal->abstract ? Str::limit($proposal->abstract, 220) : null);
             $proposal->makeHidden('abstract');
 
             return $proposal;
@@ -113,14 +113,14 @@ class ResearchProposalController extends Controller
             ->values();
 
         return Inertia::render('Research/PublicIndex', [
-            'proposals'    => $proposals,
-            'filters'      => (object) $request->only(['search', 'year', 'year_from', 'year_to', 'school', 'institution_id', 'category', 'discipline_code', 'sort']),
+            'proposals' => $proposals,
+            'filters' => (object) $request->only(['search', 'year', 'year_from', 'year_to', 'school', 'institution_id', 'category', 'discipline_code', 'sort']),
             'institutions' => Institution::query()->orderBy('name')->get(['id', 'name']),
-            'categories'   => ResearchCategory::query()->orderBy('label')->get(['value', 'label']),
-            'disciplines'  => Discipline::query()->orderBy('code')->get(['code', 'name']),
+            'categories' => ResearchCategory::query()->orderBy('label')->get(['value', 'label']),
+            'disciplines' => Discipline::query()->orderBy('code')->get(['code', 'name']),
             'popularDisciplines' => $popularDisciplines,
-            'canLogin'     => Route::has('login'),
-            'canRegister'  => Route::has('register'),
+            'canLogin' => Route::has('login'),
+            'canRegister' => Route::has('register'),
         ]);
     }
 
@@ -137,7 +137,7 @@ class ResearchProposalController extends Controller
         $proposal->setAttribute(
             'discipline_label',
             $disciplineName
-                ? ($proposal->discipline_code . ' - ' . $disciplineName)
+                ? ($proposal->discipline_code.' - '.$disciplineName)
                 : ($proposal->discipline_code ?: null)
         );
 
@@ -170,9 +170,9 @@ class ResearchProposalController extends Controller
         }
 
         return Inertia::render('Research/PublicShow', [
-            'proposal'    => $proposal,
+            'proposal' => $proposal,
             'relatedProposals' => $relatedProposals,
-            'canLogin'    => Route::has('login'),
+            'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
         ]);
     }
@@ -261,7 +261,7 @@ class ResearchProposalController extends Controller
 
         return response()->file($absolutePath, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => $disposition . '; filename="' . $downloadName . '"',
+            'Content-Disposition' => $disposition.'; filename="'.$downloadName.'"',
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }
@@ -288,7 +288,7 @@ class ResearchProposalController extends Controller
                         ->where('action', 'rejected')
                         ->where('user_id', $user->id));
             });
-        } elseif ($user->role === \App\Models\User::ROLE_HEI) {
+        } elseif ($user->role === User::ROLE_HEI) {
             // HEI: only student proposals where student -> faculty -> HEI matches current user.
             $query->whereHas('submitter', function ($inner) use ($user) {
                 $inner->where('role', User::ROLE_STUDENT)
@@ -319,10 +319,10 @@ class ResearchProposalController extends Controller
         }
 
         return Inertia::render('Research/Index', [
-            'proposals'  => $query->paginate(15)->withQueryString(),
-            'filters'    => $request->only(['search', 'status', 'year', 'school', 'editability', 'tab', 'discipline_code', 'hei_id']),
-            'tab'        => $tab,
-            'canCreate'  => $user->isStudent(),
+            'proposals' => $query->paginate(15)->withQueryString(),
+            'filters' => $request->only(['search', 'status', 'year', 'school', 'editability', 'tab', 'discipline_code', 'hei_id']),
+            'tab' => $tab,
+            'canCreate' => $user->isStudent(),
             'disciplines' => Discipline::query()->where('is_active', true)->orderBy('code')->get(['code', 'name']),
             'institutions' => $user->isSuperAdmin() || $user->isCHED()
                 ? Institution::query()->orderBy('name')->get(['id', 'name'])
@@ -367,7 +367,7 @@ class ResearchProposalController extends Controller
             }
         }
 
-        $query->when($request->filled('school'), fn ($q) => $q->where('school', 'like', '%' . trim((string) $request->input('school')) . '%'));
+        $query->when($request->filled('school'), fn ($q) => $q->where('school', 'like', '%'.trim((string) $request->input('school')).'%'));
         $query->when($request->filled('institution_id'), fn ($q) => $q->where('institution_id', (int) $request->input('institution_id')));
         $query->when($request->filled('hei_id'), fn ($q) => $q->where('institution_id', (int) $request->input('hei_id')));
         $query->when($request->filled('discipline_code'), fn ($q) => $q->where('discipline_code', trim((string) $request->input('discipline_code'))));
@@ -391,6 +391,7 @@ class ResearchProposalController extends Controller
 
                 if ($status === 'pending') {
                     $q->whereIn('status', ResearchProposal::PENDING_STATUSES);
+
                     return;
                 }
 
@@ -435,17 +436,17 @@ class ResearchProposalController extends Controller
 
         $proposal = ResearchProposal::create([
             ...$data,
-            'submitted_by'   => $request->user()->id,
-            'submitted_at'   => now(),
+            'submitted_by' => $request->user()->id,
+            'submitted_at' => now(),
             'institution_id' => $request->user()->institution_id,
-            'status'         => ResearchProposal::STATUS_UNDER_REVIEW_FACULTY,
+            'status' => ResearchProposal::STATUS_UNDER_REVIEW_FACULTY,
         ]);
 
         $requestUser = $request->user();
         SimpleNotificationService::notify(
             $requestUser?->faculty_id,
             "New submission '{$proposal->title}' is waiting for your review.",
-            route('research.show', $proposal->id) . '#review-decision',
+            route('research.show', $proposal->id).'#review-decision',
             'review_action_needed'
         );
 
@@ -534,8 +535,8 @@ class ResearchProposalController extends Controller
         }
 
         return Inertia::render('Research/Show', [
-            'proposal'            => $proposal,
-            'researchHistory'     => $proposal->researchHistories
+            'proposal' => $proposal,
+            'researchHistory' => $proposal->researchHistories
                 ->map(fn (ResearchHistory $entry) => [
                     'id' => $entry->id,
                     'action' => $entry->action,
@@ -546,12 +547,12 @@ class ResearchProposalController extends Controller
                     'actor_name' => $entry->actor?->name,
                 ])
                 ->values(),
-            'canEdit'             => $user?->can('update', $proposal) ?? false,
-            'canReview'           => $user?->can('review', $proposal) ?? false,
-            'canDelete'           => $user?->can('delete', $proposal) ?? false,
-            'editPermission'      => $editPermission,
+            'canEdit' => $user?->can('update', $proposal) ?? false,
+            'canReview' => $user?->can('review', $proposal) ?? false,
+            'canDelete' => $user?->can('delete', $proposal) ?? false,
+            'editPermission' => $editPermission,
             'pendingEditRequests' => $pendingEditRequests,
-            'breadcrumbs'         => [
+            'breadcrumbs' => [
                 ['label' => 'My Research', 'href' => route('research.index', ['tab' => 'mine'])],
                 ['label' => $proposal->title],
             ],
@@ -572,7 +573,7 @@ class ResearchProposalController extends Controller
 
         return response()->file($absolutePath, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => $disposition . '; filename="' . $downloadName . '"',
+            'Content-Disposition' => $disposition.'; filename="'.$downloadName.'"',
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }
@@ -582,10 +583,10 @@ class ResearchProposalController extends Controller
         $slug = Str::slug($proposal->title ?? 'research-paper');
 
         if ($slug === '') {
-            $slug = 'research-paper-' . $proposal->id;
+            $slug = 'research-paper-'.$proposal->id;
         }
 
-        return $slug . '.pdf';
+        return $slug.'.pdf';
     }
 
     public function edit(ResearchProposal $proposal): Response|RedirectResponse
@@ -680,7 +681,7 @@ class ResearchProposalController extends Controller
             SimpleNotificationService::notify(
                 $request->user()?->faculty_id,
                 "Updated submission '{$proposal->title}' was resubmitted and is awaiting your Faculty review.",
-                route('research.show', $proposal->id) . '#review-decision',
+                route('research.show', $proposal->id).'#review-decision',
                 'review_action_needed'
             );
         }
@@ -777,12 +778,13 @@ class ResearchProposalController extends Controller
     }
 
     /**
-     * @param array<int, string> $keywordNames
+     * @param  array<int, string>  $keywordNames
      */
     private function syncKeywords(ResearchProposal $proposal, array $keywordNames): void
     {
         if ($keywordNames === []) {
             $proposal->keywordItems()->sync([]);
+
             return;
         }
 
@@ -805,7 +807,7 @@ class ResearchProposalController extends Controller
         }
 
         $request->validate([
-            'action'   => ['required', 'in:approve,reject'],
+            'action' => ['required', 'in:approve,reject'],
             'comments' => ['nullable', 'string', 'max:2000', 'required_if:action,reject'],
         ]);
 
@@ -822,7 +824,7 @@ class ResearchProposalController extends Controller
         if ($request->action === 'approve') {
             if ($reviewer->isFaculty()) {
                 $approvedByFacultyAt = now();
-            } elseif ($reviewer->role === \App\Models\User::ROLE_HEI) {
+            } elseif ($reviewer->role === User::ROLE_HEI) {
                 $approvedByHeiAt = now();
             } elseif ($reviewer->isCHED()) {
                 $approvedByChedAt = now();
@@ -844,7 +846,7 @@ class ResearchProposalController extends Controller
         }
 
         $proposal->update([
-            'status'      => $nextStatus,
+            'status' => $nextStatus,
             'reviewed_by' => $request->user()->id,
             'reviewed_at' => now(),
             'approved_by' => $isFinalApproval ? $request->user()->id : null,
@@ -855,7 +857,7 @@ class ResearchProposalController extends Controller
             'rejected_at' => $rejectedAt,
             'rejected_by' => $rejectedBy,
             'remarks' => $remarks,
-            'comments'    => $request->comments,
+            'comments' => $request->comments,
         ]);
 
         $submitter = $proposal->submitter;
@@ -865,21 +867,21 @@ class ResearchProposalController extends Controller
                 SimpleNotificationService::notify(
                     $submitter?->hei_id,
                     "Submission '{$proposal->title}' is now awaiting HEI review.",
-                    route('research.show', $proposal->id) . '#review-decision',
+                    route('research.show', $proposal->id).'#review-decision',
                     'review_action_needed'
                 );
             } elseif ($nextStatus === ResearchProposal::STATUS_UNDER_REVIEW_CHED) {
                 SimpleNotificationService::notify(
                     $submitter?->ched_id,
                     "Submission '{$proposal->title}' is now awaiting CHED review.",
-                    route('research.show', $proposal->id) . '#review-decision',
+                    route('research.show', $proposal->id).'#review-decision',
                     'review_action_needed'
                 );
             } elseif ($nextStatus === ResearchProposal::STATUS_APPROVED) {
                 SimpleNotificationService::notify(
                     $submitter?->id,
                     "Your submission '{$proposal->title}' was approved.",
-                    route('research.show', $proposal->id) . '#research-actions',
+                    route('research.show', $proposal->id).'#research-actions',
                     'research_approved'
                 );
             }
@@ -887,13 +889,13 @@ class ResearchProposalController extends Controller
             SimpleNotificationService::notify(
                 $submitter?->id,
                 "Your submission '{$proposal->title}' was rejected.",
-                route('research.show', $proposal->id) . '#reviewer-comments',
+                route('research.show', $proposal->id).'#reviewer-comments',
                 'research_rejected'
             );
         }
 
         $this->logHistory($proposal, $request->user()->id, $request->action === 'approve' ? 'approved' : 'rejected', null, [
-            'status'   => $proposal->status,
+            'status' => $proposal->status,
             'comments' => $proposal->comments,
         ]);
         $this->logResearchHistory(
@@ -991,8 +993,8 @@ class ResearchProposalController extends Controller
     }
 
     /**
-     * @param array<string, mixed>|null $oldValues
-     * @param array<string, mixed>|null $newValues
+     * @param  array<string, mixed>|null  $oldValues
+     * @param  array<string, mixed>|null  $newValues
      */
     private function logHistory(
         ResearchProposal $proposal,
@@ -1024,11 +1026,11 @@ class ResearchProposalController extends Controller
 
         ResearchProposalHistory::create([
             'research_proposal_id' => $proposal->id,
-            'user_id'              => $userId,
-            'action'               => $action,
-            'old_values'           => $oldValues,
-            'new_values'           => $newValues,
-            'performed_at'         => now(),
+            'user_id' => $userId,
+            'action' => $action,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'performed_at' => now(),
         ]);
     }
 
@@ -1081,7 +1083,7 @@ class ResearchProposalController extends Controller
 
         if ($missing !== []) {
             return [
-                'role_linkage' => 'Your student account is missing required role linkage: ' . implode(', ', $missing) . '.',
+                'role_linkage' => 'Your student account is missing required role linkage: '.implode(', ', $missing).'.',
             ];
         }
 

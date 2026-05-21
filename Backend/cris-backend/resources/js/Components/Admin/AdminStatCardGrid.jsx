@@ -15,14 +15,19 @@ export default function AdminStatCardGrid({ items, activeKey, onSelect }) {
                                 : 'border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-sm dark:border-[#1e2d47] dark:bg-[#111827] dark:hover:border-[#3b5ba5]'
                         }`}
                     >
-                        <div className={`mb-2 text-[11px] font-bold uppercase tracking-wider truncate ${
-                            isActive
-                                ? 'text-[#0033a0] dark:text-blue-300'
-                                : 'text-slate-500 dark:text-slate-400'
-                        }`}>
+                        <div
+                            className={`mb-2 text-[11px] font-bold uppercase tracking-wider truncate ${
+                                isActive
+                                    ? 'text-[#0033a0] dark:text-blue-300'
+                                    : 'text-slate-500 dark:text-slate-400'
+                            }`}
+                        >
                             {item.label}
                         </div>
-                        <div className="text-2xl font-bold leading-none" style={{ color: item.color }}>
+                        <div
+                            className="text-2xl font-bold leading-none"
+                            style={{ color: item.color }}
+                        >
                             {(item.count ?? 0).toLocaleString()}
                         </div>
                     </button>

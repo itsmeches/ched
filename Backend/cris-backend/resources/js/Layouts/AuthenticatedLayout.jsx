@@ -46,10 +46,12 @@ export default function AuthenticatedLayout({ header, children, showHeader = tru
                         onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
                     />
 
-                    <main id="main-content" tabIndex={-1} className="main-scroll flex-1 overflow-y-auto px-3 py-5 sm:px-5 sm:py-6 lg:px-7 lg:py-7">
-                        <div className="mx-auto w-full max-w-[1700px]">
-                            {children}
-                        </div>
+                    <main
+                        id="main-content"
+                        tabIndex={-1}
+                        className="main-scroll flex-1 overflow-y-auto px-3 py-5 sm:px-5 sm:py-6 lg:px-7 lg:py-7"
+                    >
+                        <div className="mx-auto w-full max-w-[1700px]">{children}</div>
                     </main>
                 </div>
             </div>

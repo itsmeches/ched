@@ -35,7 +35,11 @@ export function buildRis(proposal) {
     if (proposal.year) lines.push(`PY  - ${proposal.year}`);
     if (proposal.institution?.name) lines.push(`PB  - ${proposal.institution.name}`);
     if (proposal.keywords) {
-        proposal.keywords.split(/[,;]/).map((k) => k.trim()).filter(Boolean).forEach((kw) => lines.push(`KW  - ${kw}`));
+        proposal.keywords
+            .split(/[,;]/)
+            .map((k) => k.trim())
+            .filter(Boolean)
+            .forEach((kw) => lines.push(`KW  - ${kw}`));
     }
     if (proposal.abstract) lines.push(`AB  - ${proposal.abstract.replace(/\r?\n/g, ' ')}`);
     lines.push('ER  - ');
@@ -44,14 +48,17 @@ export function buildRis(proposal) {
 
 export function buildApa(proposal) {
     const authors = splitAuthors(proposal.authors);
-    const authorStr = authors.length > 0
-        ? authors.map((a) => {
-            const parts = a.split(/\s+/);
-            const last = parts.pop();
-            const initials = parts.map((p) => `${p[0]?.toUpperCase()}.`).join(' ');
-            return `${last}, ${initials}`.trim();
-        }).join(', ')
-        : 'Anonymous';
+    const authorStr =
+        authors.length > 0
+            ? authors
+                  .map((a) => {
+                      const parts = a.split(/\s+/);
+                      const last = parts.pop();
+                      const initials = parts.map((p) => `${p[0]?.toUpperCase()}.`).join(' ');
+                      return `${last}, ${initials}`.trim();
+                  })
+                  .join(', ')
+            : 'Anonymous';
     const year = proposal.year ? ` (${proposal.year})` : '';
     const inst = proposal.institution?.name ? `. ${proposal.institution.name}` : '';
     return `${authorStr}${year}. ${proposal.title}${inst}.`;

@@ -30,6 +30,7 @@ Artisan::command('history:seed-demo {--count=12} {--proposal_id=} {--clear}', fu
 
     if (! $proposal) {
         $this->error('No research proposal found. Create at least one proposal first.');
+
         return self::FAILURE;
     }
 
@@ -64,7 +65,7 @@ Artisan::command('history:seed-demo {--count=12} {--proposal_id=} {--clear}', fu
 
         if ($action === 'updated') {
             $oldTitle = $titles[array_rand($titles)];
-            $newTitle = $titles[array_rand($titles)] . ' v' . ($i + 1);
+            $newTitle = $titles[array_rand($titles)].' v'.($i + 1);
 
             $oldValues = [
                 'title' => $oldTitle,
@@ -136,7 +137,7 @@ Artisan::command('ched4a:import-heis
     $dryRun = (bool) $this->option('dry-run');
 
     if ($reportPath === '') {
-        $reportPath = 'app/reports/ched4a-heis-' . now()->format('Ymd-His') . '.csv';
+        $reportPath = 'app/reports/ched4a-heis-'.now()->format('Ymd-His').'.csv';
     }
     $resolvedReportPath = str_starts_with($reportPath, DIRECTORY_SEPARATOR)
         || preg_match('/^[A-Za-z]:\\\\/', $reportPath) === 1
@@ -146,7 +147,8 @@ Artisan::command('ched4a:import-heis
     File::ensureDirectoryExists(dirname($resolvedReportPath));
     $reportHandle = fopen($resolvedReportPath, 'wb');
     if ($reportHandle === false) {
-        $this->error('Unable to open CSV report file: ' . $resolvedReportPath);
+        $this->error('Unable to open CSV report file: '.$resolvedReportPath);
+
         return self::FAILURE;
     }
 
@@ -164,6 +166,7 @@ Artisan::command('ched4a:import-heis
     $ched = User::query()->where('email', $chedEmail)->first();
     if (! $ched || $ched->role !== User::ROLE_CHED) {
         $this->error("CHED account not found or invalid role for email: {$chedEmail}");
+
         return self::FAILURE;
     }
 
@@ -174,13 +177,15 @@ Artisan::command('ched4a:import-heis
             'verify' => false,
             'timeout' => 90,
         ])->acceptJson()->get($url);
-    } catch (\Throwable $e) {
-        $this->error('Failed to fetch API: ' . $e->getMessage());
+    } catch (Throwable $e) {
+        $this->error('Failed to fetch API: '.$e->getMessage());
+
         return self::FAILURE;
     }
 
     if (! $response->ok()) {
         $this->error("API returned HTTP {$response->status()}");
+
         return self::FAILURE;
     }
 
@@ -196,6 +201,7 @@ Artisan::command('ched4a:import-heis
 
     if ($rows === []) {
         $this->warn('No HEI rows found from API payload.');
+
         return self::SUCCESS;
     }
 
@@ -226,7 +232,7 @@ Artisan::command('ched4a:import-heis
         if ($name === '') {
             $skippedInstitutions++;
             $skippedHeis++;
-            $this->warn('Skipping row with missing name at index ' . $index);
+            $this->warn('Skipping row with missing name at index '.$index);
             continue;
         }
 
@@ -271,7 +277,7 @@ Artisan::command('ched4a:import-heis
         if (! $institution) {
             $suffix = 1;
             while (in_array($finalCode, $usedCodes, true)) {
-                $candidate = Str::upper(Str::substr($sourceCode, 0, max(1, 48 - strlen((string) $suffix))) . '-' . $suffix);
+                $candidate = Str::upper(Str::substr($sourceCode, 0, max(1, 48 - strlen((string) $suffix))).'-'.$suffix);
                 $finalCode = Str::substr($candidate, 0, 50);
                 $suffix++;
             }
@@ -324,9 +330,9 @@ Artisan::command('ched4a:import-heis
         if (! $heiEmail || ! filter_var($heiEmail, FILTER_VALIDATE_EMAIL)) {
             $base = Str::lower(Str::slug($institutionCode, ''));
             if ($base === '') {
-                $base = 'hei' . ($index + 1);
+                $base = 'hei'.($index + 1);
             }
-            $heiEmail = $base . '@edu.ph';
+            $heiEmail = $base.'@edu.ph';
         }
 
         $normalizedEmail = Str::lower($existingUser?->email ?? $heiEmail);
@@ -345,9 +351,9 @@ Artisan::command('ched4a:import-heis
 
             while (in_array($candidateEmail, $usedEmails, true)) {
                 if (preg_match('/^([^@]+)@(.+)$/', $normalizedEmail, $matches) === 1) {
-                    $candidateEmail = $matches[1] . '+' . $suffix . '@' . $matches[2];
+                    $candidateEmail = $matches[1].'+'.$suffix.'@'.$matches[2];
                 } else {
-                    $candidateEmail = $normalizedEmail . '+' . $suffix;
+                    $candidateEmail = $normalizedEmail.'+'.$suffix;
                 }
                 $suffix++;
             }
@@ -359,7 +365,7 @@ Artisan::command('ched4a:import-heis
             $usedEmails[] = $normalizedEmail;
         }
 
-        $heiName = $institutionCode . ' HEI';
+        $heiName = $institutionCode.' HEI';
         if ($existingUser) {
             if ($existingUser->trashed()) {
                 if (! $dryRun) {
@@ -435,8 +441,8 @@ Artisan::command('ched4a:import-heis
     $this->info('Import summary');
     $this->line("Institutions: created={$createdInstitutions}, updated={$updatedInstitutions}, skipped={$skippedInstitutions}");
     $this->line("HEI users:    created={$createdHeis}, updated={$updatedHeis}, skipped={$skippedHeis}");
-    $this->line('Mode: ' . ($dryRun ? 'DRY RUN (no writes)' : 'WRITE'));
-    $this->line('CSV report: ' . $resolvedReportPath);
+    $this->line('Mode: '.($dryRun ? 'DRY RUN (no writes)' : 'WRITE'));
+    $this->line('CSV report: '.$resolvedReportPath);
 
     return self::SUCCESS;
 })->purpose('Import CHED 4-A schools as Institutions and linked HEI accounts from external API');

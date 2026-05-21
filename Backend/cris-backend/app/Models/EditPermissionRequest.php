@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $reason
  * @property string $status
  * @property int|null $decided_by
- * @property \Illuminate\Support\Carbon|null $decided_at
+ * @property Carbon|null $decided_at
  */
 class EditPermissionRequest extends Model
 {

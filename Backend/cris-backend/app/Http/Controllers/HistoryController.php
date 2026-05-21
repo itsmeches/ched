@@ -6,9 +6,9 @@ use App\Models\ResearchProposalHistory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class HistoryController extends Controller
 {
@@ -59,12 +59,12 @@ class HistoryController extends Controller
             ->pluck('aggregate', 'action');
 
         $stats = [
-            'total'    => (clone $statsBaseQuery)->count(),
-            'created'  => (int) ($actionCounts['created'] ?? 0),
-            'updated'  => (int) ($actionCounts['updated'] ?? 0),
+            'total' => (clone $statsBaseQuery)->count(),
+            'created' => (int) ($actionCounts['created'] ?? 0),
+            'updated' => (int) ($actionCounts['updated'] ?? 0),
             'approved' => (int) ($actionCounts['approved'] ?? 0),
             'rejected' => (int) ($actionCounts['rejected'] ?? 0),
-            'deleted'  => (int) ($actionCounts['deleted'] ?? 0),
+            'deleted' => (int) ($actionCounts['deleted'] ?? 0),
         ];
 
         $history = $query->paginate(20)->withQueryString();
@@ -72,8 +72,8 @@ class HistoryController extends Controller
         return Inertia::render('History/Index', [
             'history' => $history,
             'filters' => $filters,
-            'role'    => $user->role,
-            'stats'   => $stats,
+            'role' => $user->role,
+            'stats' => $stats,
         ]);
     }
 
@@ -92,7 +92,7 @@ class HistoryController extends Controller
         $this->applyFilters($query, $request);
         $columns = $this->resolveExportColumns($request);
 
-        $fileName = 'history-audit-' . now()->format('Ymd-His') . '.csv';
+        $fileName = 'history-audit-'.now()->format('Ymd-His').'.csv';
 
         return response()->streamDownload(function () use ($query, $columns) {
             $handle = fopen('php://output', 'w');
@@ -139,6 +139,7 @@ class HistoryController extends Controller
         if ($user->role === User::ROLE_STUDENT) {
             // Student: only activity on the student's own submissions.
             $query->whereHas('proposal', fn ($q) => $q->where('submitted_by', $user->id));
+
             return;
         }
 
@@ -148,6 +149,7 @@ class HistoryController extends Controller
                 $q->where('user_id', $user->id)
                     ->orWhereHas('proposal.submitter', fn ($inner) => $inner->where('faculty_id', $user->id));
             });
+
             return;
         }
 
@@ -162,6 +164,7 @@ class HistoryController extends Controller
                         ->whereHas('faculty', fn ($faculty) => $faculty->where('hei_id', $user->id));
                 })
             );
+
             return;
         }
 
@@ -171,6 +174,7 @@ class HistoryController extends Controller
                 $q->where('user_id', $user->id)
                     ->orWhereHas('proposal', fn ($inner) => $inner->where('reviewed_by', $user->id));
             });
+
             return;
         }
 
@@ -270,9 +274,9 @@ class HistoryController extends Controller
         return [
             'search' => $search,
             'action' => $action,
-            'range'  => $range,
-            'from'   => $from,
-            'to'     => $to,
+            'range' => $range,
+            'from' => $from,
+            'to' => $to,
         ];
     }
 }

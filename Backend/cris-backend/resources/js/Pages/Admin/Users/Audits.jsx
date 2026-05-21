@@ -6,7 +6,19 @@ import EmptyState from '@/Components/EmptyState';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDateTime } from '@/utils/date';
 import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Col, DatePicker, Input, Modal, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import {
+    Button,
+    Col,
+    DatePicker,
+    Input,
+    Modal,
+    Row,
+    Select,
+    Space,
+    Table,
+    Tag,
+    Typography,
+} from 'antd';
 import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
 
@@ -21,81 +33,101 @@ export default function UserAudits({ audits, filters, actionOptions = [] }) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [action, setAction] = useState(filters.action ?? '');
     const [range, setRange] = useState(
-        filters.from && filters.to ? [dayjs(filters.from), dayjs(filters.to)] : null,
+        filters.from && filters.to ? [dayjs(filters.from), dayjs(filters.to)] : null
     );
     const [selectedAudit, setSelectedAudit] = useState(null);
 
-    const columns = useMemo(() => [
-        {
-            title: 'When',
-            dataIndex: 'performed_at',
-            key: 'performed_at',
-            width: 190,
-            render: (value) => formatDateTime(value) || '—',
-        },
-        {
-            title: 'Action',
-            dataIndex: 'action',
-            key: 'action',
-            width: 230,
-            render: (value) => <Tag color="blue">{prettifyAction(value)}</Tag>,
-        },
-        {
-            title: 'Actor',
-            key: 'actor',
-            responsive: ['sm'],
-            render: (_, row) => (
-                <div>
-                    <div style={{ fontWeight: 600 }}>{row.actor?.name ?? 'System/Unknown'}</div>
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        {row.actor?.email ?? '—'}
-                    </Typography.Text>
-                </div>
-            ),
-        },
-        {
-            title: 'Target',
-            key: 'target',
-            render: (_, row) => (
-                <div>
-                    <div style={{ fontWeight: 600 }}>
-                        {row.target?.name ?? `User #${row.target_user_id}`}
-                        {row.target?.deleted_at ? <Tag color="red" style={{ marginLeft: 6 }}>Deactivated</Tag> : null}
+    const columns = useMemo(
+        () => [
+            {
+                title: 'When',
+                dataIndex: 'performed_at',
+                key: 'performed_at',
+                width: 190,
+                render: (value) => formatDateTime(value) || '—',
+            },
+            {
+                title: 'Action',
+                dataIndex: 'action',
+                key: 'action',
+                width: 230,
+                render: (value) => <Tag color="blue">{prettifyAction(value)}</Tag>,
+            },
+            {
+                title: 'Actor',
+                key: 'actor',
+                responsive: ['sm'],
+                render: (_, row) => (
+                    <div>
+                        <div style={{ fontWeight: 600 }}>{row.actor?.name ?? 'System/Unknown'}</div>
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                            {row.actor?.email ?? '—'}
+                        </Typography.Text>
                     </div>
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        {row.target?.email ?? '—'}
-                    </Typography.Text>
-                </div>
-            ),
-        },
-        {
-            title: 'Details',
-            key: 'details',
-            responsive: ['md'],
-            render: (_, row) => (
-                <Space direction="vertical" size={2}>
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        IP: {row.ip_address || '—'}
-                    </Typography.Text>
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        Changes: {Object.keys(row.new_values || {}).length || Object.keys(row.old_values || {}).length ? 'Yes' : 'No'}
-                    </Typography.Text>
-                    <Button size="small" type="link" style={{ padding: 0 }} onClick={() => setSelectedAudit(row)}>
-                        View JSON
-                    </Button>
-                </Space>
-            ),
-        },
-    ], []);
+                ),
+            },
+            {
+                title: 'Target',
+                key: 'target',
+                render: (_, row) => (
+                    <div>
+                        <div style={{ fontWeight: 600 }}>
+                            {row.target?.name ?? `User #${row.target_user_id}`}
+                            {row.target?.deleted_at ? (
+                                <Tag color="red" style={{ marginLeft: 6 }}>
+                                    Deactivated
+                                </Tag>
+                            ) : null}
+                        </div>
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                            {row.target?.email ?? '—'}
+                        </Typography.Text>
+                    </div>
+                ),
+            },
+            {
+                title: 'Details',
+                key: 'details',
+                responsive: ['md'],
+                render: (_, row) => (
+                    <Space direction="vertical" size={2}>
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                            IP: {row.ip_address || '—'}
+                        </Typography.Text>
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                            Changes:{' '}
+                            {Object.keys(row.new_values || {}).length ||
+                            Object.keys(row.old_values || {}).length
+                                ? 'Yes'
+                                : 'No'}
+                        </Typography.Text>
+                        <Button
+                            size="small"
+                            type="link"
+                            style={{ padding: 0 }}
+                            onClick={() => setSelectedAudit(row)}
+                        >
+                            View JSON
+                        </Button>
+                    </Space>
+                ),
+            },
+        ],
+        []
+    );
 
     function applyFilters(page = 1) {
-        router.get(route('admin.users.audits'), {
-            search,
-            action,
-            from: range?.[0]?.format('YYYY-MM-DD') ?? '',
-            to: range?.[1]?.format('YYYY-MM-DD') ?? '',
-            page,
-        }, { preserveState: true, replace: true });
+        router.get(
+            route('admin.users.audits'),
+            {
+                search,
+                action,
+                from: range?.[0]?.format('YYYY-MM-DD') ?? '',
+                to: range?.[1]?.format('YYYY-MM-DD') ?? '',
+                page,
+            },
+            { preserveState: true, replace: true }
+        );
     }
 
     function clearFilters() {
@@ -103,26 +135,30 @@ export default function UserAudits({ audits, filters, actionOptions = [] }) {
         setAction('');
         setRange(null);
 
-        router.get(route('admin.users.audits'), {
-            search: '',
-            action: '',
-            from: '',
-            to: '',
-        }, { preserveState: true, replace: true });
+        router.get(
+            route('admin.users.audits'),
+            {
+                search: '',
+                action: '',
+                from: '',
+                to: '',
+            },
+            { preserveState: true, replace: true }
+        );
     }
 
     return (
         <AuthenticatedLayout
-            header={(
+            header={
                 <AdminPageHeader
                     title="User Management Audits"
-                    actions={(
+                    actions={
                         <Link href={route('admin.users.index')}>
                             <Button icon={<ArrowLeftOutlined />}>Back to Users</Button>
                         </Link>
-                    )}
+                    }
                 />
-            )}
+            }
         >
             <Head title="User Management Audits" />
 
@@ -140,24 +176,30 @@ export default function UserAudits({ audits, filters, actionOptions = [] }) {
                             <strong>Action:</strong> {prettifyAction(selectedAudit.action)}
                         </Typography.Text>
                         <Typography.Text>
-                            <strong>When:</strong> {formatDateTime(selectedAudit.performed_at) || '—'}
+                            <strong>When:</strong>{' '}
+                            {formatDateTime(selectedAudit.performed_at) || '—'}
                         </Typography.Text>
                         <Typography.Text>
                             <strong>Actor:</strong> {selectedAudit.actor?.name ?? 'System/Unknown'}
                         </Typography.Text>
                         <Typography.Text>
-                            <strong>Target:</strong> {selectedAudit.target?.name ?? `User #${selectedAudit.target_user_id}`}
+                            <strong>Target:</strong>{' '}
+                            {selectedAudit.target?.name ?? `User #${selectedAudit.target_user_id}`}
                         </Typography.Text>
 
                         <div>
-                            <Typography.Title level={5} style={{ marginBottom: 8 }}>Old Values</Typography.Title>
+                            <Typography.Title level={5} style={{ marginBottom: 8 }}>
+                                Old Values
+                            </Typography.Title>
                             <pre className="max-h-[220px] overflow-auto rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-700 dark:border-[#2a3a5c] dark:bg-[#0f172a] dark:text-slate-200">
                                 {JSON.stringify(selectedAudit.old_values ?? {}, null, 2)}
                             </pre>
                         </div>
 
                         <div>
-                            <Typography.Title level={5} style={{ marginBottom: 8 }}>New Values</Typography.Title>
+                            <Typography.Title level={5} style={{ marginBottom: 8 }}>
+                                New Values
+                            </Typography.Title>
                             <pre className="max-h-[220px] overflow-auto rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-700 dark:border-[#2a3a5c] dark:bg-[#0f172a] dark:text-slate-200">
                                 {JSON.stringify(selectedAudit.new_values ?? {}, null, 2)}
                             </pre>
@@ -170,7 +212,7 @@ export default function UserAudits({ audits, filters, actionOptions = [] }) {
                 <AdminFilterCard
                     title="Audit trail filters"
                     description="Search by actor or target, and narrow by action/date."
-                    controls={(
+                    controls={
                         <Row gutter={[12, 12]}>
                             <Col xs={24} md={10}>
                                 <Input
@@ -202,13 +244,22 @@ export default function UserAudits({ audits, filters, actionOptions = [] }) {
                                 />
                             </Col>
                             <Col xs={24} md={4}>
-                                <Button size="large" block type="primary" onClick={() => applyFilters(1)}>Apply</Button>
+                                <Button
+                                    size="large"
+                                    block
+                                    type="primary"
+                                    onClick={() => applyFilters(1)}
+                                >
+                                    Apply
+                                </Button>
                             </Col>
                             <Col xs={24} md={4}>
-                                <Button size="large" block onClick={clearFilters}>Clear</Button>
+                                <Button size="large" block onClick={clearFilters}>
+                                    Clear
+                                </Button>
                             </Col>
                         </Row>
-                    )}
+                    }
                 />
 
                 <AdminTableCard
@@ -226,7 +277,14 @@ export default function UserAudits({ audits, filters, actionOptions = [] }) {
                             onChange: (page) => applyFilters(page),
                         }}
                         scroll={{ x: 1100 }}
-                        locale={{ emptyText: <EmptyState title="No audit events found" description="Try another date range, action, or search query." /> }}
+                        locale={{
+                            emptyText: (
+                                <EmptyState
+                                    title="No audit events found"
+                                    description="Try another date range, action, or search query."
+                                />
+                            ),
+                        }}
                     />
                 </AdminTableCard>
             </div>

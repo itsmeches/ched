@@ -91,7 +91,7 @@ class ProposalAuditSummaryWebTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Laguna State Polytechnic University',
-            'code' => 'LSPU-' . fake()->unique()->numerify('###'),
+            'code' => 'LSPU-'.fake()->unique()->numerify('###'),
         ]);
 
         $ched = User::factory()->create([

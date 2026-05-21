@@ -18,8 +18,8 @@ class SecureHeaders
 
         $nonce = Vite::cspNonce();
         $isLocal = app()->environment('local');
-        $viteOrigins = " http://127.0.0.1:5173 http://localhost:5173";
-        $viteConnect = " ws://127.0.0.1:5173 ws://localhost:5173";
+        $viteOrigins = ' http://127.0.0.1:5173 http://localhost:5173';
+        $viteConnect = ' ws://127.0.0.1:5173 ws://localhost:5173';
         // Dev mode allows unsafe-inline/eval for Vite HMR and dev speed.
         // Production uses strict nonce-based CSP (no unsafe-*) for security.
         // Vite does NOT need 'unsafe-eval' (it uses ES modules with source maps).
@@ -30,7 +30,7 @@ class SecureHeaders
         $styleSrc = $isLocal
             ? "'self' 'unsafe-inline' https://fonts.bunny.net{$viteOrigins}"
             : "'self' 'nonce-{$nonce}' https://fonts.bunny.net";
-        $connectSrc = "'self'" . ($isLocal ? $viteOrigins . $viteConnect : '');
+        $connectSrc = "'self'".($isLocal ? $viteOrigins.$viteConnect : '');
         $upgradeInsecure = $isLocal ? '' : '; upgrade-insecure-requests';
 
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');

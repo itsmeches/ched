@@ -6,7 +6,20 @@ import EmptyState from '@/Components/EmptyState';
 import { confirmAction } from '@/utils/confirmAction';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Col, Input, Modal, Row, Space, Table, Tag, Tooltip, Typography, message } from 'antd';
+import {
+    Alert,
+    Button,
+    Col,
+    Input,
+    Modal,
+    Row,
+    Space,
+    Table,
+    Tag,
+    Tooltip,
+    Typography,
+    message,
+} from 'antd';
 import { PlusOutlined, SearchOutlined, TagsOutlined } from '@ant-design/icons';
 
 export default function KeywordsIndex({ keywords, filters }) {
@@ -31,46 +44,65 @@ export default function KeywordsIndex({ keywords, filters }) {
         }
     }, [flash?.success, flash?.error]);
 
-    const columns = useMemo(() => [
-        {
-            title: 'Keyword',
-            dataIndex: 'name',
-            key: 'name',
-            render: (value) => <Tag color="blue">{value}</Tag>,
-        },
-        {
-            title: 'Used By Papers',
-            dataIndex: 'research_proposals_count',
-            key: 'research_proposals_count',
-            responsive: ['sm'],
-        },
-        {
-            title: 'Action',
-            key: 'action',
-            align: 'center',
-            onHeaderCell: () => ({ style: { textAlign: 'center' } }),
-            render: (_, keyword) => (
-                <Space>
-                    <Button type="link" className="edit-action-btn" onClick={() => openEdit(keyword)}>Edit</Button>
-                    <Tooltip title={keyword.research_proposals_count > 0 ? 'Cannot delete: keyword is in use' : null}>
-                        <span>
-                            <Button
-                                danger
-                                type="link"
-                                disabled={keyword.research_proposals_count > 0}
-                                onClick={() => deleteKeyword(keyword)}
-                            >
-                                Delete
-                            </Button>
-                        </span>
-                    </Tooltip>
-                </Space>
-            ),
-        },
-    ], []);
+    const columns = useMemo(
+        () => [
+            {
+                title: 'Keyword',
+                dataIndex: 'name',
+                key: 'name',
+                render: (value) => <Tag color="blue">{value}</Tag>,
+            },
+            {
+                title: 'Used By Papers',
+                dataIndex: 'research_proposals_count',
+                key: 'research_proposals_count',
+                responsive: ['sm'],
+            },
+            {
+                title: 'Action',
+                key: 'action',
+                align: 'center',
+                onHeaderCell: () => ({ style: { textAlign: 'center' } }),
+                render: (_, keyword) => (
+                    <Space>
+                        <Button
+                            type="link"
+                            className="edit-action-btn"
+                            onClick={() => openEdit(keyword)}
+                        >
+                            Edit
+                        </Button>
+                        <Tooltip
+                            title={
+                                keyword.research_proposals_count > 0
+                                    ? 'Cannot delete: keyword is in use'
+                                    : null
+                            }
+                        >
+                            <span>
+                                <Button
+                                    danger
+                                    type="link"
+                                    disabled={keyword.research_proposals_count > 0}
+                                    onClick={() => deleteKeyword(keyword)}
+                                >
+                                    Delete
+                                </Button>
+                            </span>
+                        </Tooltip>
+                    </Space>
+                ),
+            },
+        ],
+        []
+    );
 
     function applyFilter() {
-        router.get(route('admin.keywords.index'), { search }, { preserveState: true, replace: true });
+        router.get(
+            route('admin.keywords.index'),
+            { search },
+            { preserveState: true, replace: true }
+        );
     }
 
     function openCreate() {
@@ -111,7 +143,9 @@ export default function KeywordsIndex({ keywords, filters }) {
 
     function deleteKeyword(keyword) {
         if (keyword.research_proposals_count > 0) {
-            message.warning('This keyword is currently used by research papers and cannot be deleted.');
+            message.warning(
+                'This keyword is currently used by research papers and cannot be deleted.'
+            );
             return;
         }
 
@@ -141,16 +175,21 @@ export default function KeywordsIndex({ keywords, filters }) {
 
     return (
         <AuthenticatedLayout
-            header={(
+            header={
                 <AdminPageHeader
                     title="Keyword Management"
-                    actions={(
-                        <Button size="large" type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+                    actions={
+                        <Button
+                            size="large"
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={openCreate}
+                        >
                             Add Keyword
                         </Button>
-                    )}
+                    }
                 />
-            )}
+            }
         >
             <Head title="Keywords" />
 
@@ -161,7 +200,7 @@ export default function KeywordsIndex({ keywords, filters }) {
                 <AdminFilterCard
                     title="Manage keyword catalog"
                     description="Add official keywords used by researchers when tagging papers."
-                    controls={(
+                    controls={
                         <Row gutter={[12, 12]}>
                             <Col xs={24} md={18}>
                                 <Input
@@ -175,15 +214,23 @@ export default function KeywordsIndex({ keywords, filters }) {
                                 />
                             </Col>
                             <Col xs={24} md={6}>
-                                <Button size="large" block type="primary" onClick={applyFilter} icon={<TagsOutlined />}>
+                                <Button
+                                    size="large"
+                                    block
+                                    type="primary"
+                                    onClick={applyFilter}
+                                    icon={<TagsOutlined />}
+                                >
                                     Apply
                                 </Button>
                             </Col>
                         </Row>
-                    )}
+                    }
                 />
 
-                <AdminTableCard summary={`${keywords.total} keyword${keywords.total === 1 ? '' : 's'} in catalog`}>
+                <AdminTableCard
+                    summary={`${keywords.total} keyword${keywords.total === 1 ? '' : 's'} in catalog`}
+                >
                     <Table
                         rowKey="id"
                         columns={columns}
@@ -192,10 +239,22 @@ export default function KeywordsIndex({ keywords, filters }) {
                             current: keywords.current_page,
                             pageSize: keywords.per_page,
                             total: keywords.total,
-                            onChange: (page) => router.get(route('admin.keywords.index'), { search, page }, { preserveState: true, replace: true }),
+                            onChange: (page) =>
+                                router.get(
+                                    route('admin.keywords.index'),
+                                    { search, page },
+                                    { preserveState: true, replace: true }
+                                ),
                         }}
                         scroll={{ x: 720 }}
-                        locale={{ emptyText: <EmptyState title="No keywords matched" description="Try another search term or add a new keyword." /> }}
+                        locale={{
+                            emptyText: (
+                                <EmptyState
+                                    title="No keywords matched"
+                                    description="Try another search term or add a new keyword."
+                                />
+                            ),
+                        }}
                     />
                 </AdminTableCard>
             </div>
@@ -228,4 +287,3 @@ export default function KeywordsIndex({ keywords, filters }) {
         </AuthenticatedLayout>
     );
 }
-

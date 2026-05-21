@@ -1,13 +1,7 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 
-export function confirmAction({
-    title,
-    content,
-    okText = 'Confirm',
-    danger = false,
-    onOk,
-}) {
+export function confirmAction({ title, content, okText = 'Confirm', danger = false, onOk }) {
     Modal.confirm({
         title,
         icon: <ExclamationCircleOutlined />,

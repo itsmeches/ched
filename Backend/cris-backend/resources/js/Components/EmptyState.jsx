@@ -14,16 +14,14 @@ export default function EmptyState({
     return (
         <Empty
             image={icon ?? Empty.PRESENTED_IMAGE_SIMPLE}
-            description={(
+            description={
                 <div className="space-y-1">
                     <Typography.Text strong style={{ display: 'block' }}>
                         {title}
                     </Typography.Text>
-                    <Typography.Text type="secondary">
-                        {description}
-                    </Typography.Text>
+                    <Typography.Text type="secondary">{description}</Typography.Text>
                 </div>
-            )}
+            }
         >
             {action}
         </Empty>

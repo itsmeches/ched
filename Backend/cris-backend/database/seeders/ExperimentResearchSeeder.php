@@ -31,7 +31,7 @@ class ExperimentResearchSeeder extends Seeder
         if (! $ched) {
             $ched = User::create([
                 'name' => 'CHED Seeder',
-                'email' => 'ched_seeder_' . $batchSuffix . '@cris.gov.ph',
+                'email' => 'ched_seeder_'.$batchSuffix.'@cris.gov.ph',
                 'password' => Hash::make('password'),
                 'role' => User::ROLE_CHED,
             ]);
@@ -42,7 +42,7 @@ class ExperimentResearchSeeder extends Seeder
             $heiUsers = collect([
                 User::create([
                     'name' => 'HEI Seeder',
-                    'email' => 'hei_seeder_' . $batchSuffix . '@edu.ph',
+                    'email' => 'hei_seeder_'.$batchSuffix.'@edu.ph',
                     'password' => Hash::make('password'),
                     'role' => User::ROLE_HEI,
                     'institution_id' => $institutions->random(),

@@ -314,7 +314,7 @@ class HistoryHardeningTest extends TestCase
     {
         $institution = Institution::query()->create([
             'name' => 'Calabarzon State University',
-            'code' => 'CSU-' . fake()->unique()->numerify('###'),
+            'code' => 'CSU-'.fake()->unique()->numerify('###'),
         ]);
 
         $hei = User::factory()->create([

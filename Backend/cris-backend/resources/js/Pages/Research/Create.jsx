@@ -5,13 +5,29 @@ import { Alert, Card, message, Typography } from 'antd';
 import { useEffect } from 'react';
 import ResearchProposalForm from './Partials/ResearchProposalForm';
 
-export default function ResearchCreate({ keywordOptions = [], disciplineOptions = [], researchCategoryGroups = [] }) {
+export default function ResearchCreate({
+    keywordOptions = [],
+    disciplineOptions = [],
+    researchCategoryGroups = [],
+}) {
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
-        title: '', authors: '', author_email: '', author_phone: '',
-        co_authors: '', co_author_emails: '', co_author_phones: '',
-        school: '', year: new Date().getFullYear(),
-        research_category: '', category_type: '', discipline: '', keywords: '', keyword_items: [], abstract: '', pdf_file: null,
+        title: '',
+        authors: '',
+        author_email: '',
+        author_phone: '',
+        co_authors: '',
+        co_author_emails: '',
+        co_author_phones: '',
+        school: '',
+        year: new Date().getFullYear(),
+        research_category: '',
+        category_type: '',
+        discipline: '',
+        keywords: '',
+        keyword_items: [],
+        abstract: '',
+        pdf_file: null,
     });
 
     function submit(e) {
@@ -32,31 +48,30 @@ export default function ResearchCreate({ keywordOptions = [], disciplineOptions 
         <AuthenticatedLayout header={<AdminPageHeader title="Submit Research Paper" />}>
             <Head title="Submit Research Paper" />
             <div className="space-y-4">
-                    {flash?.success && <Alert type="success" showIcon message={flash.success} />}
-                    {flash?.error && <Alert type="error" showIcon message={flash.error} />}
-                    <Card className="admin-dashboard-shell" bordered={false}>
-                        <Typography.Text type="secondary">
-                            Complete all required fields and upload your research paper in PDF format.
-                        </Typography.Text>
-                    </Card>
+                {flash?.success && <Alert type="success" showIcon message={flash.success} />}
+                {flash?.error && <Alert type="error" showIcon message={flash.error} />}
+                <Card className="admin-dashboard-shell" bordered={false}>
+                    <Typography.Text type="secondary">
+                        Complete all required fields and upload your research paper in PDF format.
+                    </Typography.Text>
+                </Card>
 
-                    <Card className="admin-dashboard-shell" bordered={false}>
-                        <ResearchProposalForm
-                            data={data}
-                            setData={setData}
-                            errors={errors}
-                            processing={processing}
-                            onSubmit={submit}
-                            keywordOptions={keywordOptions}
-                            disciplineOptions={disciplineOptions}
-                            researchCategoryGroups={researchCategoryGroups}
-                            submitLabel="Submit Paper"
-                            cancelHref={route('research.index')}
-                            cancelLabel="Back to Papers"
-                        />
-                    </Card>
+                <Card className="admin-dashboard-shell" bordered={false}>
+                    <ResearchProposalForm
+                        data={data}
+                        setData={setData}
+                        errors={errors}
+                        processing={processing}
+                        onSubmit={submit}
+                        keywordOptions={keywordOptions}
+                        disciplineOptions={disciplineOptions}
+                        researchCategoryGroups={researchCategoryGroups}
+                        submitLabel="Submit Paper"
+                        cancelHref={route('research.index')}
+                        cancelLabel="Back to Papers"
+                    />
+                </Card>
             </div>
         </AuthenticatedLayout>
     );
 }
-

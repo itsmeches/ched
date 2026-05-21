@@ -21,13 +21,18 @@ use Laravel\Sanctum\HasApiTokens;
  */
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     public const ROLE_PENDING = 'pending';
+
     public const ROLE_SUPER_ADMIN = 'super_admin';
+
     public const ROLE_CHED = 'ched';
+
     public const ROLE_HEI = 'hei';
+
     public const ROLE_FACULTY = 'faculty';
+
     public const ROLE_STUDENT = 'student';
 
     public const ROLES = [

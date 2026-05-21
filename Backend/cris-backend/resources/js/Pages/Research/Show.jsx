@@ -4,12 +4,36 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { StatusBadge } from '@/Components/StatusBadge';
 import Breadcrumb from '@/Components/Breadcrumb';
 import { formatDateTime } from '@/utils/date';
-import { Alert, Button, Card, Divider, Input, Modal, Popconfirm, Select, Space, Steps, Tag, Timeline, Typography, message } from 'antd';
+import {
+    Alert,
+    Button,
+    Card,
+    Divider,
+    Input,
+    Modal,
+    Popconfirm,
+    Select,
+    Space,
+    Steps,
+    Tag,
+    Timeline,
+    Typography,
+    message,
+} from 'antd';
 import { DownloadOutlined, FilePdfOutlined, KeyOutlined, LockOutlined } from '@ant-design/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getReviewRemarkTemplates } from '@/utils/reviewRemarkTemplates';
 
-export default function ResearchShow({ proposal, researchHistory = [], canEdit, canReview, canDelete, editPermission, pendingEditRequests, breadcrumbs = [] }) {
+export default function ResearchShow({
+    proposal,
+    researchHistory = [],
+    canEdit,
+    canReview,
+    canDelete,
+    editPermission,
+    pendingEditRequests,
+    breadcrumbs = [],
+}) {
     const { flash, auth } = usePage().props;
     const deleteForm = useForm({});
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -63,11 +87,12 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
     }, [proposal?.id]);
 
     function openRejectModal() {
-        const starter = proposal.status === 'under_review_faculty'
-            ? 'Faculty review: Please revise and improve the submission based on stage requirements.'
-            : proposal.status === 'under_review_hei'
-                ? 'HEI review: Please revise and improve the submission based on institutional requirements.'
-                : 'CHED final review: Please revise and resubmit with required corrections.';
+        const starter =
+            proposal.status === 'under_review_faculty'
+                ? 'Faculty review: Please revise and improve the submission based on stage requirements.'
+                : proposal.status === 'under_review_hei'
+                  ? 'HEI review: Please revise and improve the submission based on institutional requirements.'
+                  : 'CHED final review: Please revise and resubmit with required corrections.';
 
         setRejectModal({
             open: true,
@@ -89,23 +114,33 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
     function submitApprove() {
         setIsSubmittingReview(true);
 
-        router.post(route('research.review', proposal.id), {
-            action: 'approve',
-        }, {
-            onFinish: () => setIsSubmittingReview(false),
-        });
+        router.post(
+            route('research.review', proposal.id),
+            {
+                action: 'approve',
+            },
+            {
+                onFinish: () => setIsSubmittingReview(false),
+            }
+        );
     }
 
     function submitReject() {
         const remarks = String(rejectModal.comments || '').trim();
 
         if (!remarks) {
-            setRejectModal((prev) => ({ ...prev, error: 'Remarks are required when rejecting a submission.' }));
+            setRejectModal((prev) => ({
+                ...prev,
+                error: 'Remarks are required when rejecting a submission.',
+            }));
             return;
         }
 
         if (remarks === String(rejectModal.starter || '').trim()) {
-            setRejectModal((prev) => ({ ...prev, error: 'Please edit the default remarks before submitting rejection.' }));
+            setRejectModal((prev) => ({
+                ...prev,
+                error: 'Please edit the default remarks before submitting rejection.',
+            }));
             return;
         }
 
@@ -120,7 +155,7 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
             {
                 onSuccess: () => closeRejectModal(),
                 onFinish: () => setIsSubmittingReview(false),
-            },
+            }
         );
     }
 
@@ -138,8 +173,16 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
         {
             title: 'Authors',
             rows: [
-                { label: 'Author', value: proposal.authors, sub: formatContact(proposal.author_email, proposal.author_phone) },
-                { label: 'Co-Authors', value: proposal.co_authors || '—', sub: formatContact(proposal.co_author_emails, proposal.co_author_phones) },
+                {
+                    label: 'Author',
+                    value: proposal.authors,
+                    sub: formatContact(proposal.author_email, proposal.author_phone),
+                },
+                {
+                    label: 'Co-Authors',
+                    value: proposal.co_authors || '—',
+                    sub: formatContact(proposal.co_author_emails, proposal.co_author_phones),
+                },
             ],
         },
         {
@@ -160,9 +203,21 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
             title: 'Workflow',
             rows: [
                 { label: 'Submitted By', value: proposal.submitter?.name ?? '—' },
-                { label: 'Viewed By CHED', value: proposal.viewer?.name ?? 'Not viewed yet', sub: formatDateTime(proposal.viewed_at) || null },
-                { label: 'Last Action', value: proposal.last_action_by || '—', sub: formatDateTime(proposal.last_action_at) || null },
-                { label: 'Approved By', value: proposal.approver?.name ?? '—', sub: formatDateTime(proposal.approved_at) || null },
+                {
+                    label: 'Viewed By CHED',
+                    value: proposal.viewer?.name ?? 'Not viewed yet',
+                    sub: formatDateTime(proposal.viewed_at) || null,
+                },
+                {
+                    label: 'Last Action',
+                    value: proposal.last_action_by || '—',
+                    sub: formatDateTime(proposal.last_action_at) || null,
+                },
+                {
+                    label: 'Approved By',
+                    value: proposal.approver?.name ?? '—',
+                    sub: formatDateTime(proposal.approved_at) || null,
+                },
             ],
         },
     ];
@@ -174,21 +229,20 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
         { label: 'Remarks', value: proposal.remarks || '—' },
     ];
 
-    const isLockedForEditing =
-        proposal.status !== 'rejected';
+    const isLockedForEditing = proposal.status !== 'rejected';
 
     const role = auth?.user?.role;
 
-    const canEditFromPermission =
-        role === 'student' && editPermission?.status === 'approved';
+    const canEditFromPermission = role === 'student' && editPermission?.status === 'approved';
 
     const canShowEditButton = canEdit || canEditFromPermission;
 
-    const reviewTitle = proposal.status === 'under_review_faculty' || proposal.status === 'submitted'
-        ? 'Faculty Review Decision'
-        : proposal.status === 'under_review_hei'
-            ? 'HEI Review Decision'
-            : proposal.status === 'under_review_ched'
+    const reviewTitle =
+        proposal.status === 'under_review_faculty' || proposal.status === 'submitted'
+            ? 'Faculty Review Decision'
+            : proposal.status === 'under_review_hei'
+              ? 'HEI Review Decision'
+              : proposal.status === 'under_review_ched'
                 ? 'CHED Final Review Decision'
                 : 'Review Decision';
 
@@ -206,22 +260,33 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
         }
 
         if (role === 'super_admin') {
-            return ['submitted', 'under_review_faculty', 'under_review_hei', 'under_review_ched'].includes(proposal.status);
+            return [
+                'submitted',
+                'under_review_faculty',
+                'under_review_hei',
+                'under_review_ched',
+            ].includes(proposal.status);
         }
 
         return false;
     })();
 
-    const rejectModalTitle = proposal.status === 'under_review_faculty' || proposal.status === 'submitted'
-        ? 'Faculty Reject Submission'
-        : proposal.status === 'under_review_hei'
-            ? 'HEI Reject Submission'
-            : proposal.status === 'under_review_ched'
+    const rejectModalTitle =
+        proposal.status === 'under_review_faculty' || proposal.status === 'submitted'
+            ? 'Faculty Reject Submission'
+            : proposal.status === 'under_review_hei'
+              ? 'HEI Reject Submission'
+              : proposal.status === 'under_review_ched'
                 ? 'CHED Reject Submission'
                 : 'Reject Submission';
 
-    const rejectTemplates = getReviewRemarkTemplates(proposal.status === 'submitted' ? 'under_review_faculty' : proposal.status);
-    const remarkTemplateOptions = rejectTemplates.map((template) => ({ value: template, label: template }));
+    const rejectTemplates = getReviewRemarkTemplates(
+        proposal.status === 'submitted' ? 'under_review_faculty' : proposal.status
+    );
+    const remarkTemplateOptions = rejectTemplates.map((template) => ({
+        value: template,
+        label: template,
+    }));
 
     const actionMeta = {
         submitted: { label: 'Submitted', color: 'blue' },
@@ -275,489 +340,647 @@ export default function ResearchShow({ proposal, researchHistory = [], canEdit, 
             {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
 
             <div className="space-y-4">
-                    {flash?.success && <Alert type="success" showIcon message={flash.success} />}
-                    {flash?.error && <Alert type="error" showIcon message={flash.error} />}
+                {flash?.success && <Alert type="success" showIcon message={flash.success} />}
+                {flash?.error && <Alert type="error" showIcon message={flash.error} />}
 
-                    {/* Workflow Progress */}
-                    {(() => {
-                        const statusStepMap = {
-                            submitted: 0,
-                            under_review_faculty: 1,
-                            under_review_hei: 2,
-                            under_review_ched: 3,
-                            approved: 4,
-                            rejected: -1,
-                            needs_revision: -1,
-                        };
-                        const currentStep = statusStepMap[proposal.status] ?? 0;
-                        const isRejected = proposal.status === 'rejected' || proposal.status === 'needs_revision';
-                        return (
-                            <Card className="admin-dashboard-shell" bordered={false}>
-                                <Steps
-                                    current={isRejected ? currentStep : currentStep}
-                                    status={isRejected ? 'error' : proposal.status === 'approved' ? 'finish' : 'process'}
-                                    size="small"
-                                    items={[
-                                        { title: 'Submitted' },
-                                        { title: 'Faculty Review' },
-                                        { title: 'HEI Review' },
-                                        { title: 'CHED Review' },
-                                        { title: proposal.status === 'rejected' ? 'Rejected' : proposal.status === 'needs_revision' ? 'Needs Revision' : 'Approved' },
-                                    ]}
-                                />
-                            </Card>
-                        );
-                    })()}
-
-                    {/* CHED: pending edit permission requests */}
-                    {pendingEditRequests?.length > 0 && (
-                        <Card
-                            id="edit-permission-requests"
-                            className="admin-dashboard-shell"
-                            bordered={false}
-                            title={
-                                <Space>
-                                    <KeyOutlined style={{ color: '#d97706' }} />
-                                    <span>Edit Permission Requests</span>
-                                    <Tag color="orange">{pendingEditRequests.length}</Tag>
-                                </Space>
-                            }
-                        >
-                            <Space direction="vertical" style={{ width: '100%' }} size={10}>
-                                {pendingEditRequests.map((req) => (
-                                    <div
-                                        key={req.id}
-                                        className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-amber-50/50 px-4 py-3"
-                                    >
-                                        <div className="min-w-0">
-                                            <Typography.Text strong>{req.requester?.name}</Typography.Text>
-                                            {req.reason ? (
-                                                <Typography.Paragraph
-                                                    style={{ margin: '4px 0 0', color: '#64748b', fontSize: 13 }}
-                                                >
-                                                    {req.reason}
-                                                </Typography.Paragraph>
-                                            ) : (
-                                                <Typography.Text
-                                                    type="secondary"
-                                                    style={{ display: 'block', fontSize: 13, marginTop: 2 }}
-                                                >
-                                                    No reason provided
-                                                </Typography.Text>
-                                            )}
-                                        </div>
-                                        <Space>
-                                            <Popconfirm
-                                                title="Approve this edit request?"
-                                                description="The HEI will be able to edit this submission once."
-                                                okText="Approve"
-                                                onConfirm={() =>
-                                                    router.post(
-                                                        route('research.edit-permission.decide', {
-                                                            proposal: proposal.id,
-                                                            editRequest: req.id,
-                                                        }),
-                                                        { decision: 'approved' },
-                                                    )
-                                                }
-                                            >
-                                                <Button type="primary" size="small">Approve</Button>
-                                            </Popconfirm>
-                                            <Popconfirm
-                                                title="Deny this edit request?"
-                                                okText="Deny"
-                                                okButtonProps={{ danger: true }}
-                                                onConfirm={() =>
-                                                    router.post(
-                                                        route('research.edit-permission.decide', {
-                                                            proposal: proposal.id,
-                                                            editRequest: req.id,
-                                                        }),
-                                                        { decision: 'denied' },
-                                                    )
-                                                }
-                                            >
-                                                <Button danger size="small">Deny</Button>
-                                            </Popconfirm>
-                                        </Space>
-                                    </div>
-                                ))}
-                            </Space>
-                        </Card>
-                    )}
-
-                    <Card id="research-actions" className="admin-dashboard-shell" bordered={false}>
-                        <div className="space-y-5">
-                            <div className="flex flex-wrap items-start justify-between gap-4">
-                                <div className="min-w-0 space-y-2">
-                                    <Typography.Title level={3} style={{ margin: 0 }}>
-                                        {proposal.title}
-                                    </Typography.Title>
-                                    <Space wrap size={[8, 8]}>
-                                        <StatusBadge status={proposal.status} />
-                                        {proposal.year && <Tag color="blue">Year {proposal.year}</Tag>}
-                                        {proposal.category && <Tag color="geekblue">{proposal.category}</Tag>}
-                                    </Space>
-                                </div>
-
-                                <Space wrap>
-                                    {proposal.file_path && (
-                                        <Button
-                                            icon={<FilePdfOutlined />}
-                                            type={pdfOpen ? 'primary' : 'default'}
-                                            onClick={handleViewPdf}
-                                        >
-                                            {pdfOpen ? 'Hide PDF' : 'View PDF'}
-                                        </Button>
-                                    )}
-
-                                    {proposal.file_path && (
-                                        <a href={route('research.file', { proposal: proposal.id, download: 1 })}>
-                                            <Button icon={<DownloadOutlined />}>Download PDF</Button>
-                                        </a>
-                                    )}
-
-                                    {canEdit && proposal.status === 'rejected' && (
-                                        <Popconfirm
-                                            title="Resubmit this revised proposal?"
-                                            description="This will reset approval trail timestamps and route it back to Faculty review."
-                                            okText="Resubmit"
-                                            onConfirm={() => router.post(route('research.resubmit', proposal.id))}
-                                        >
-                                            <Button type="primary">Resubmit to Faculty</Button>
-                                        </Popconfirm>
-                                    )}
-
-                                    {canShowEditButton && (
-                                        <Link href={route('research.edit', proposal.id)}>
-                                            <Button className="edit-action-btn">Edit</Button>
-                                        </Link>
-                                    )}
-
-                                    {canDelete && (
-                                        <Popconfirm
-                                            title="Delete this research record?"
-                                            description="This action cannot be undone."
-                                            okText="Delete"
-                                            okButtonProps={{ danger: true, loading: deleteForm.processing }}
-                                            onConfirm={() => deleteForm.delete(route('research.destroy', proposal.id))}
-                                        >
-                                            <Button danger loading={deleteForm.processing}>Delete</Button>
-                                        </Popconfirm>
-                                    )}
-
-                                    {showReviewActions && (
-                                        <>
-                                            <Popconfirm
-                                                title="Approve this submission?"
-                                                onConfirm={submitApprove}
-                                                okText="Approve"
-                                            >
-                                                <Button type="primary" loading={isSubmittingReview}>
-                                                    Approve
-                                                </Button>
-                                            </Popconfirm>
-                                            <Button danger loading={isSubmittingReview} onClick={openRejectModal}>
-                                                Reject
-                                            </Button>
-                                        </>
-                                    )}
-                                </Space>
-                            </div>
-
-                            <div className="rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/65 dark:bg-blue-950/30 p-3.5">
-                                <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">Audit Summary</p>
-                                <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
-                                    {auditSummaryItems.map((item) => (
-                                        <div key={item.label} className="rounded-xl border border-blue-200/80 dark:border-blue-900/40 bg-white/80 dark:bg-[#111827] px-3 py-2">
-                                            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{item.label}</p>
-                                            <p className="mt-0.5 break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">{item.value}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                                <div className="lg:col-span-2 space-y-6">
-                                    <section>
-                                        <Typography.Title level={5} style={{ marginBottom: 4 }}>Abstract</Typography.Title>
-                                        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 10, fontSize: 12 }}>
-                                            Research summary and key findings
-                                        </Typography.Text>
-                                        <Typography.Paragraph
-                                            style={{
-                                                whiteSpace: 'pre-line',
-                                                fontSize: 15,
-                                                lineHeight: 1.85,
-                                                marginBottom: 0,
-                                            }}
-                                        >
-                                            {proposal.abstract || <Typography.Text type="secondary">No abstract provided.</Typography.Text>}
-                                        </Typography.Paragraph>
-                                    </section>
-
-                                    {keywordList.length > 0 && (
-                                        <section>
-                                            <Typography.Title level={5} style={{ marginBottom: 8 }}>Keywords</Typography.Title>
-                                            <Space wrap size={[6, 6]}>
-                                                {keywordList.map((kw) => (
-                                                    <Tag key={kw} style={{ borderRadius: 999, padding: '2px 10px' }}>{kw}</Tag>
-                                                ))}
-                                            </Space>
-                                        </section>
-                                    )}
-                                </div>
-
-                                <aside className="space-y-4 lg:border-l lg:border-slate-200/80 lg:pl-6 dark:lg:border-[#1e2d47]">
-                                    {sidebarSections.map((section) => (
-                                        <div key={section.title}>
-                                            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                                {section.title}
-                                            </p>
-                                            <dl className="space-y-2">
-                                                {section.rows.map((row) => (
-                                                    <div key={row.label}>
-                                                        <dt className="text-[11px] text-slate-500 dark:text-slate-400">{row.label}</dt>
-                                                        <dd className="break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">
-                                                            {row.value}
-                                                            {row.sub && (
-                                                                <span className="block text-[11px] text-slate-500 dark:text-slate-400">{row.sub}</span>
-                                                            )}
-                                                        </dd>
-                                                    </div>
-                                                ))}
-                                            </dl>
-                                        </div>
-                                    ))}
-                                </aside>
-                            </div>
-                        </div>
-                    </Card>
-
-                    {pdfOpen && proposal.file_path && (
-                        <Card
-                            ref={pdfCardRef}
-                            className="admin-dashboard-shell"
-                            bordered={false}
-                            title={
-                                <Space>
-                                    <FilePdfOutlined style={{ color: '#0033a0' }} />
-                                    <span>PDF Viewer</span>
-                                </Space>
-                            }
-                            extra={
-                                <Button size="small" onClick={() => setPdfOpen(false)}>Close</Button>
-                            }
-                        >
-                            <iframe
-                                src={route('research.file', proposal.id)}
-                                title="Research PDF"
-                                style={{ width: '100%', height: '80vh', border: 'none', borderRadius: 8 }}
+                {/* Workflow Progress */}
+                {(() => {
+                    const statusStepMap = {
+                        submitted: 0,
+                        under_review_faculty: 1,
+                        under_review_hei: 2,
+                        under_review_ched: 3,
+                        approved: 4,
+                        rejected: -1,
+                        needs_revision: -1,
+                    };
+                    const currentStep = statusStepMap[proposal.status] ?? 0;
+                    const isRejected =
+                        proposal.status === 'rejected' || proposal.status === 'needs_revision';
+                    return (
+                        <Card className="admin-dashboard-shell" bordered={false}>
+                            <Steps
+                                current={isRejected ? currentStep : currentStep}
+                                status={
+                                    isRejected
+                                        ? 'error'
+                                        : proposal.status === 'approved'
+                                          ? 'finish'
+                                          : 'process'
+                                }
+                                size="small"
+                                items={[
+                                    { title: 'Submitted' },
+                                    { title: 'Faculty Review' },
+                                    { title: 'HEI Review' },
+                                    { title: 'CHED Review' },
+                                    {
+                                        title:
+                                            proposal.status === 'rejected'
+                                                ? 'Rejected'
+                                                : proposal.status === 'needs_revision'
+                                                  ? 'Needs Revision'
+                                                  : 'Approved',
+                                    },
+                                ]}
                             />
                         </Card>
-                    )}
+                    );
+                })()}
 
+                {/* CHED: pending edit permission requests */}
+                {pendingEditRequests?.length > 0 && (
                     <Card
-                        id="research-timeline"
+                        id="edit-permission-requests"
                         className="admin-dashboard-shell"
                         bordered={false}
-                        title={<Typography.Title level={5} style={{ margin: 0 }}>Research Timeline</Typography.Title>}
-                        extra={<Button size="small" onClick={() => setShowRaw(!showRaw)}>{showRaw ? 'Show Grouped' : 'Show Raw'}</Button>}
+                        title={
+                            <Space>
+                                <KeyOutlined style={{ color: '#d97706' }} />
+                                <span>Edit Permission Requests</span>
+                                <Tag color="orange">{pendingEditRequests.length}</Tag>
+                            </Space>
+                        }
                     >
-                        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 14 }}>
-                            History for this paper only.
-                        </Typography.Text>
+                        <Space direction="vertical" style={{ width: '100%' }} size={10}>
+                            {pendingEditRequests.map((req) => (
+                                <div
+                                    key={req.id}
+                                    className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-amber-50/50 px-4 py-3"
+                                >
+                                    <div className="min-w-0">
+                                        <Typography.Text strong>
+                                            {req.requester?.name}
+                                        </Typography.Text>
+                                        {req.reason ? (
+                                            <Typography.Paragraph
+                                                style={{
+                                                    margin: '4px 0 0',
+                                                    color: '#64748b',
+                                                    fontSize: 13,
+                                                }}
+                                            >
+                                                {req.reason}
+                                            </Typography.Paragraph>
+                                        ) : (
+                                            <Typography.Text
+                                                type="secondary"
+                                                style={{
+                                                    display: 'block',
+                                                    fontSize: 13,
+                                                    marginTop: 2,
+                                                }}
+                                            >
+                                                No reason provided
+                                            </Typography.Text>
+                                        )}
+                                    </div>
+                                    <Space>
+                                        <Popconfirm
+                                            title="Approve this edit request?"
+                                            description="The HEI will be able to edit this submission once."
+                                            okText="Approve"
+                                            onConfirm={() =>
+                                                router.post(
+                                                    route('research.edit-permission.decide', {
+                                                        proposal: proposal.id,
+                                                        editRequest: req.id,
+                                                    }),
+                                                    { decision: 'approved' }
+                                                )
+                                            }
+                                        >
+                                            <Button type="primary" size="small">
+                                                Approve
+                                            </Button>
+                                        </Popconfirm>
+                                        <Popconfirm
+                                            title="Deny this edit request?"
+                                            okText="Deny"
+                                            okButtonProps={{ danger: true }}
+                                            onConfirm={() =>
+                                                router.post(
+                                                    route('research.edit-permission.decide', {
+                                                        proposal: proposal.id,
+                                                        editRequest: req.id,
+                                                    }),
+                                                    { decision: 'denied' }
+                                                )
+                                            }
+                                        >
+                                            <Button danger size="small">
+                                                Deny
+                                            </Button>
+                                        </Popconfirm>
+                                    </Space>
+                                </div>
+                            ))}
+                        </Space>
+                    </Card>
+                )}
 
-                        {(showRaw ? researchHistory : groupedResearchHistory).length === 0 ? (
-                            <Typography.Text type="secondary">No timeline entries yet.</Typography.Text>
-                        ) : (
-                            <Timeline
-                                items={(showRaw ? researchHistory : groupedResearchHistory).map((item) => ({
+                <Card id="research-actions" className="admin-dashboard-shell" bordered={false}>
+                    <div className="space-y-5">
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                            <div className="min-w-0 space-y-2">
+                                <Typography.Title level={3} style={{ margin: 0 }}>
+                                    {proposal.title}
+                                </Typography.Title>
+                                <Space wrap size={[8, 8]}>
+                                    <StatusBadge status={proposal.status} />
+                                    {proposal.year && <Tag color="blue">Year {proposal.year}</Tag>}
+                                    {proposal.category && (
+                                        <Tag color="geekblue">{proposal.category}</Tag>
+                                    )}
+                                </Space>
+                            </div>
+
+                            <Space wrap>
+                                {proposal.file_path && (
+                                    <Button
+                                        icon={<FilePdfOutlined />}
+                                        type={pdfOpen ? 'primary' : 'default'}
+                                        onClick={handleViewPdf}
+                                    >
+                                        {pdfOpen ? 'Hide PDF' : 'View PDF'}
+                                    </Button>
+                                )}
+
+                                {proposal.file_path && (
+                                    <a
+                                        href={route('research.file', {
+                                            proposal: proposal.id,
+                                            download: 1,
+                                        })}
+                                    >
+                                        <Button icon={<DownloadOutlined />}>Download PDF</Button>
+                                    </a>
+                                )}
+
+                                {canEdit && proposal.status === 'rejected' && (
+                                    <Popconfirm
+                                        title="Resubmit this revised proposal?"
+                                        description="This will reset approval trail timestamps and route it back to Faculty review."
+                                        okText="Resubmit"
+                                        onConfirm={() =>
+                                            router.post(route('research.resubmit', proposal.id))
+                                        }
+                                    >
+                                        <Button type="primary">Resubmit to Faculty</Button>
+                                    </Popconfirm>
+                                )}
+
+                                {canShowEditButton && (
+                                    <Link href={route('research.edit', proposal.id)}>
+                                        <Button className="edit-action-btn">Edit</Button>
+                                    </Link>
+                                )}
+
+                                {canDelete && (
+                                    <Popconfirm
+                                        title="Delete this research record?"
+                                        description="This action cannot be undone."
+                                        okText="Delete"
+                                        okButtonProps={{
+                                            danger: true,
+                                            loading: deleteForm.processing,
+                                        }}
+                                        onConfirm={() =>
+                                            deleteForm.delete(
+                                                route('research.destroy', proposal.id)
+                                            )
+                                        }
+                                    >
+                                        <Button danger loading={deleteForm.processing}>
+                                            Delete
+                                        </Button>
+                                    </Popconfirm>
+                                )}
+
+                                {showReviewActions && (
+                                    <>
+                                        <Popconfirm
+                                            title="Approve this submission?"
+                                            onConfirm={submitApprove}
+                                            okText="Approve"
+                                        >
+                                            <Button type="primary" loading={isSubmittingReview}>
+                                                Approve
+                                            </Button>
+                                        </Popconfirm>
+                                        <Button
+                                            danger
+                                            loading={isSubmittingReview}
+                                            onClick={openRejectModal}
+                                        >
+                                            Reject
+                                        </Button>
+                                    </>
+                                )}
+                            </Space>
+                        </div>
+
+                        <div className="rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/65 dark:bg-blue-950/30 p-3.5">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">
+                                Audit Summary
+                            </p>
+                            <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
+                                {auditSummaryItems.map((item) => (
+                                    <div
+                                        key={item.label}
+                                        className="rounded-xl border border-blue-200/80 dark:border-blue-900/40 bg-white/80 dark:bg-[#111827] px-3 py-2"
+                                    >
+                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                                            {item.label}
+                                        </p>
+                                        <p className="mt-0.5 break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">
+                                            {item.value}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                            <div className="lg:col-span-2 space-y-6">
+                                <section>
+                                    <Typography.Title level={5} style={{ marginBottom: 4 }}>
+                                        Abstract
+                                    </Typography.Title>
+                                    <Typography.Text
+                                        type="secondary"
+                                        style={{ display: 'block', marginBottom: 10, fontSize: 12 }}
+                                    >
+                                        Research summary and key findings
+                                    </Typography.Text>
+                                    <Typography.Paragraph
+                                        style={{
+                                            whiteSpace: 'pre-line',
+                                            fontSize: 15,
+                                            lineHeight: 1.85,
+                                            marginBottom: 0,
+                                        }}
+                                    >
+                                        {proposal.abstract || (
+                                            <Typography.Text type="secondary">
+                                                No abstract provided.
+                                            </Typography.Text>
+                                        )}
+                                    </Typography.Paragraph>
+                                </section>
+
+                                {keywordList.length > 0 && (
+                                    <section>
+                                        <Typography.Title level={5} style={{ marginBottom: 8 }}>
+                                            Keywords
+                                        </Typography.Title>
+                                        <Space wrap size={[6, 6]}>
+                                            {keywordList.map((kw) => (
+                                                <Tag
+                                                    key={kw}
+                                                    style={{
+                                                        borderRadius: 999,
+                                                        padding: '2px 10px',
+                                                    }}
+                                                >
+                                                    {kw}
+                                                </Tag>
+                                            ))}
+                                        </Space>
+                                    </section>
+                                )}
+                            </div>
+
+                            <aside className="space-y-4 lg:border-l lg:border-slate-200/80 lg:pl-6 dark:lg:border-[#1e2d47]">
+                                {sidebarSections.map((section) => (
+                                    <div key={section.title}>
+                                        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                            {section.title}
+                                        </p>
+                                        <dl className="space-y-2">
+                                            {section.rows.map((row) => (
+                                                <div key={row.label}>
+                                                    <dt className="text-[11px] text-slate-500 dark:text-slate-400">
+                                                        {row.label}
+                                                    </dt>
+                                                    <dd className="break-words text-[13px] leading-snug text-slate-800 dark:text-slate-200">
+                                                        {row.value}
+                                                        {row.sub && (
+                                                            <span className="block text-[11px] text-slate-500 dark:text-slate-400">
+                                                                {row.sub}
+                                                            </span>
+                                                        )}
+                                                    </dd>
+                                                </div>
+                                            ))}
+                                        </dl>
+                                    </div>
+                                ))}
+                            </aside>
+                        </div>
+                    </div>
+                </Card>
+
+                {pdfOpen && proposal.file_path && (
+                    <Card
+                        ref={pdfCardRef}
+                        className="admin-dashboard-shell"
+                        bordered={false}
+                        title={
+                            <Space>
+                                <FilePdfOutlined style={{ color: '#0033a0' }} />
+                                <span>PDF Viewer</span>
+                            </Space>
+                        }
+                        extra={
+                            <Button size="small" onClick={() => setPdfOpen(false)}>
+                                Close
+                            </Button>
+                        }
+                    >
+                        <iframe
+                            src={route('research.file', proposal.id)}
+                            title="Research PDF"
+                            style={{
+                                width: '100%',
+                                height: '80vh',
+                                border: 'none',
+                                borderRadius: 8,
+                            }}
+                        />
+                    </Card>
+                )}
+
+                <Card
+                    id="research-timeline"
+                    className="admin-dashboard-shell"
+                    bordered={false}
+                    title={
+                        <Typography.Title level={5} style={{ margin: 0 }}>
+                            Research Timeline
+                        </Typography.Title>
+                    }
+                    extra={
+                        <Button size="small" onClick={() => setShowRaw(!showRaw)}>
+                            {showRaw ? 'Show Grouped' : 'Show Raw'}
+                        </Button>
+                    }
+                >
+                    <Typography.Text
+                        type="secondary"
+                        style={{ display: 'block', marginBottom: 14 }}
+                    >
+                        History for this paper only.
+                    </Typography.Text>
+
+                    {(showRaw ? researchHistory : groupedResearchHistory).length === 0 ? (
+                        <Typography.Text type="secondary">No timeline entries yet.</Typography.Text>
+                    ) : (
+                        <Timeline
+                            items={(showRaw ? researchHistory : groupedResearchHistory).map(
+                                (item) => ({
                                     color: actionMeta[item.action]?.color ?? 'blue',
                                     children: (
                                         <Space direction="vertical" size={4}>
                                             <Space size={[6, 6]} wrap>
-                                                <Tag color={actionMeta[item.action]?.color ?? 'blue'} style={{ marginInlineEnd: 0 }}>
-                                                    {actionMeta[item.action]?.label ?? String(item.action || '').replace('_', ' ').toUpperCase()}
+                                                <Tag
+                                                    color={actionMeta[item.action]?.color ?? 'blue'}
+                                                    style={{ marginInlineEnd: 0 }}
+                                                >
+                                                    {actionMeta[item.action]?.label ??
+                                                        String(item.action || '')
+                                                            .replace('_', ' ')
+                                                            .toUpperCase()}
                                                 </Tag>
-                                                <Tag color={roleColor[item.role] ?? 'default'} style={{ marginInlineEnd: 0 }}>
+                                                <Tag
+                                                    color={roleColor[item.role] ?? 'default'}
+                                                    style={{ marginInlineEnd: 0 }}
+                                                >
                                                     {String(item.role || 'unknown').toUpperCase()}
                                                 </Tag>
                                                 {!showRaw && item.count > 1 ? (
-                                                    <Tag style={{ marginInlineEnd: 0 }}>x{item.count}</Tag>
+                                                    <Tag style={{ marginInlineEnd: 0 }}>
+                                                        x{item.count}
+                                                    </Tag>
                                                 ) : null}
                                             </Space>
-                                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                                By {item.actor_name || 'Unknown'} on {formatDateTime(showRaw ? item.created_at : item.latest_created_at) || '—'}
+                                            <Typography.Text
+                                                type="secondary"
+                                                style={{ fontSize: 12 }}
+                                            >
+                                                By {item.actor_name || 'Unknown'} on{' '}
+                                                {formatDateTime(
+                                                    showRaw
+                                                        ? item.created_at
+                                                        : item.latest_created_at
+                                                ) || '—'}
                                             </Typography.Text>
                                             {item.remarks ? (
-                                                <Typography.Text style={{ whiteSpace: 'pre-line' }}>{item.remarks}</Typography.Text>
+                                                <Typography.Text style={{ whiteSpace: 'pre-line' }}>
+                                                    {item.remarks}
+                                                </Typography.Text>
                                             ) : null}
                                         </Space>
                                     ),
-                                }))}
-                            />
-                        )}
-                    </Card>
-
-                    {proposal.comments && (
-                        <div id="reviewer-comments">
-                            <Alert
-                                type="warning"
-                                showIcon
-                                message="Reviewer Comments"
-                                description={
-                                    <div>
-                                        <div style={{ whiteSpace: 'pre-line' }}>{proposal.comments}</div>
-                                        {proposal.reviewer && (
-                                            <div style={{ marginTop: 8, color: '#854d0e' }}>- {proposal.reviewer.name}</div>
-                                        )}
-                                    </div>
-                                }
-                            />
-                        </div>
+                                })
+                            )}
+                        />
                     )}
+                </Card>
 
-                    {/* Student: lock details + revision guidance */}
-                    {role === 'student' && !canEdit && isLockedForEditing && (
-                        <Card
-                            id="editing-locked"
-                            className="admin-dashboard-shell"
-                            bordered={false}
-                            title={
-                                <Space>
-                                    <LockOutlined style={{ color: '#d97706' }} />
-                                    <span>Editing Locked</span>
-                                </Space>
+                {proposal.comments && (
+                    <div id="reviewer-comments">
+                        <Alert
+                            type="warning"
+                            showIcon
+                            message="Reviewer Comments"
+                            description={
+                                <div>
+                                    <div style={{ whiteSpace: 'pre-line' }}>
+                                        {proposal.comments}
+                                    </div>
+                                    {proposal.reviewer && (
+                                        <div style={{ marginTop: 8, color: '#854d0e' }}>
+                                            - {proposal.reviewer.name}
+                                        </div>
+                                    )}
+                                </div>
                             }
-                        >
-                            <Space direction="vertical" style={{ width: '100%' }} size={12}>
-                                <Typography.Text type="secondary">
-                                    {proposal.status === 'approved' &&
-                                        'This research has been approved. If you need to make corrections, you can request edit permission from CHED.'}
-                                    {proposal.status === 'rejected' &&
-                                        'This research was rejected. You can edit it, then resubmit to restart the review from Faculty.'}
-                                    {proposal.status === 'needs_revision' &&
-                                        'Revision is required. Update your research and resubmit for review.'}
-                                    {proposal.status === 'under_review_ched' && proposal.viewed_at &&
-                                        'This submission is locked because CHED has already viewed it. You may request permission to edit from the reviewing CHED officer.'}
-                                    {proposal.status === 'under_review_hei' &&
-                                        'This submission is awaiting HEI review and is currently locked for editing.'}
-                                    {proposal.status === 'under_review_faculty' &&
-                                        'This submission is currently under Faculty review and cannot be edited.'}
-                                </Typography.Text>
+                        />
+                    </div>
+                )}
 
-                                {/* No request yet, or previous was denied → show form */}
-                                {(!editPermission || editPermission.status === 'denied') && (
-                                    <Space direction="vertical" style={{ width: '100%' }} size={8}>
-                                        {editPermission?.status === 'denied' && (
-                                            <Alert
-                                                type="error"
-                                                showIcon
-                                                message="Request Denied"
-                                                description="Your previous edit permission request was denied. You may submit a new request below."
-                                                style={{ marginBottom: 4 }}
-                                            />
-                                        )}
-                                        <Input.TextArea
-                                            rows={3}
-                                            placeholder="Reason for edit request (optional)"
-                                            value={editPermForm.data.reason}
-                                            onChange={(e) => editPermForm.setData('reason', e.target.value)}
-                                            maxLength={500}
-                                            showCount
+                {/* Student: lock details + revision guidance */}
+                {role === 'student' && !canEdit && isLockedForEditing && (
+                    <Card
+                        id="editing-locked"
+                        className="admin-dashboard-shell"
+                        bordered={false}
+                        title={
+                            <Space>
+                                <LockOutlined style={{ color: '#d97706' }} />
+                                <span>Editing Locked</span>
+                            </Space>
+                        }
+                    >
+                        <Space direction="vertical" style={{ width: '100%' }} size={12}>
+                            <Typography.Text type="secondary">
+                                {proposal.status === 'approved' &&
+                                    'This research has been approved. If you need to make corrections, you can request edit permission from CHED.'}
+                                {proposal.status === 'rejected' &&
+                                    'This research was rejected. You can edit it, then resubmit to restart the review from Faculty.'}
+                                {proposal.status === 'needs_revision' &&
+                                    'Revision is required. Update your research and resubmit for review.'}
+                                {proposal.status === 'under_review_ched' &&
+                                    proposal.viewed_at &&
+                                    'This submission is locked because CHED has already viewed it. You may request permission to edit from the reviewing CHED officer.'}
+                                {proposal.status === 'under_review_hei' &&
+                                    'This submission is awaiting HEI review and is currently locked for editing.'}
+                                {proposal.status === 'under_review_faculty' &&
+                                    'This submission is currently under Faculty review and cannot be edited.'}
+                            </Typography.Text>
+
+                            {/* No request yet, or previous was denied → show form */}
+                            {(!editPermission || editPermission.status === 'denied') && (
+                                <Space direction="vertical" style={{ width: '100%' }} size={8}>
+                                    {editPermission?.status === 'denied' && (
+                                        <Alert
+                                            type="error"
+                                            showIcon
+                                            message="Request Denied"
+                                            description="Your previous edit permission request was denied. You may submit a new request below."
+                                            style={{ marginBottom: 4 }}
                                         />
-                                        <Button
-                                            type="primary"
-                                            icon={<KeyOutlined />}
-                                            loading={editPermForm.processing}
-                                            onClick={() =>
-                                                editPermForm.post(
-                                                    route('research.edit-permission.store', proposal.id),
-                                                    { onSuccess: () => editPermForm.reset() },
-                                                )
+                                    )}
+                                    <Input.TextArea
+                                        rows={3}
+                                        placeholder="Reason for edit request (optional)"
+                                        value={editPermForm.data.reason}
+                                        onChange={(e) =>
+                                            editPermForm.setData('reason', e.target.value)
+                                        }
+                                        maxLength={500}
+                                        showCount
+                                    />
+                                    <Button
+                                        type="primary"
+                                        icon={<KeyOutlined />}
+                                        loading={editPermForm.processing}
+                                        onClick={() =>
+                                            editPermForm.post(
+                                                route(
+                                                    'research.edit-permission.store',
+                                                    proposal.id
+                                                ),
+                                                { onSuccess: () => editPermForm.reset() }
+                                            )
+                                        }
+                                    >
+                                        Request Edit Permission
+                                    </Button>
+                                </Space>
+                            )}
+
+                            {/* Pending */}
+                            {editPermission?.status === 'pending' && (
+                                <Alert
+                                    type="info"
+                                    showIcon
+                                    message="Request Pending"
+                                    description="Your edit permission request is awaiting CHED review."
+                                />
+                            )}
+
+                            {/* Approved — Edit button is visible above */}
+                            {editPermission?.status === 'approved' && (
+                                <Alert
+                                    type="success"
+                                    showIcon
+                                    message="Permission Granted"
+                                    description="CHED approved your request. Use the Edit button above to make your changes."
+                                />
+                            )}
+                        </Space>
+                    </Card>
+                )}
+
+                {showReviewActions && (
+                    <Card
+                        id="review-decision"
+                        className="admin-dashboard-shell"
+                        bordered={false}
+                        title={reviewTitle}
+                    >
+                        <Typography.Text type="secondary">
+                            Use the Approve/Reject actions in the header area to review this
+                            submission.
+                        </Typography.Text>
+                    </Card>
+                )}
+
+                <Modal
+                    title={rejectModalTitle}
+                    open={rejectModal.open}
+                    onCancel={closeRejectModal}
+                    onOk={submitReject}
+                    okText="Reject"
+                    okButtonProps={{ danger: true, loading: isSubmittingReview }}
+                >
+                    <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                        {rejectTemplates.length > 0 && (
+                            <div>
+                                <Typography.Text
+                                    type="secondary"
+                                    style={{ fontSize: 12, display: 'block', marginBottom: 6 }}
+                                >
+                                    Quick templates
+                                </Typography.Text>
+                                <Space wrap size={[6, 6]}>
+                                    {rejectTemplates.map((template) => (
+                                        <Tag.CheckableTag
+                                            key={template}
+                                            checked={rejectModal.comments === template}
+                                            onChange={() =>
+                                                setRejectModal((prev) => ({
+                                                    ...prev,
+                                                    comments: template,
+                                                    error: '',
+                                                }))
                                             }
                                         >
-                                            Request Edit Permission
-                                        </Button>
-                                    </Space>
-                                )}
-
-                                {/* Pending */}
-                                {editPermission?.status === 'pending' && (
-                                    <Alert
-                                        type="info"
-                                        showIcon
-                                        message="Request Pending"
-                                        description="Your edit permission request is awaiting CHED review."
-                                    />
-                                )}
-
-                                {/* Approved — Edit button is visible above */}
-                                {editPermission?.status === 'approved' && (
-                                    <Alert
-                                        type="success"
-                                        showIcon
-                                        message="Permission Granted"
-                                        description="CHED approved your request. Use the Edit button above to make your changes."
-                                    />
-                                )}
-                            </Space>
-                        </Card>
-                    )}
-
-                    {showReviewActions && (
-                        <Card id="review-decision" className="admin-dashboard-shell" bordered={false} title={reviewTitle}>
-                            <Typography.Text type="secondary">
-                                Use the Approve/Reject actions in the header area to review this submission.
-                            </Typography.Text>
-                        </Card>
-                    )}
-
-                    <Modal
-                        title={rejectModalTitle}
-                        open={rejectModal.open}
-                        onCancel={closeRejectModal}
-                        onOk={submitReject}
-                        okText="Reject"
-                        okButtonProps={{ danger: true, loading: isSubmittingReview }}
-                    >
-                        <Space direction="vertical" size={10} style={{ width: '100%' }}>
-                            {rejectTemplates.length > 0 && (
-                                <div>
-                                    <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
-                                        Quick templates
-                                    </Typography.Text>
-                                    <Space wrap size={[6, 6]}>
-                                        {rejectTemplates.map((template) => (
-                                            <Tag.CheckableTag
-                                                key={template}
-                                                checked={rejectModal.comments === template}
-                                                onChange={() => setRejectModal((prev) => ({ ...prev, comments: template, error: '' }))}
-                                            >
-                                                {template.length > 58 ? `${template.slice(0, 58)}...` : template}
-                                            </Tag.CheckableTag>
-                                        ))}
-                                    </Space>
-                                </div>
-                            )}
-                            <Select
-                                placeholder="Apply remark template"
-                                options={remarkTemplateOptions}
-                                onChange={(value) => setRejectModal((prev) => ({ ...prev, comments: value, error: '' }))}
-                            />
-                            <Input.TextArea
-                                rows={4}
-                                value={rejectModal.comments}
-                                onChange={(event) => setRejectModal((prev) => ({ ...prev, comments: event.target.value, error: '' }))}
-                                placeholder="Enter rejection remarks"
-                            />
-                            {rejectModal.error && <Alert type="error" showIcon message={rejectModal.error} />}
-                        </Space>
-                    </Modal>
-
+                                            {template.length > 58
+                                                ? `${template.slice(0, 58)}...`
+                                                : template}
+                                        </Tag.CheckableTag>
+                                    ))}
+                                </Space>
+                            </div>
+                        )}
+                        <Select
+                            placeholder="Apply remark template"
+                            options={remarkTemplateOptions}
+                            onChange={(value) =>
+                                setRejectModal((prev) => ({ ...prev, comments: value, error: '' }))
+                            }
+                        />
+                        <Input.TextArea
+                            rows={4}
+                            value={rejectModal.comments}
+                            onChange={(event) =>
+                                setRejectModal((prev) => ({
+                                    ...prev,
+                                    comments: event.target.value,
+                                    error: '',
+                                }))
+                            }
+                            placeholder="Enter rejection remarks"
+                        />
+                        {rejectModal.error && (
+                            <Alert type="error" showIcon message={rejectModal.error} />
+                        )}
+                    </Space>
+                </Modal>
             </div>
         </AuthenticatedLayout>
     );
 }
-

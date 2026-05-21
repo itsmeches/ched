@@ -3,13 +3,28 @@ import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link } from '@inertiajs/react';
 import { formatDate } from '@/utils/date';
 import { Alert, Button, Card, Col, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, FileAddOutlined, FileTextOutlined, StopOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import {
+    CheckCircleOutlined,
+    ClockCircleOutlined,
+    FileAddOutlined,
+    FileTextOutlined,
+    StopOutlined,
+    UnorderedListOutlined,
+} from '@ant-design/icons';
 import { StatusBadge } from '@/Components/StatusBadge';
 import DashboardFilters from '@/Components/DashboardFilters';
 import { useTheme } from '@/utils/ThemeContext';
 import StudentCharts from './Partials/StudentCharts';
 
-export default function StudentDashboard({ stats, stageCounts = {}, recentUploads, pendingQueue, monthlyActivity = [], filters = {}, filterOptions = {} }) {
+export default function StudentDashboard({
+    stats,
+    stageCounts = {},
+    recentUploads,
+    pendingQueue,
+    monthlyActivity = [],
+    filters = {},
+    filterOptions = {},
+}) {
     const { dark } = useTheme();
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     const metricTextColor = dark ? '#e2e8f0' : '#0f172a';
@@ -26,7 +41,10 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
             dataIndex: 'title',
             key: 'title',
             render: (value, row) => (
-                <Link href={route('research.show', row.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                <Link
+                    href={route('research.show', row.id)}
+                    className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline"
+                >
                     {value}
                 </Link>
             ),
@@ -58,7 +76,10 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
             dataIndex: 'title',
             key: 'title',
             render: (value, row) => (
-                <Link href={route('research.show', row.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                <Link
+                    href={route('research.show', row.id)}
+                    className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline"
+                >
                     {value}
                 </Link>
             ),
@@ -77,30 +98,62 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
             <Head title="Student Dashboard" />
 
             <div className="space-y-6">
-                <Card bordered={false} className="admin-dashboard-hero" styles={{ body: { padding: 32 } }}>
+                <Card
+                    bordered={false}
+                    className="admin-dashboard-hero"
+                    styles={{ body: { padding: 32 } }}
+                >
                     <Row gutter={[24, 24]} align="middle">
                         <Col xs={24} lg={16}>
                             <Space direction="vertical" size={10}>
-                                <Tag style={{ alignSelf: 'flex-start', borderRadius: 999, paddingInline: 12, paddingBlock: 4, backgroundColor: accentPrimary, color: '#fff', border: 'none' }}>
+                                <Tag
+                                    style={{
+                                        alignSelf: 'flex-start',
+                                        borderRadius: 999,
+                                        paddingInline: 12,
+                                        paddingBlock: 4,
+                                        backgroundColor: accentPrimary,
+                                        color: '#fff',
+                                        border: 'none',
+                                    }}
+                                >
                                     Student Workspace
                                 </Tag>
                                 <Typography.Title level={2} style={{ margin: 0, color: '#ffffff' }}>
                                     Upload and track your research status
                                 </Typography.Title>
-                                <Typography.Paragraph style={{ margin: 0, color: 'rgba(255,255,255,0.82)', fontSize: 16 }}>
-                                    Submit papers, monitor approval progress, and review remarks from Faculty, HEI, and CHED.
+                                <Typography.Paragraph
+                                    style={{
+                                        margin: 0,
+                                        color: 'rgba(255,255,255,0.82)',
+                                        fontSize: 16,
+                                    }}
+                                >
+                                    Submit papers, monitor approval progress, and review remarks
+                                    from Faculty, HEI, and CHED.
                                 </Typography.Paragraph>
                             </Space>
                         </Col>
                         <Col xs={24} lg={8}>
                             <Space direction="vertical" style={{ width: '100%' }} size={12}>
                                 <Link href={route('research.create')}>
-                                    <Button type="primary" size="large" block icon={<FileAddOutlined />} className="quick-action-primary">
+                                    <Button
+                                        type="primary"
+                                        size="large"
+                                        block
+                                        icon={<FileAddOutlined />}
+                                        className="quick-action-primary"
+                                    >
                                         Open Submission Form
                                     </Button>
                                 </Link>
                                 <Link href={route('research.index')}>
-                                    <Button size="large" block icon={<UnorderedListOutlined />} className="quick-action-secondary">
+                                    <Button
+                                        size="large"
+                                        block
+                                        icon={<UnorderedListOutlined />}
+                                        className="quick-action-secondary"
+                                    >
                                         Open My Submissions
                                     </Button>
                                 </Link>
@@ -117,19 +170,42 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
                     disciplines={filterOptions.disciplines ?? []}
                 />
 
-                <Card className="admin-dashboard-shell dashboard-table-card" title="Review Queue" bordered={false}>
+                <Card
+                    className="admin-dashboard-shell dashboard-table-card"
+                    title="Review Queue"
+                    bordered={false}
+                >
                     {pendingQueue.length === 0 ? (
-                        <Alert type="success" showIcon message="No submissions currently pending review." />
+                        <Alert
+                            type="success"
+                            showIcon
+                            message="No submissions currently pending review."
+                        />
                     ) : (
-                        <Table rowKey="id" columns={pendingColumns} dataSource={pendingQueue} pagination={false} size="small" />
+                        <Table
+                            rowKey="id"
+                            columns={pendingColumns}
+                            dataSource={pendingQueue}
+                            pagination={false}
+                            size="small"
+                        />
                     )}
                 </Card>
 
                 <Row gutter={[16, 16]}>
                     {statItems.map((item, index) => (
                         <Col xs={24} sm={12} xl={24 / statItems.length} key={item.key}>
-                            <Card className="admin-dashboard-shell kpi-stat-card dashboard-reveal" hoverable style={{ animationDelay: `${index * 55}ms` }}>
-                                <Statistic title={item.label} value={stats[item.key]} prefix={<span style={{ color: item.color }}>{item.icon}</span>} valueStyle={{ color: metricTextColor }} />
+                            <Card
+                                className="admin-dashboard-shell kpi-stat-card dashboard-reveal"
+                                hoverable
+                                style={{ animationDelay: `${index * 55}ms` }}
+                            >
+                                <Statistic
+                                    title={item.label}
+                                    value={stats[item.key]}
+                                    prefix={<span style={{ color: item.color }}>{item.icon}</span>}
+                                    valueStyle={{ color: metricTextColor }}
+                                />
                             </Card>
                         </Col>
                     ))}
@@ -137,13 +213,27 @@ export default function StudentDashboard({ stats, stageCounts = {}, recentUpload
 
                 <Card title="Recent Uploads" className="admin-dashboard-shell dashboard-table-card">
                     {recentUploads.length === 0 ? (
-                        <Alert type="info" showIcon message="No papers yet. Upload your first research paper." />
+                        <Alert
+                            type="info"
+                            showIcon
+                            message="No papers yet. Upload your first research paper."
+                        />
                     ) : (
-                        <Table rowKey="id" columns={recentColumns} dataSource={recentUploads} pagination={false} scroll={{ x: 920 }} />
+                        <Table
+                            rowKey="id"
+                            columns={recentColumns}
+                            dataSource={recentUploads}
+                            pagination={false}
+                            scroll={{ x: 920 }}
+                        />
                     )}
                 </Card>
 
-                <StudentCharts stats={stats} stageCounts={stageCounts} monthlyActivity={monthlyActivity} />
+                <StudentCharts
+                    stats={stats}
+                    stageCounts={stageCounts}
+                    monthlyActivity={monthlyActivity}
+                />
             </div>
         </AuthenticatedLayout>
     );

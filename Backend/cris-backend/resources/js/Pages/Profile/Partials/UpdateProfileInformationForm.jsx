@@ -2,18 +2,13 @@ import { Button, Form, Input } from 'antd';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
 
-export default function UpdateProfileInformation({
-    mustVerifyEmail,
-    status,
-    className = '',
-}) {
+export default function UpdateProfileInformation({ mustVerifyEmail, status, className = '' }) {
     const user = usePage().props.auth.user;
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } =
-        useForm({
-            name: user.name,
-            email: user.email,
-        });
+    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
+        name: user.name,
+        email: user.email,
+    });
 
     const submit = (e) => {
         e.preventDefault();
@@ -81,15 +76,21 @@ export default function UpdateProfileInformation({
 
                         {status === 'verification-link-sent' && (
                             <div className="mt-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
-                                A new verification link has been sent to your
-                                email address.
+                                A new verification link has been sent to your email address.
                             </div>
                         )}
                     </div>
                 )}
 
                 <div className="flex items-center gap-4">
-                    <Button htmlType="submit" type="primary" loading={processing} disabled={processing}>Save</Button>
+                    <Button
+                        htmlType="submit"
+                        type="primary"
+                        loading={processing}
+                        disabled={processing}
+                    >
+                        Save
+                    </Button>
 
                     <Transition
                         show={recentlySuccessful}
@@ -98,9 +99,7 @@ export default function UpdateProfileInformation({
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                            Saved.
-                        </p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Saved.</p>
                     </Transition>
                 </div>
             </form>

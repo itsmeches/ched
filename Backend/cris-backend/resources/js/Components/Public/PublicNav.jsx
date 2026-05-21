@@ -19,7 +19,9 @@ export default function PublicNav({ canLogin, canRegister }) {
             <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
                 <Link href={route('research.public.index')} className="flex items-center gap-2.5">
                     <img src="/cris-mark.svg" alt="CRIS" className="h-8 w-8 rounded-lg" />
-                    <span className={`hidden text-sm font-semibold sm:block ${D ? 'text-white' : 'text-slate-800'}`}>
+                    <span
+                        className={`hidden text-sm font-semibold sm:block ${D ? 'text-white' : 'text-slate-800'}`}
+                    >
                         CRIS
                     </span>
                 </Link>

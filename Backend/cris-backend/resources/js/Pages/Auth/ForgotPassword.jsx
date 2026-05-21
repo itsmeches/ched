@@ -18,7 +18,9 @@ export default function ForgotPassword({ status }) {
             <Head title="Forgot Password" />
 
             <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Forgot password</h2>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                    Forgot password
+                </h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Enter your account email and we will send a reset link.
                 </p>
@@ -49,14 +51,24 @@ export default function ForgotPassword({ status }) {
                     </Form.Item>
                 </Form>
 
-                <Button htmlType="submit" type="primary" block size="large" loading={processing} disabled={processing}>
+                <Button
+                    htmlType="submit"
+                    type="primary"
+                    block
+                    size="large"
+                    loading={processing}
+                    disabled={processing}
+                >
                     {processing ? 'Sending link…' : 'Send password reset link'}
                 </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 Remembered your password?{' '}
-                <Link href={route('login')} className="font-medium text-[#0b3ea9] transition-colors hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                <Link
+                    href={route('login')}
+                    className="font-medium text-[#0b3ea9] transition-colors hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline"
+                >
                     Back to sign in
                 </Link>
             </p>

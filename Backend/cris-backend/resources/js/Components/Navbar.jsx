@@ -34,63 +34,139 @@ export default function Navbar() {
             {
                 label: 'Dashboard',
                 href: route('dashboard'),
-                activePatterns: ['dashboard', 'admin.dashboard', 'ched.dashboard', 'hei.dashboard', 'faculty.dashboard', 'student.dashboard'],
+                activePatterns: [
+                    'dashboard',
+                    'admin.dashboard',
+                    'ched.dashboard',
+                    'hei.dashboard',
+                    'faculty.dashboard',
+                    'student.dashboard',
+                ],
             },
         ];
 
         if (user.role === 'super_admin') {
             return [
                 ...commonItems,
-                { label: 'User Management', href: route('admin.users.index'), activePatterns: ['admin.users.*'] },
+                {
+                    label: 'User Management',
+                    href: route('admin.users.index'),
+                    activePatterns: ['admin.users.*'],
+                },
                 {
                     label: 'Settings',
                     dropdown: true,
-                    activePatterns: ['admin.institutions.*', 'admin.keywords.*', 'admin.taxonomy.*'],
+                    activePatterns: [
+                        'admin.institutions.*',
+                        'admin.keywords.*',
+                        'admin.taxonomy.*',
+                    ],
                     children: [
-                        { label: 'Institutions', href: route('admin.institutions.index'), activePatterns: ['admin.institutions.*'], isLink: true },
-                        { label: 'Keywords', href: route('admin.keywords.index'), activePatterns: ['admin.keywords.*'], isLink: true },
-                        { label: 'Categories', href: route('admin.taxonomy.categories.index'), activePatterns: ['admin.taxonomy.categories.*'], isLink: true },
-                        { label: 'Disciplines', href: route('admin.taxonomy.disciplines.index'), activePatterns: ['admin.taxonomy.disciplines.*'], isLink: true },
+                        {
+                            label: 'Institutions',
+                            href: route('admin.institutions.index'),
+                            activePatterns: ['admin.institutions.*'],
+                            isLink: true,
+                        },
+                        {
+                            label: 'Keywords',
+                            href: route('admin.keywords.index'),
+                            activePatterns: ['admin.keywords.*'],
+                            isLink: true,
+                        },
+                        {
+                            label: 'Categories',
+                            href: route('admin.taxonomy.categories.index'),
+                            activePatterns: ['admin.taxonomy.categories.*'],
+                            isLink: true,
+                        },
+                        {
+                            label: 'Disciplines',
+                            href: route('admin.taxonomy.disciplines.index'),
+                            activePatterns: ['admin.taxonomy.disciplines.*'],
+                            isLink: true,
+                        },
                     ],
                 },
-                { label: 'History', href: route('history.index'), activePatterns: ['history.index'] },
+                {
+                    label: 'History',
+                    href: route('history.index'),
+                    activePatterns: ['history.index'],
+                },
             ];
         }
 
         if (user.role === 'ched') {
             return [
                 ...commonItems,
-                { label: 'Create HEI', href: route('accounts.create'), activePatterns: ['accounts.create'] },
-                { label: 'Account Hierarchy', href: route('accounts.hierarchy'), activePatterns: ['accounts.hierarchy'] },
+                {
+                    label: 'Create HEI',
+                    href: route('accounts.create'),
+                    activePatterns: ['accounts.create'],
+                },
+                {
+                    label: 'Account Hierarchy',
+                    href: route('accounts.hierarchy'),
+                    activePatterns: ['accounts.hierarchy'],
+                },
                 {
                     label: 'Research Queue',
                     href: route('research.index'),
-                    activePatterns: ['research.index', 'research.show', 'research.file', 'research.edit', 'research.update', 'research.destroy'],
+                    activePatterns: [
+                        'research.index',
+                        'research.show',
+                        'research.file',
+                        'research.edit',
+                        'research.update',
+                        'research.destroy',
+                    ],
                 },
-                { label: 'My Decisions', href: route('ched.decisions'), activePatterns: ['ched.decisions'] },
-                { label: 'History', href: route('history.index'), activePatterns: ['history.index'] },
+                {
+                    label: 'My Decisions',
+                    href: route('ched.decisions'),
+                    activePatterns: ['ched.decisions'],
+                },
+                {
+                    label: 'History',
+                    href: route('history.index'),
+                    activePatterns: ['history.index'],
+                },
             ];
         }
 
         if (['hei', 'faculty', 'student'].includes(user.role)) {
-            const accountItem = user.role === 'hei'
-                ? { label: 'Create Faculty', href: route('accounts.create'), activePatterns: ['accounts.create'] }
-                : user.role === 'faculty'
-                    ? { label: 'Create Student', href: route('accounts.create'), activePatterns: ['accounts.create'] }
-                    : null;
+            const accountItem =
+                user.role === 'hei'
+                    ? {
+                          label: 'Create Faculty',
+                          href: route('accounts.create'),
+                          activePatterns: ['accounts.create'],
+                      }
+                    : user.role === 'faculty'
+                      ? {
+                            label: 'Create Student',
+                            href: route('accounts.create'),
+                            activePatterns: ['accounts.create'],
+                        }
+                      : null;
 
             const hierarchyItem = ['hei', 'faculty'].includes(user.role)
-                ? { label: 'Account Hierarchy', href: route('accounts.hierarchy'), activePatterns: ['accounts.hierarchy'] }
+                ? {
+                      label: 'Account Hierarchy',
+                      href: route('accounts.hierarchy'),
+                      activePatterns: ['accounts.hierarchy'],
+                  }
                 : null;
 
-            const reviewItem = user.role === 'student'
-                ? null
-                : {
-                    label: 'Review Queue',
-                    href: route('research.index', { tab: 'queue' }),
-                    activePatterns: ['research.index', 'research.review'],
-                    tab: 'queue',
-                };
+            const reviewItem =
+                user.role === 'student'
+                    ? null
+                    : {
+                          label: 'Review Queue',
+                          href: route('research.index', { tab: 'queue' }),
+                          activePatterns: ['research.index', 'research.review'],
+                          tab: 'queue',
+                      };
 
             return [
                 ...commonItems,
@@ -100,11 +176,29 @@ export default function Navbar() {
                 {
                     label: 'My Research',
                     href: route('research.index', { tab: 'mine' }),
-                    activePatterns: ['research.index', 'research.show', 'research.edit', 'research.update', 'research.destroy'],
+                    activePatterns: [
+                        'research.index',
+                        'research.show',
+                        'research.edit',
+                        'research.update',
+                        'research.destroy',
+                    ],
                     tab: 'mine',
                 },
-                ...(user.role === 'student' ? [{ label: 'Submit Paper', href: route('research.create'), activePatterns: ['research.create', 'research.store'] }] : []),
-                { label: 'History', href: route('history.index'), activePatterns: ['history.index'] },
+                ...(user.role === 'student'
+                    ? [
+                          {
+                              label: 'Submit Paper',
+                              href: route('research.create'),
+                              activePatterns: ['research.create', 'research.store'],
+                          },
+                      ]
+                    : []),
+                {
+                    label: 'History',
+                    href: route('history.index'),
+                    activePatterns: ['history.index'],
+                },
             ];
         }
 
@@ -129,7 +223,13 @@ export default function Navbar() {
     const formatNotifDate = (dateStr) => {
         if (!dateStr) return '';
         const d = new Date(dateStr);
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        return d.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
     };
 
     const getNotificationMeta = (message, type) => {
@@ -152,13 +252,17 @@ export default function Navbar() {
             };
         }
 
-        if (normalizedType === 'edit_permission_approved' || normalizedType === 'edit_permission_denied') {
+        if (
+            normalizedType === 'edit_permission_approved' ||
+            normalizedType === 'edit_permission_denied'
+        ) {
             return {
                 label: 'Decision',
                 filterKey: 'decisions',
-                badgeClass: normalizedType === 'edit_permission_approved'
-                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200'
-                    : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200',
+                badgeClass:
+                    normalizedType === 'edit_permission_approved'
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200'
+                        : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200',
             };
         }
 
@@ -174,7 +278,8 @@ export default function Navbar() {
             return {
                 label: 'Approved',
                 filterKey: 'decisions',
-                badgeClass: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200',
+                badgeClass:
+                    'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200',
             };
         }
 
@@ -194,7 +299,10 @@ export default function Navbar() {
             };
         }
 
-        if (text.includes('edit permission') && (text.includes('approved') || text.includes('denied'))) {
+        if (
+            text.includes('edit permission') &&
+            (text.includes('approved') || text.includes('denied'))
+        ) {
             return {
                 label: 'Decision',
                 filterKey: 'decisions',
@@ -216,7 +324,8 @@ export default function Navbar() {
             return {
                 label: 'Approved',
                 filterKey: 'decisions',
-                badgeClass: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200',
+                badgeClass:
+                    'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200',
             };
         }
 
@@ -266,11 +375,16 @@ export default function Navbar() {
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo Section */}
                     <div className="flex items-center gap-8">
-                        <Link href={route('dashboard')} className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
+                        <Link
+                            href={route('dashboard')}
+                            className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity"
+                        >
                             <div className="relative">
                                 <img src="/cris-mark.svg" alt="CRIS" className="h-8 w-8" />
                             </div>
-                            <span className="hidden sm:block font-bold text-slate-900 dark:text-white">CRIS</span>
+                            <span className="hidden sm:block font-bold text-slate-900 dark:text-white">
+                                CRIS
+                            </span>
                         </Link>
 
                         {/* Desktop Navigation */}
@@ -284,7 +398,9 @@ export default function Navbar() {
                                         dropdownRender={() => (
                                             <div className="min-w-[192px] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-[#1e2d47] dark:bg-[#111827]">
                                                 {item.children.map((child) => {
-                                                    const childActive = child.activePatterns?.some((p) => route().current(p));
+                                                    const childActive = child.activePatterns?.some(
+                                                        (p) => route().current(p)
+                                                    );
                                                     return (
                                                         <Link
                                                             key={child.href}
@@ -312,8 +428,18 @@ export default function Navbar() {
                                             style={isActive(item) ? { borderColor: '#0033a0' } : {}}
                                         >
                                             {item.label}
-                                            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            <svg
+                                                className="h-3.5 w-3.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M19 9l-7 7-7-7"
+                                                />
                                             </svg>
                                         </button>
                                     </AntDropdown>
@@ -355,8 +481,18 @@ export default function Navbar() {
                                 onClick={() => setNotifOpen((o) => !o)}
                                 className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-[#1e2d47] bg-white dark:bg-[#111827] text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-[#1a2540] hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
                             >
-                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                                    />
                                 </svg>
                                 {notifications.length > 0 && (
                                     <span
@@ -374,7 +510,10 @@ export default function Navbar() {
                                         <span className="text-sm font-semibold text-slate-900 dark:text-white">
                                             Notifications
                                             {notifications.length > 0 && (
-                                                <span className="ml-2 inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-bold text-white" style={{ background: '#0033a0' }}>
+                                                <span
+                                                    className="ml-2 inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-bold text-white"
+                                                    style={{ background: '#0033a0' }}
+                                                >
                                                     {notifications.length}
                                                 </span>
                                             )}
@@ -384,10 +523,14 @@ export default function Navbar() {
                                                 type="button"
                                                 className="text-xs font-medium text-[#0033a0] hover:underline dark:text-blue-300"
                                                 onClick={() => {
-                                                    router.post(route('notifications.read-all'), {}, {
-                                                        onSuccess: () => setNotifOpen(false),
-                                                        preserveScroll: true,
-                                                    });
+                                                    router.post(
+                                                        route('notifications.read-all'),
+                                                        {},
+                                                        {
+                                                            onSuccess: () => setNotifOpen(false),
+                                                            preserveScroll: true,
+                                                        }
+                                                    );
                                                 }}
                                             >
                                                 Mark all as read
@@ -423,7 +566,7 @@ export default function Navbar() {
                                                 No notifications in this filter.
                                             </div>
                                         ) : (
-                                            filteredNotifications.map((item) => (
+                                            filteredNotifications.map((item) =>
                                                 item.link_url ? (
                                                     <button
                                                         key={item.id}
@@ -432,38 +575,61 @@ export default function Navbar() {
                                                         onClick={() => {
                                                             setNotifOpen(false);
                                                             router.post(
-                                                                route('notifications.read-one', { id: item.id }),
+                                                                route('notifications.read-one', {
+                                                                    id: item.id,
+                                                                }),
                                                                 { redirect: item.link_url },
-                                                                { preserveScroll: false },
+                                                                { preserveScroll: false }
                                                             );
                                                         }}
                                                     >
                                                         {(() => {
-                                                            const meta = getNotificationMeta(item.message, item.type);
+                                                            const meta = getNotificationMeta(
+                                                                item.message,
+                                                                item.type
+                                                            );
                                                             return (
-                                                                <span className={`mb-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${meta.badgeClass}`}>
+                                                                <span
+                                                                    className={`mb-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${meta.badgeClass}`}
+                                                                >
                                                                     {meta.label}
                                                                 </span>
                                                             );
                                                         })()}
-                                                        <p className="whitespace-pre-line text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
-                                                        <p className="mt-1 text-xs text-[#0033a0] dark:text-blue-300">{formatNotifDate(item.created_at)}</p>
+                                                        <p className="whitespace-pre-line text-sm leading-snug text-slate-700 dark:text-slate-200">
+                                                            {item.message}
+                                                        </p>
+                                                        <p className="mt-1 text-xs text-[#0033a0] dark:text-blue-300">
+                                                            {formatNotifDate(item.created_at)}
+                                                        </p>
                                                     </button>
                                                 ) : (
-                                                    <div key={item.id} className="px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-[#1a2540]">
+                                                    <div
+                                                        key={item.id}
+                                                        className="px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-[#1a2540]"
+                                                    >
                                                         {(() => {
-                                                            const meta = getNotificationMeta(item.message, item.type);
+                                                            const meta = getNotificationMeta(
+                                                                item.message,
+                                                                item.type
+                                                            );
                                                             return (
-                                                                <span className={`mb-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${meta.badgeClass}`}>
+                                                                <span
+                                                                    className={`mb-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${meta.badgeClass}`}
+                                                                >
                                                                     {meta.label}
                                                                 </span>
                                                             );
                                                         })()}
-                                                        <p className="whitespace-pre-line text-sm leading-snug text-slate-700 dark:text-slate-200">{item.message}</p>
-                                                        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{formatNotifDate(item.created_at)}</p>
+                                                        <p className="whitespace-pre-line text-sm leading-snug text-slate-700 dark:text-slate-200">
+                                                            {item.message}
+                                                        </p>
+                                                        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                                                            {formatNotifDate(item.created_at)}
+                                                        </p>
                                                     </div>
                                                 )
-                                            ))
+                                            )
                                         )}
                                     </div>
                                 </div>
@@ -471,7 +637,9 @@ export default function Navbar() {
                         </div>
 
                         <div className="hidden h-9 items-center pl-1 pr-2 sm:flex">
-                            <span className="text-sm font-medium leading-5 text-slate-700 dark:text-slate-200">{user.name}</span>
+                            <span className="text-sm font-medium leading-5 text-slate-700 dark:text-slate-200">
+                                {user.name}
+                            </span>
                         </div>
 
                         {/* User Dropdown */}
@@ -481,9 +649,15 @@ export default function Navbar() {
                             dropdownRender={() => (
                                 <div className="min-w-[200px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-[#1e2d47] dark:bg-[#111827]">
                                     <div className="border-b border-slate-200 px-4 py-2 dark:border-[#1e2d47]">
-                                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{user.name}</p>
-                                        <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
-                                        <p className="text-xs font-medium text-[#0033a0] dark:text-blue-300">{getRoleLabel()}</p>
+                                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                                            {user.name}
+                                        </p>
+                                        <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">
+                                            {user.email}
+                                        </p>
+                                        <p className="text-xs font-medium text-[#0033a0] dark:text-blue-300">
+                                            {getRoleLabel()}
+                                        </p>
                                     </div>
                                     <div className="py-1">
                                         <Link
@@ -507,7 +681,10 @@ export default function Navbar() {
                                 type="button"
                                 aria-label="Open user menu"
                                 className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white shadow-sm transition-shadow hover:shadow-md"
-                                style={{ background: 'linear-gradient(to bottom right, #0047d4, #0033a0)' }}
+                                style={{
+                                    background:
+                                        'linear-gradient(to bottom right, #0047d4, #0033a0)',
+                                }}
                             >
                                 {user.name.charAt(0).toUpperCase()}
                             </button>
@@ -522,11 +699,26 @@ export default function Navbar() {
                             onClick={() => setMenuOpen(!menuOpen)}
                             className="inline-flex items-center justify-center rounded-md p-2 text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-slate-300 dark:hover:bg-[#1a2540] md:hidden"
                         >
-                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
                                 {menuOpen ? (
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M6 18L18 6M6 6l12 12"
+                                    />
                                 ) : (
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 6h16M4 12h16M4 18h16"
+                                    />
                                 )}
                             </svg>
                         </button>
@@ -535,7 +727,10 @@ export default function Navbar() {
 
                 {/* Mobile Navigation Menu */}
                 {menuOpen && (
-                    <div id="mobile-nav-menu" className="md:hidden border-t border-slate-200 dark:border-[#1e2d47] bg-slate-50 dark:bg-[#0d1526] py-2">
+                    <div
+                        id="mobile-nav-menu"
+                        className="md:hidden border-t border-slate-200 dark:border-[#1e2d47] bg-slate-50 dark:bg-[#0d1526] py-2"
+                    >
                         <div className="space-y-1">
                             {navItems.map((item) =>
                                 item.dropdown ? (
@@ -544,32 +739,34 @@ export default function Navbar() {
                                             {item.label}
                                         </div>
                                         {item.children.map((child) => {
-                                                const childActive = child.activePatterns?.some((p) => route().current(p));
-                                                const cls = `block pl-7 pr-4 py-2 text-sm font-medium transition-all duration-200 ${
-                                                    childActive
-                                                        ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300'
-                                                        : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-blue-100'
-                                                }`;
-                                                return child.isLink ? (
-                                                    <Link
-                                                        key={child.href}
-                                                        href={child.href}
-                                                        className={cls}
-                                                        onClick={() => setMenuOpen(false)}
-                                                    >
-                                                        {child.label}
-                                                    </Link>
-                                                ) : (
-                                                    <a
-                                                        key={child.href}
-                                                        href={child.href}
-                                                        className={cls}
-                                                        onClick={() => setMenuOpen(false)}
-                                                    >
-                                                        {child.label}
-                                                    </a>
-                                                );
-                                            })}
+                                            const childActive = child.activePatterns?.some((p) =>
+                                                route().current(p)
+                                            );
+                                            const cls = `block pl-7 pr-4 py-2 text-sm font-medium transition-all duration-200 ${
+                                                childActive
+                                                    ? 'bg-blue-50 dark:bg-[#1a2540] text-blue-900 dark:text-blue-300'
+                                                    : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1a2540] hover:text-slate-900 dark:hover:text-blue-100'
+                                            }`;
+                                            return child.isLink ? (
+                                                <Link
+                                                    key={child.href}
+                                                    href={child.href}
+                                                    className={cls}
+                                                    onClick={() => setMenuOpen(false)}
+                                                >
+                                                    {child.label}
+                                                </Link>
+                                            ) : (
+                                                <a
+                                                    key={child.href}
+                                                    href={child.href}
+                                                    className={cls}
+                                                    onClick={() => setMenuOpen(false)}
+                                                >
+                                                    {child.label}
+                                                </a>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <Link
@@ -588,8 +785,12 @@ export default function Navbar() {
                             )}
                         </div>
                         <div className="border-t border-slate-200 dark:border-[#1e2d47] mt-2 px-4 py-3">
-                            <p className="text-sm font-semibold leading-none text-slate-900 dark:text-white">{user.name}</p>
-                            <p className="mt-1 text-xs leading-none text-slate-500 dark:text-slate-400 mb-2">{user.email}</p>
+                            <p className="text-sm font-semibold leading-none text-slate-900 dark:text-white">
+                                {user.name}
+                            </p>
+                            <p className="mt-1 text-xs leading-none text-slate-500 dark:text-slate-400 mb-2">
+                                {user.email}
+                            </p>
                             <Link
                                 href={route('profile.edit')}
                                 className="block text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-blue-100 mb-2"

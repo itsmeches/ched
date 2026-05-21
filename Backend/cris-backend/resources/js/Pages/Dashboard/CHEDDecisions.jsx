@@ -13,7 +13,10 @@ export default function CHEDDecisions({ decisions }) {
             dataIndex: 'title',
             key: 'title',
             render: (value, row) => (
-                <Link href={route('research.show', row.id)} className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline">
+                <Link
+                    href={route('research.show', row.id)}
+                    className="font-medium text-[#0b3ea9] hover:text-[#001f66] hover:underline dark:text-blue-300 dark:hover:text-blue-100 dark:hover:underline"
+                >
                     {value}
                 </Link>
             ),
@@ -55,11 +58,15 @@ export default function CHEDDecisions({ decisions }) {
                         My Decisions
                     </Typography.Title>
                     <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
-                        View the latest approved and rejected research proposals handled by the CHED review desk.
+                        View the latest approved and rejected research proposals handled by the CHED
+                        review desk.
                     </Typography.Paragraph>
                 </Card>
 
-                <Card className="admin-dashboard-shell dashboard-table-card" title="Recent Review Decisions">
+                <Card
+                    className="admin-dashboard-shell dashboard-table-card"
+                    title="Recent Review Decisions"
+                >
                     {decisions.length === 0 ? (
                         <Alert type="info" showIcon message="No decisions available yet." />
                     ) : (
@@ -69,7 +76,14 @@ export default function CHEDDecisions({ decisions }) {
                             dataSource={decisions}
                             pagination={{ pageSize: 10 }}
                             scroll={{ x: 980 }}
-                            locale={{ emptyText: <EmptyState title="No decisions yet" description="Your recent approvals and rejections will appear here." /> }}
+                            locale={{
+                                emptyText: (
+                                    <EmptyState
+                                        title="No decisions yet"
+                                        description="Your recent approvals and rejections will appear here."
+                                    />
+                                ),
+                            }}
                         />
                     )}
                 </Card>
@@ -77,4 +91,3 @@ export default function CHEDDecisions({ decisions }) {
         </AuthenticatedLayout>
     );
 }
-

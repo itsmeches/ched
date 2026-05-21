@@ -47,8 +47,8 @@ class EditPermissionController extends Controller
 
         $editRequest = $proposal->editPermissionRequests()->create([
             'requested_by' => $user->id,
-            'reason'       => $validated['reason'] ?? null,
-            'status'       => 'pending',
+            'reason' => $validated['reason'] ?? null,
+            'status' => 'pending',
         ]);
 
         // Notify the CHED user — prefer the reviewer, fall back to the viewer
@@ -63,7 +63,7 @@ class EditPermissionController extends Controller
             SimpleNotificationService::notify(
                 $chedUserId,
                 "Edit permission request from {$user->name} for '{$proposal->title}'.\nReason: {$reasonText}",
-                route('research.show', $proposal->id) . '#edit-permission-requests',
+                route('research.show', $proposal->id).'#edit-permission-requests',
                 'edit_permission_request'
             );
         }
@@ -71,7 +71,7 @@ class EditPermissionController extends Controller
         SimpleNotificationService::notify(
             $user->id,
             "Your edit permission request for '{$proposal->title}' was submitted to CHED.",
-            route('research.show', $proposal->id) . '#editing-locked',
+            route('research.show', $proposal->id).'#editing-locked',
             'edit_permission_submitted'
         );
 
@@ -97,7 +97,7 @@ class EditPermissionController extends Controller
         ]);
 
         $editRequest->update([
-            'status'     => $validated['decision'],
+            'status' => $validated['decision'],
             'decided_by' => $user->id,
             'decided_at' => now(),
         ]);
@@ -114,7 +114,7 @@ class EditPermissionController extends Controller
             $editRequest->requested_by,
             $decisionMessage,
             route('research.show', $proposal->id)
-                . ($validated['decision'] === 'approved' ? '#research-actions' : '#editing-locked'),
+                .($validated['decision'] === 'approved' ? '#research-actions' : '#editing-locked'),
             $validated['decision'] === 'approved' ? 'edit_permission_approved' : 'edit_permission_denied'
         );
 

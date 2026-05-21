@@ -47,7 +47,9 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
     };
 
     const noData = (
-        <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div
+            style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
             <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                 description={<Typography.Text type="secondary">No data available</Typography.Text>}
@@ -86,26 +88,83 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
         <div className="space-y-4 dashboard-charts-grid">
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={16}>
-                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Monthly Submission Activity" extra={<Typography.Text type="secondary">Last 12 months</Typography.Text>} style={{ animationDelay: '100ms' }}>
+                    <Card
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        title="Monthly Submission Activity"
+                        extra={<Typography.Text type="secondary">Last 12 months</Typography.Text>}
+                        style={{ animationDelay: '100ms' }}
+                    >
                         {monthlyActivity.length > 0 ? (
                             <ResponsiveContainer width="100%" height={300}>
                                 <AreaChart data={monthlyActivity}>
                                     <defs>
-                                        <linearGradient id="studentUploads" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor={accentPrimary} stopOpacity={0.45} />
-                                            <stop offset="95%" stopColor={accentPrimary} stopOpacity={0} />
+                                        <linearGradient
+                                            id="studentUploads"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="5%"
+                                                stopColor={accentPrimary}
+                                                stopOpacity={0.45}
+                                            />
+                                            <stop
+                                                offset="95%"
+                                                stopColor={accentPrimary}
+                                                stopOpacity={0}
+                                            />
                                         </linearGradient>
-                                        <linearGradient id="studentApproved" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#16a34a" stopOpacity={0.35} />
-                                            <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+                                        <linearGradient
+                                            id="studentApproved"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="5%"
+                                                stopColor="#16a34a"
+                                                stopOpacity={0.35}
+                                            />
+                                            <stop
+                                                offset="95%"
+                                                stopColor="#16a34a"
+                                                stopOpacity={0}
+                                            />
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke={borderColor} />
                                     <XAxis dataKey="month" stroke={axisColor} />
                                     <YAxis stroke={axisColor} allowDecimals={false} />
-                                    <Tooltip contentStyle={{ backgroundColor: surfaceColor, border: `1px solid ${borderColor}`, borderRadius: 8, color: textColor }} />
-                                    <Area type="monotone" dataKey="uploads" stroke={accentPrimary} strokeWidth={2} fill="url(#studentUploads)" name="Uploads" onClick={onMonthClick} />
-                                    <Area type="monotone" dataKey="approved" stroke="#16a34a" strokeWidth={2} fill="url(#studentApproved)" name="Approved" onClick={onMonthClick} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: surfaceColor,
+                                            border: `1px solid ${borderColor}`,
+                                            borderRadius: 8,
+                                            color: textColor,
+                                        }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="uploads"
+                                        stroke={accentPrimary}
+                                        strokeWidth={2}
+                                        fill="url(#studentUploads)"
+                                        name="Uploads"
+                                        onClick={onMonthClick}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="approved"
+                                        stroke="#16a34a"
+                                        strokeWidth={2}
+                                        fill="url(#studentApproved)"
+                                        name="Approved"
+                                        onClick={onMonthClick}
+                                    />
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
@@ -114,20 +173,47 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
                     </Card>
                 </Col>
                 <Col xs={24} xl={8}>
-                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Status Distribution" extra={<Typography.Text type="secondary">Click to filter</Typography.Text>} style={{ animationDelay: '145ms' }}>
+                    <Card
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        title="Status Distribution"
+                        extra={<Typography.Text type="secondary">Click to filter</Typography.Text>}
+                        style={{ animationDelay: '145ms' }}
+                    >
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
-                                <Pie data={statusDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} onClick={onStatusClick}>
+                                <Pie
+                                    data={statusDistribution}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={100}
+                                    paddingAngle={3}
+                                    onClick={onStatusClick}
+                                >
                                     {statusDistribution.map((entry) => (
                                         <Cell key={entry.name} fill={entry.fill} />
                                     ))}
                                 </Pie>
-                                <Tooltip contentStyle={{ backgroundColor: surfaceColor, border: `1px solid ${borderColor}`, borderRadius: 8, color: textColor }} />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: surfaceColor,
+                                        border: `1px solid ${borderColor}`,
+                                        borderRadius: 8,
+                                        color: textColor,
+                                    }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="flex flex-wrap justify-center gap-2 pt-3">
                             {statusDistribution.map((item) => (
-                                <Tag key={item.name} color={item.fill} style={{ paddingInline: 10, paddingBlock: 4 }}>
+                                <Tag
+                                    key={item.name}
+                                    color={item.fill}
+                                    style={{ paddingInline: 10, paddingBlock: 4 }}
+                                >
                                     {item.name}: {item.value}
                                 </Tag>
                             ))}
@@ -138,13 +224,26 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
 
             <Row gutter={[16, 16]}>
                 <Col xs={24} xl={14}>
-                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Review Stage Flow" extra={<Typography.Text type="secondary">Open by stage</Typography.Text>} style={{ animationDelay: '190ms' }}>
+                    <Card
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        title="Review Stage Flow"
+                        extra={<Typography.Text type="secondary">Open by stage</Typography.Text>}
+                        style={{ animationDelay: '190ms' }}
+                    >
                         <ResponsiveContainer width="100%" height={280}>
                             <BarChart data={stageFlow}>
                                 <CartesianGrid strokeDasharray="3 3" stroke={borderColor} />
                                 <XAxis dataKey="stage" stroke={axisColor} />
                                 <YAxis stroke={axisColor} allowDecimals={false} />
-                                <Tooltip contentStyle={{ backgroundColor: surfaceColor, border: `1px solid ${borderColor}`, borderRadius: 8, color: textColor }} />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: surfaceColor,
+                                        border: `1px solid ${borderColor}`,
+                                        borderRadius: 8,
+                                        color: textColor,
+                                    }}
+                                />
                                 <Bar
                                     dataKey="count"
                                     fill={accentPrimary}
@@ -161,30 +260,88 @@ export default function StudentCharts({ monthlyActivity = [], stats = {}, stageC
                     </Card>
                 </Col>
                 <Col xs={24} xl={10}>
-                    <Card className="admin-dashboard-shell dashboard-reveal" bordered={false} title="Approval Snapshot" extra={<Typography.Text type="secondary">Quick health check</Typography.Text>} style={{ animationDelay: '235ms' }}>
+                    <Card
+                        className="admin-dashboard-shell dashboard-reveal"
+                        bordered={false}
+                        title="Approval Snapshot"
+                        extra={
+                            <Typography.Text type="secondary">Quick health check</Typography.Text>
+                        }
+                        style={{ animationDelay: '235ms' }}
+                    >
                         <div className="space-y-6">
                             <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: textColor }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        marginBottom: 8,
+                                        color: textColor,
+                                    }}
+                                >
                                     <span>Approval Rate</span>
                                     <span>{stats.approvalRate ?? 0}%</span>
                                 </div>
-                                <Progress percent={Number(stats.approvalRate ?? 0)} strokeColor={accentPrimary} trailColor={dark ? '#1e293b' : '#e2e8f0'} />
+                                <Progress
+                                    percent={Number(stats.approvalRate ?? 0)}
+                                    strokeColor={accentPrimary}
+                                    trailColor={dark ? '#1e293b' : '#e2e8f0'}
+                                />
                             </div>
                             <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: textColor }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        marginBottom: 8,
+                                        color: textColor,
+                                    }}
+                                >
                                     <span>Uploaded This Month</span>
                                     <span>{stats.uploadedThisMonth ?? 0}</span>
                                 </div>
-                                <Progress percent={Math.min(((stats.uploadedThisMonth ?? 0) / Math.max(stats.total ?? 1, 1)) * 100, 100)} strokeColor="#d97706" trailColor={dark ? '#1e293b' : '#e2e8f0'} showInfo={false} />
+                                <Progress
+                                    percent={Math.min(
+                                        ((stats.uploadedThisMonth ?? 0) /
+                                            Math.max(stats.total ?? 1, 1)) *
+                                            100,
+                                        100
+                                    )}
+                                    strokeColor="#d97706"
+                                    trailColor={dark ? '#1e293b' : '#e2e8f0'}
+                                    showInfo={false}
+                                />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                                <div style={{ border: `1px solid ${borderColor}`, borderRadius: 12, padding: 16, backgroundColor: surfaceColor }}>
+                                <div
+                                    style={{
+                                        border: `1px solid ${borderColor}`,
+                                        borderRadius: 12,
+                                        padding: 16,
+                                        backgroundColor: surfaceColor,
+                                    }}
+                                >
                                     <div style={{ color: axisColor, fontSize: 12 }}>Approved</div>
-                                    <div style={{ color: '#16a34a', fontSize: 24, fontWeight: 700 }}>{stats.approved ?? 0}</div>
+                                    <div
+                                        style={{ color: '#16a34a', fontSize: 24, fontWeight: 700 }}
+                                    >
+                                        {stats.approved ?? 0}
+                                    </div>
                                 </div>
-                                <div style={{ border: `1px solid ${borderColor}`, borderRadius: 12, padding: 16, backgroundColor: surfaceColor }}>
+                                <div
+                                    style={{
+                                        border: `1px solid ${borderColor}`,
+                                        borderRadius: 12,
+                                        padding: 16,
+                                        backgroundColor: surfaceColor,
+                                    }}
+                                >
                                     <div style={{ color: axisColor, fontSize: 12 }}>Pending</div>
-                                    <div style={{ color: '#d97706', fontSize: 24, fontWeight: 700 }}>{stats.pending ?? 0}</div>
+                                    <div
+                                        style={{ color: '#d97706', fontSize: 24, fontWeight: 700 }}
+                                    >
+                                        {stats.pending ?? 0}
+                                    </div>
                                 </div>
                             </div>
                         </div>

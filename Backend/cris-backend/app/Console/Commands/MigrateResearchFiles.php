@@ -19,6 +19,7 @@ class MigrateResearchFiles extends Command
 
         if (! $public->exists('research_papers')) {
             $this->info('No legacy research_papers directory on the public disk. Nothing to do.');
+
             return self::SUCCESS;
         }
 
@@ -54,7 +55,7 @@ class MigrateResearchFiles extends Command
         }
 
         $this->info($dry
-            ? "Dry run complete. " . count($files) . " file(s) examined, {$skipped} already on private disk."
+            ? 'Dry run complete. '.count($files)." file(s) examined, {$skipped} already on private disk."
             : "Migration complete. {$moved} moved, {$skipped} skipped.");
 
         return self::SUCCESS;

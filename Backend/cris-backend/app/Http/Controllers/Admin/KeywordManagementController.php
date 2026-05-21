@@ -15,8 +15,7 @@ class KeywordManagementController extends Controller
     {
         $keywords = Keyword::query()
             ->withCount('researchProposals')
-            ->when($request->search, fn ($query, $search) =>
-                $query->where('name', 'like', "%{$search}%")
+            ->when($request->search, fn ($query, $search) => $query->where('name', 'like', "%{$search}%")
             )
             ->orderBy('name')
             ->paginate(20)

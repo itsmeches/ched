@@ -1,7 +1,22 @@
 ﻿import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import AdminPageHeader from '@/Components/Admin/AdminPageHeader';
 import { Head, Link, router } from '@inertiajs/react';
-import { Button, Card, Checkbox, Col, Collapse, DatePicker, Input, Pagination, Row, Select, Space, Tag, Timeline, Typography } from 'antd';
+import {
+    Button,
+    Card,
+    Checkbox,
+    Col,
+    Collapse,
+    DatePicker,
+    Input,
+    Pagination,
+    Row,
+    Select,
+    Space,
+    Tag,
+    Timeline,
+    Typography,
+} from 'antd';
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
@@ -18,19 +33,28 @@ import { useMemo, useState } from 'react';
 import { useTheme } from '@/utils/ThemeContext';
 
 const ACTION_CONFIG = {
-    created:  { color: '#16a34a', icon: <PlusCircleOutlined />,  label: 'Submitted' },
-    updated:  { color: '#2563eb', icon: <EditOutlined />,        label: 'Updated'   },
-    deleted:  { color: '#dc2626', icon: <DeleteOutlined />,      label: 'Deleted'   },
-    approved: { color: '#0033a0', icon: <CheckCircleOutlined />, label: 'Approved'  },
-    rejected: { color: '#d97706', icon: <CloseCircleOutlined />, label: 'Rejected'  },
+    created: { color: '#16a34a', icon: <PlusCircleOutlined />, label: 'Submitted' },
+    updated: { color: '#2563eb', icon: <EditOutlined />, label: 'Updated' },
+    deleted: { color: '#dc2626', icon: <DeleteOutlined />, label: 'Deleted' },
+    approved: { color: '#0033a0', icon: <CheckCircleOutlined />, label: 'Approved' },
+    rejected: { color: '#d97706', icon: <CloseCircleOutlined />, label: 'Rejected' },
 };
 
 const FIELD_LABELS = {
-    title: 'Title', authors: 'Authors', author_email: 'Author Email',
-    author_phone: 'Author Phone', co_authors: 'Co-Authors',
-    co_author_emails: 'Co-Author Emails', co_author_phones: 'Co-Author Phones',
-    year: 'Year', school: 'School', abstract: 'Abstract',
-    category: 'Category', keywords: 'Keywords', status: 'Status', comments: 'Reviewer Comments',
+    title: 'Title',
+    authors: 'Authors',
+    author_email: 'Author Email',
+    author_phone: 'Author Phone',
+    co_authors: 'Co-Authors',
+    co_author_emails: 'Co-Author Emails',
+    co_author_phones: 'Co-Author Phones',
+    year: 'Year',
+    school: 'School',
+    abstract: 'Abstract',
+    category: 'Category',
+    keywords: 'Keywords',
+    status: 'Status',
+    comments: 'Reviewer Comments',
 };
 
 const EXPORT_COLUMN_OPTIONS = [
@@ -89,7 +113,7 @@ function getDayLabel(dateKey) {
 
 export default function HistoryIndex({ history, filters, role, stats }) {
     const { dark } = useTheme();
-    
+
     // Theme-aware colors
     const accentPrimary = dark ? '#93c5fd' : '#0033a0';
     const accentApproved = dark ? '#60a5fa' : '#0033a0';
@@ -103,7 +127,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
     const [action, setAction] = useState(filters.action ?? '');
     const [range, setRange] = useState(filters.range ?? '');
     const [customRange, setCustomRange] = useState(
-        filters.from && filters.to ? [dayjs(filters.from), dayjs(filters.to)] : null,
+        filters.from && filters.to ? [dayjs(filters.from), dayjs(filters.to)] : null
     );
     const [expandedEntryId, setExpandedEntryId] = useState(null);
     const [exportColumns, setExportColumns] = useState(DEFAULT_EXPORT_COLUMNS);
@@ -115,8 +139,14 @@ export default function HistoryIndex({ history, filters, role, stats }) {
             search,
             action,
             range,
-            from: range === 'custom' && customRange?.[0] ? customRange[0].format('YYYY-MM-DD') : undefined,
-            to: range === 'custom' && customRange?.[1] ? customRange[1].format('YYYY-MM-DD') : undefined,
+            from:
+                range === 'custom' && customRange?.[0]
+                    ? customRange[0].format('YYYY-MM-DD')
+                    : undefined,
+            to:
+                range === 'custom' && customRange?.[1]
+                    ? customRange[1].format('YYYY-MM-DD')
+                    : undefined,
         };
 
         const params = { ...base, ...overrides };
@@ -129,11 +159,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
             delete params.to;
         }
 
-        router.get(
-            route('history.index'),
-            params,
-            { preserveState: true, replace: true },
-        );
+        router.get(route('history.index'), params, { preserveState: true, replace: true });
     }
 
     function resetFilters() {
@@ -152,8 +178,14 @@ export default function HistoryIndex({ history, filters, role, stats }) {
             search,
             action,
             range,
-            from: range === 'custom' && customRange?.[0] ? customRange[0].format('YYYY-MM-DD') : undefined,
-            to: range === 'custom' && customRange?.[1] ? customRange[1].format('YYYY-MM-DD') : undefined,
+            from:
+                range === 'custom' && customRange?.[0]
+                    ? customRange[0].format('YYYY-MM-DD')
+                    : undefined,
+            to:
+                range === 'custom' && customRange?.[1]
+                    ? customRange[1].format('YYYY-MM-DD')
+                    : undefined,
             columns: selectedColumns,
         };
 
@@ -203,139 +235,266 @@ export default function HistoryIndex({ history, filters, role, stats }) {
     }, [history.data]);
 
     // Build Collapse items — one panel per paper
-    const collapseItems = useMemo(() => paperGroups.map((group) => {
-        const lastEntry = group.entries[0];
-        const lastCfgBase = ACTION_CONFIG[lastEntry?.action] ?? { color: '#64748b', label: lastEntry?.action ?? '—' };
-        const lastCfg = lastEntry?.action === 'approved'
-            ? { ...lastCfgBase, color: accentApproved }
-            : lastCfgBase;
+    const collapseItems = useMemo(
+        () =>
+            paperGroups.map((group) => {
+                const lastEntry = group.entries[0];
+                const lastCfgBase = ACTION_CONFIG[lastEntry?.action] ?? {
+                    color: '#64748b',
+                    label: lastEntry?.action ?? '—',
+                };
+                const lastCfg =
+                    lastEntry?.action === 'approved'
+                        ? { ...lastCfgBase, color: accentApproved }
+                        : lastCfgBase;
 
-        // Group entries inside the panel by date
-        const byDate = group.entries.reduce((acc, entry) => {
-            const dk = dayjs(entry.performed_at).format('YYYY-MM-DD');
-            if (!acc[dk]) acc[dk] = [];
-            acc[dk].push(entry);
-            return acc;
-        }, {});
-        const dateKeys = Object.keys(byDate).sort((a, b) => dayjs(b).valueOf() - dayjs(a).valueOf());
+                // Group entries inside the panel by date
+                const byDate = group.entries.reduce((acc, entry) => {
+                    const dk = dayjs(entry.performed_at).format('YYYY-MM-DD');
+                    if (!acc[dk]) acc[dk] = [];
+                    acc[dk].push(entry);
+                    return acc;
+                }, {});
+                const dateKeys = Object.keys(byDate).sort(
+                    (a, b) => dayjs(b).valueOf() - dayjs(a).valueOf()
+                );
 
-        const timelineByDate = dateKeys.map((dk) => ({
-            dateKey: dk,
-            items: byDate[dk].map((entry) => {
-                const cfgBase = ACTION_CONFIG[entry.action] ?? { color: '#64748b', icon: <HistoryOutlined />, label: entry.action };
-                const cfg = entry.action === 'approved'
-                    ? { ...cfgBase, color: accentApproved }
-                    : cfgBase;
+                const timelineByDate = dateKeys.map((dk) => ({
+                    dateKey: dk,
+                    items: byDate[dk].map((entry) => {
+                        const cfgBase = ACTION_CONFIG[entry.action] ?? {
+                            color: '#64748b',
+                            icon: <HistoryOutlined />,
+                            label: entry.action,
+                        };
+                        const cfg =
+                            entry.action === 'approved'
+                                ? { ...cfgBase, color: accentApproved }
+                                : cfgBase;
+                        return {
+                            key: entry.id,
+                            color: cfg.color,
+                            dot: <span style={{ fontSize: 15, color: cfg.color }}>{cfg.icon}</span>,
+                            children: (
+                                <div style={{ paddingBottom: 10 }}>
+                                    <Space wrap size={4} style={{ marginBottom: 4 }}>
+                                        <Tag color={cfg.color} style={{ marginInlineEnd: 0 }}>
+                                            {cfg.label}
+                                        </Tag>
+                                        <span style={{ fontSize: 12, color: textMuted }}>
+                                            {formatTs(entry.performed_at)}
+                                        </span>
+                                    </Space>
+                                    <div style={{ fontSize: 13, color: textSecondary }}>
+                                        {entry.actor ? entry.actor.name : 'System'}
+                                        {entry.actor?.role && (
+                                            <Tag style={{ fontSize: 11, marginLeft: 6 }}>
+                                                {entry.actor.role.toUpperCase()}
+                                            </Tag>
+                                        )}
+                                    </div>
+
+                                    {/* Field diff for updates */}
+                                    {entry.action === 'updated' && entry.new_values && (
+                                        <div style={{ marginTop: 6 }}>
+                                            {(expandedEntryId === entry.id
+                                                ? Object.keys(entry.new_values)
+                                                : Object.keys(entry.new_values).slice(0, 3)
+                                            ).map((field) => (
+                                                <div
+                                                    key={field}
+                                                    style={{
+                                                        marginBottom: 6,
+                                                        padding: '5px 10px',
+                                                        background: bgMuted,
+                                                        borderRadius: 6,
+                                                        border: `1px solid ${borderColor}`,
+                                                    }}
+                                                >
+                                                    <span
+                                                        style={{
+                                                            fontSize: 11,
+                                                            fontWeight: 600,
+                                                            textTransform: 'uppercase',
+                                                            color: textMuted,
+                                                            letterSpacing: '0.05em',
+                                                        }}
+                                                    >
+                                                        {FIELD_LABELS[field] ?? field}
+                                                    </span>
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            gap: 8,
+                                                            marginTop: 4,
+                                                            flexWrap: 'wrap',
+                                                            alignItems: 'center',
+                                                        }}
+                                                    >
+                                                        <span
+                                                            style={{
+                                                                fontSize: 12,
+                                                                color: '#b91c1c',
+                                                                background: '#fef2f2',
+                                                                borderRadius: 4,
+                                                                padding: '2px 6px',
+                                                                maxWidth: 280,
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap',
+                                                                display: 'inline-block',
+                                                            }}
+                                                        >
+                                                            {formatValue(entry.old_values?.[field])}
+                                                        </span>
+                                                        <span style={{ color: '#94a3b8' }}>→</span>
+                                                        <span
+                                                            style={{
+                                                                fontSize: 12,
+                                                                color: '#15803d',
+                                                                background: '#f0fdf4',
+                                                                borderRadius: 4,
+                                                                padding: '2px 6px',
+                                                                maxWidth: 280,
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap',
+                                                                display: 'inline-block',
+                                                            }}
+                                                        >
+                                                            {formatValue(entry.new_values[field])}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {Object.keys(entry.new_values).length > 3 && (
+                                                <Button
+                                                    type="link"
+                                                    size="small"
+                                                    style={{ paddingLeft: 0, marginTop: 2 }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setExpandedEntryId((prev) =>
+                                                            prev === entry.id ? null : entry.id
+                                                        );
+                                                    }}
+                                                >
+                                                    {expandedEntryId === entry.id
+                                                        ? 'Show less'
+                                                        : `Show ${Object.keys(entry.new_values).length - 3} more changes`}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Review comments */}
+                                    {(entry.action === 'approved' || entry.action === 'rejected') &&
+                                        entry.new_values?.comments && (
+                                            <div
+                                                style={{
+                                                    marginTop: 4,
+                                                    fontSize: 12,
+                                                    color: textTertiary,
+                                                    fontStyle: 'italic',
+                                                }}
+                                            >
+                                                &ldquo;{entry.new_values.comments}&rdquo;
+                                            </div>
+                                        )}
+                                </div>
+                            ),
+                        };
+                    }),
+                }));
+
                 return {
-                    key: entry.id,
-                    color: cfg.color,
-                    dot: <span style={{ fontSize: 15, color: cfg.color }}>{cfg.icon}</span>,
-                    children: (
-                        <div style={{ paddingBottom: 10 }}>
-                            <Space wrap size={4} style={{ marginBottom: 4 }}>
-                                <Tag color={cfg.color} style={{ marginInlineEnd: 0 }}>{cfg.label}</Tag>
-                                <span style={{ fontSize: 12, color: textMuted }}>{formatTs(entry.performed_at)}</span>
-                            </Space>
-                            <div style={{ fontSize: 13, color: textSecondary }}>
-                                {entry.actor ? entry.actor.name : 'System'}
-                                {entry.actor?.role && (
-                                    <Tag style={{ fontSize: 11, marginLeft: 6 }}>{entry.actor.role.toUpperCase()}</Tag>
+                    key: group.key,
+                    label: (
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                                flexWrap: 'wrap',
+                                minWidth: 0,
+                            }}
+                        >
+                            <FileTextOutlined
+                                style={{ color: accentPrimary, fontSize: 14, flexShrink: 0 }}
+                            />
+                            <span
+                                style={{
+                                    fontWeight: 600,
+                                    fontSize: 13,
+                                    color: textNormal,
+                                    flex: 1,
+                                    minWidth: 0,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {group.proposalId ? (
+                                    <Link
+                                        href={route('research.show', group.proposalId)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        style={{ color: accentPrimary }}
+                                    >
+                                        {group.title}
+                                    </Link>
+                                ) : (
+                                    group.title
                                 )}
-                            </div>
-
-                            {/* Field diff for updates */}
-                            {entry.action === 'updated' && entry.new_values && (
-                                <div style={{ marginTop: 6 }}>
-                                    {(expandedEntryId === entry.id
-                                        ? Object.keys(entry.new_values)
-                                        : Object.keys(entry.new_values).slice(0, 3)
-                                    ).map((field) => (
-                                        <div
-                                            key={field}
+                            </span>
+                            <Space size={4} style={{ flexShrink: 0 }}>
+                                <Tag color={lastCfg.color} style={{ marginInlineEnd: 0 }}>
+                                    {lastCfg.label}
+                                </Tag>
+                                <Tag
+                                    style={{
+                                        marginInlineEnd: 0,
+                                        background: 'transparent',
+                                        borderColor: borderColor,
+                                        color: textMuted,
+                                    }}
+                                >
+                                    {group.entries.length}{' '}
+                                    {group.entries.length === 1 ? 'event' : 'events'}
+                                </Tag>
+                                <span style={{ fontSize: 11, color: textMuted }}>
+                                    {formatTs(lastEntry?.performed_at)}
+                                </span>
+                            </Space>
+                        </div>
+                    ),
+                    children: (
+                        <div className="space-y-4" style={{ paddingTop: 4 }}>
+                            {timelineByDate.map(({ dateKey, items }) => (
+                                <div key={dateKey}>
+                                    <div style={{ marginBottom: 8 }}>
+                                        <Tag
                                             style={{
-                                                marginBottom: 6,
-                                                padding: '5px 10px',
-                                                background: bgMuted,
-                                                borderRadius: 6,
+                                                borderRadius: 999,
+                                                paddingInline: 10,
                                                 border: `1px solid ${borderColor}`,
+                                                color: textSecondary,
+                                                background: bgMuted,
+                                                fontWeight: 600,
+                                                fontSize: 11,
                                             }}
                                         >
-                                            <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', color: textMuted, letterSpacing: '0.05em' }}>
-                                                {FIELD_LABELS[field] ?? field}
-                                            </span>
-                                            <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-                                                <span style={{ fontSize: 12, color: '#b91c1c', background: '#fef2f2', borderRadius: 4, padding: '2px 6px', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>
-                                                    {formatValue(entry.old_values?.[field])}
-                                                </span>
-                                                <span style={{ color: '#94a3b8' }}>→</span>
-                                                <span style={{ fontSize: 12, color: '#15803d', background: '#f0fdf4', borderRadius: 4, padding: '2px 6px', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>
-                                                    {formatValue(entry.new_values[field])}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {Object.keys(entry.new_values).length > 3 && (
-                                        <Button type="link" size="small" style={{ paddingLeft: 0, marginTop: 2 }}
-                                            onClick={(e) => { e.stopPropagation(); setExpandedEntryId((prev) => (prev === entry.id ? null : entry.id)); }}>
-                                            {expandedEntryId === entry.id ? 'Show less' : `Show ${Object.keys(entry.new_values).length - 3} more changes`}
-                                        </Button>
-                                    )}
+                                            {getDayLabel(dateKey)}
+                                        </Tag>
+                                    </div>
+                                    <Timeline items={items} />
                                 </div>
-                            )}
-
-                            {/* Review comments */}
-                            {(entry.action === 'approved' || entry.action === 'rejected') && entry.new_values?.comments && (
-                                <div style={{ marginTop: 4, fontSize: 12, color: textTertiary, fontStyle: 'italic' }}>
-                                    &ldquo;{entry.new_values.comments}&rdquo;
-                                </div>
-                            )}
+                            ))}
                         </div>
                     ),
                 };
             }),
-        }));
-
-        return {
-            key: group.key,
-            label: (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', minWidth: 0 }}>
-                    <FileTextOutlined style={{ color: accentPrimary, fontSize: 14, flexShrink: 0 }} />
-                    <span style={{ fontWeight: 600, fontSize: 13, color: textNormal, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {group.proposalId ? (
-                            <Link
-                                href={route('research.show', group.proposalId)}
-                                onClick={(e) => e.stopPropagation()}
-                                style={{ color: accentPrimary }}
-                            >
-                                {group.title}
-                            </Link>
-                        ) : group.title}
-                    </span>
-                    <Space size={4} style={{ flexShrink: 0 }}>
-                        <Tag color={lastCfg.color} style={{ marginInlineEnd: 0 }}>{lastCfg.label}</Tag>
-                        <Tag style={{ marginInlineEnd: 0, background: 'transparent', borderColor: borderColor, color: textMuted }}>
-                            {group.entries.length} {group.entries.length === 1 ? 'event' : 'events'}
-                        </Tag>
-                        <span style={{ fontSize: 11, color: textMuted }}>{formatTs(lastEntry?.performed_at)}</span>
-                    </Space>
-                </div>
-            ),
-            children: (
-                <div className="space-y-4" style={{ paddingTop: 4 }}>
-                    {timelineByDate.map(({ dateKey, items }) => (
-                        <div key={dateKey}>
-                            <div style={{ marginBottom: 8 }}>
-                                <Tag style={{ borderRadius: 999, paddingInline: 10, border: `1px solid ${borderColor}`, color: textSecondary, background: bgMuted, fontWeight: 600, fontSize: 11 }}>
-                                    {getDayLabel(dateKey)}
-                                </Tag>
-                            </div>
-                            <Timeline items={items} />
-                        </div>
-                    ))}
-                </div>
-            ),
-        };
-    }), [paperGroups, expandedEntryId, dark]);
+        [paperGroups, expandedEntryId, dark]
+    );
 
     // Pagination helpers
     const lastPage = history.meta?.last_page ?? history.last_page ?? 1;
@@ -350,11 +509,30 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                 <Row gutter={[12, 12]}>
                     {statItems.map((item) => (
                         <Col key={item.key} xs={12} sm={8} lg={4}>
-                            <Card className="admin-dashboard-shell" bordered={false} bodyStyle={{ padding: 14 }}>
-                                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', color: textMuted, textTransform: 'uppercase' }}>
+                            <Card
+                                className="admin-dashboard-shell"
+                                bordered={false}
+                                bodyStyle={{ padding: 14 }}
+                            >
+                                <div
+                                    style={{
+                                        fontSize: 11,
+                                        fontWeight: 700,
+                                        letterSpacing: '0.04em',
+                                        color: textMuted,
+                                        textTransform: 'uppercase',
+                                    }}
+                                >
                                     {item.label}
                                 </div>
-                                <div style={{ marginTop: 4, fontSize: 24, fontWeight: 700, color: item.color }}>
+                                <div
+                                    style={{
+                                        marginTop: 4,
+                                        fontSize: 24,
+                                        fontWeight: 700,
+                                        color: item.color,
+                                    }}
+                                >
                                     {item.value}
                                 </div>
                             </Card>
@@ -364,7 +542,9 @@ export default function HistoryIndex({ history, filters, role, stats }) {
 
                 {/* Filters */}
                 <Card className="admin-dashboard-shell" bordered={false}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                    <div
+                        style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}
+                    >
                         <Input
                             prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
                             placeholder="Search by paper title…"
@@ -388,11 +568,11 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                             allowClear
                             style={{ width: 170 }}
                             options={[
-                                { value: 'created',  label: 'Submitted'  },
-                                { value: 'updated',  label: 'Updated'    },
-                                { value: 'approved', label: 'Approved'   },
-                                { value: 'rejected', label: 'Rejected'   },
-                                { value: 'deleted',  label: 'Deleted'    },
+                                { value: 'created', label: 'Submitted' },
+                                { value: 'updated', label: 'Updated' },
+                                { value: 'approved', label: 'Approved' },
+                                { value: 'rejected', label: 'Rejected' },
+                                { value: 'deleted', label: 'Deleted' },
                             ]}
                         />
                         <Select
@@ -403,7 +583,12 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                                 setRange(nextRange);
                                 if (nextRange !== 'custom') {
                                     setCustomRange(null);
-                                    applyFilters({ range: nextRange, from: undefined, to: undefined, page: 1 });
+                                    applyFilters({
+                                        range: nextRange,
+                                        from: undefined,
+                                        to: undefined,
+                                        page: 1,
+                                    });
                                 }
                             }}
                             allowClear
@@ -422,12 +607,25 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                                 allowClear
                             />
                         )}
-                        <Button type="primary" onClick={() => applyFilters({ search, action, page: 1 })}>
+                        <Button
+                            type="primary"
+                            onClick={() => applyFilters({ search, action, page: 1 })}
+                        >
                             Apply Filters
                         </Button>
-                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div
+                            style={{
+                                marginLeft: 'auto',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 12,
+                            }}
+                        >
                             <Button onClick={resetFilters}>Reset</Button>
-                            <Typography.Text type="secondary" style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
+                            <Typography.Text
+                                type="secondary"
+                                style={{ fontSize: 13, whiteSpace: 'nowrap' }}
+                            >
                                 Showing {totalRecords} {totalRecords === 1 ? 'entry' : 'entries'}
                             </Typography.Text>
                         </div>
@@ -435,37 +633,82 @@ export default function HistoryIndex({ history, filters, role, stats }) {
 
                     {/* Export CSV — super_admin only */}
                     {role === 'super_admin' && (
-                        <div style={{
-                            marginTop: 14,
-                            paddingTop: 14,
-                            borderTop: `1px solid ${borderColor}`,
-                        }}>
-                            <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Typography.Text strong style={{ fontSize: 12, color: textTertiary, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        <div
+                            style={{
+                                marginTop: 14,
+                                paddingTop: 14,
+                                borderTop: `1px solid ${borderColor}`,
+                            }}
+                        >
+                            <div
+                                style={{
+                                    marginBottom: 8,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                }}
+                            >
+                                <Typography.Text
+                                    strong
+                                    style={{
+                                        fontSize: 12,
+                                        color: textTertiary,
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.04em',
+                                    }}
+                                >
                                     Export columns
                                 </Typography.Text>
-                                <Button size="small" type="link" style={{ padding: 0, height: 'auto', fontSize: 12 }} onClick={() => setExportColumns(DEFAULT_EXPORT_COLUMNS)}>
+                                <Button
+                                    size="small"
+                                    type="link"
+                                    style={{ padding: 0, height: 'auto', fontSize: 12 }}
+                                    onClick={() => setExportColumns(DEFAULT_EXPORT_COLUMNS)}
+                                >
                                     Select all
                                 </Button>
-                                <Button size="small" type="link" style={{ padding: 0, height: 'auto', fontSize: 12 }} onClick={() => setExportColumns([])}>
+                                <Button
+                                    size="small"
+                                    type="link"
+                                    style={{ padding: 0, height: 'auto', fontSize: 12 }}
+                                    onClick={() => setExportColumns([])}
+                                >
                                     Clear all
                                 </Button>
                                 <Checkbox
                                     checked={allColumnsSelected}
                                     indeterminate={someColumnsSelected}
-                                    onChange={(e) => setExportColumns(e.target.checked ? DEFAULT_EXPORT_COLUMNS : [])}
+                                    onChange={(e) =>
+                                        setExportColumns(
+                                            e.target.checked ? DEFAULT_EXPORT_COLUMNS : []
+                                        )
+                                    }
                                     style={{ marginLeft: 4 }}
                                 >
                                     <span style={{ fontSize: 12 }}>All</span>
                                 </Checkbox>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-end',
+                                    gap: 12,
+                                    flexWrap: 'wrap',
+                                }}
+                            >
                                 <Checkbox.Group
                                     options={EXPORT_COLUMN_OPTIONS}
                                     value={exportColumns}
                                     onChange={(values) => setExportColumns(values)}
                                 />
-                                <Button icon={<DownloadOutlined />} type="primary" ghost onClick={exportCsv} style={{ flexShrink: 0 }}>
+                                <Button
+                                    icon={<DownloadOutlined />}
+                                    type="primary"
+                                    ghost
+                                    onClick={exportCsv}
+                                    style={{ flexShrink: 0 }}
+                                >
                                     Export CSV
                                 </Button>
                             </div>
@@ -485,14 +728,22 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                             <Collapse
                                 accordion={false}
                                 ghost={false}
-                                defaultActiveKey={paperGroups.length > 0 ? [paperGroups[0].key] : []}
+                                defaultActiveKey={
+                                    paperGroups.length > 0 ? [paperGroups[0].key] : []
+                                }
                                 style={{ background: 'transparent' }}
                                 items={collapseItems}
                             />
 
                             {/* Pagination */}
                             {lastPage > 1 && (
-                                <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        marginTop: 16,
+                                    }}
+                                >
                                     <Pagination
                                         current={currentPage}
                                         total={totalRecords}
@@ -509,4 +760,3 @@ export default function HistoryIndex({ history, filters, role, stats }) {
         </AuthenticatedLayout>
     );
 }
-

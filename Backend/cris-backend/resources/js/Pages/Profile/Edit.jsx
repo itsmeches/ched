@@ -16,23 +16,22 @@ export default function Edit({ mustVerifyEmail, status }) {
             <Head title="Profile" />
 
             <div className="space-y-4">
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#1e2d47] dark:bg-[#111827] sm:p-8">
-                        <UpdateProfileInformationForm
-                            mustVerifyEmail={mustVerifyEmail}
-                            status={status}
-                            className="max-w-xl"
-                        />
-                    </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#1e2d47] dark:bg-[#111827] sm:p-8">
+                    <UpdateProfileInformationForm
+                        mustVerifyEmail={mustVerifyEmail}
+                        status={status}
+                        className="max-w-xl"
+                    />
+                </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#1e2d47] dark:bg-[#111827] sm:p-8">
-                        <UpdatePasswordForm className="max-w-xl" />
-                    </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#1e2d47] dark:bg-[#111827] sm:p-8">
+                    <UpdatePasswordForm className="max-w-xl" />
+                </div>
 
-                    <div className="rounded-2xl border border-rose-200 bg-rose-50/40 p-6 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/20 sm:p-8">
-                        <DeleteUserForm className="max-w-xl" />
-                    </div>
+                <div className="rounded-2xl border border-rose-200 bg-rose-50/40 p-6 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/20 sm:p-8">
+                    <DeleteUserForm className="max-w-xl" />
+                </div>
             </div>
         </AuthenticatedLayout>
     );
 }
-

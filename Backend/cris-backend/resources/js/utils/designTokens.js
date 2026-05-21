@@ -48,32 +48,92 @@ export const surfaces = {
 // avatars, and tags. Light/dark variants for both Tailwind classes
 // (text/bg pairs) and Ant Design Tag colors.
 export const roleColorMap = {
-    super_admin:   { antTag: 'magenta', bg: '#7e22ce', soft: 'rgba(126, 34, 206, 0.12)', text: '#7e22ce', label: 'Super Admin' },
-    superadmin:    { antTag: 'magenta', bg: '#7e22ce', soft: 'rgba(126, 34, 206, 0.12)', text: '#7e22ce', label: 'Super Admin' },
-    ched:          { antTag: 'geekblue', bg: '#0033a0', soft: 'rgba(0, 51, 160, 0.12)',  text: '#0033a0', label: 'CHED' },
-    hei:           { antTag: 'cyan',    bg: '#0e7490', soft: 'rgba(14, 116, 144, 0.12)', text: '#0e7490', label: 'HEI' },
-    hei_admin:     { antTag: 'cyan',    bg: '#0e7490', soft: 'rgba(14, 116, 144, 0.12)', text: '#0e7490', label: 'HEI Admin' },
-    faculty:       { antTag: 'purple',  bg: '#6d28d9', soft: 'rgba(109, 40, 217, 0.12)', text: '#6d28d9', label: 'Faculty' },
-    student:       { antTag: 'orange',  bg: '#c2410c', soft: 'rgba(194, 65, 12, 0.12)',  text: '#c2410c', label: 'Student' },
-    researcher:    { antTag: 'green',   bg: '#15803d', soft: 'rgba(21, 128, 61, 0.12)',  text: '#15803d', label: 'Researcher' },
-    reviewer:      { antTag: 'gold',    bg: '#a16207', soft: 'rgba(161, 98, 7, 0.12)',   text: '#a16207', label: 'Reviewer' },
+    super_admin: {
+        antTag: 'magenta',
+        bg: '#7e22ce',
+        soft: 'rgba(126, 34, 206, 0.12)',
+        text: '#7e22ce',
+        label: 'Super Admin',
+    },
+    superadmin: {
+        antTag: 'magenta',
+        bg: '#7e22ce',
+        soft: 'rgba(126, 34, 206, 0.12)',
+        text: '#7e22ce',
+        label: 'Super Admin',
+    },
+    ched: {
+        antTag: 'geekblue',
+        bg: '#0033a0',
+        soft: 'rgba(0, 51, 160, 0.12)',
+        text: '#0033a0',
+        label: 'CHED',
+    },
+    hei: {
+        antTag: 'cyan',
+        bg: '#0e7490',
+        soft: 'rgba(14, 116, 144, 0.12)',
+        text: '#0e7490',
+        label: 'HEI',
+    },
+    hei_admin: {
+        antTag: 'cyan',
+        bg: '#0e7490',
+        soft: 'rgba(14, 116, 144, 0.12)',
+        text: '#0e7490',
+        label: 'HEI Admin',
+    },
+    faculty: {
+        antTag: 'purple',
+        bg: '#6d28d9',
+        soft: 'rgba(109, 40, 217, 0.12)',
+        text: '#6d28d9',
+        label: 'Faculty',
+    },
+    student: {
+        antTag: 'orange',
+        bg: '#c2410c',
+        soft: 'rgba(194, 65, 12, 0.12)',
+        text: '#c2410c',
+        label: 'Student',
+    },
+    researcher: {
+        antTag: 'green',
+        bg: '#15803d',
+        soft: 'rgba(21, 128, 61, 0.12)',
+        text: '#15803d',
+        label: 'Researcher',
+    },
+    reviewer: {
+        antTag: 'gold',
+        bg: '#a16207',
+        soft: 'rgba(161, 98, 7, 0.12)',
+        text: '#a16207',
+        label: 'Reviewer',
+    },
 };
 
 const ROLE_DARK_TEXT = {
     super_admin: '#e9d5ff',
-    superadmin:  '#e9d5ff',
-    ched:        '#bfdbfe',
-    hei:         '#a5f3fc',
-    hei_admin:   '#a5f3fc',
-    faculty:     '#ddd6fe',
-    student:     '#fed7aa',
-    researcher:  '#bbf7d0',
-    reviewer:    '#fde68a',
+    superadmin: '#e9d5ff',
+    ched: '#bfdbfe',
+    hei: '#a5f3fc',
+    hei_admin: '#a5f3fc',
+    faculty: '#ddd6fe',
+    student: '#fed7aa',
+    researcher: '#bbf7d0',
+    reviewer: '#fde68a',
 };
 
 export function getRoleColor(role, dark = false) {
     const key = (role ?? '').toString().toLowerCase().replace(/-/g, '_');
-    const base = roleColorMap[key] ?? { antTag: 'default', bg: '#475569', soft: 'rgba(71, 85, 105, 0.14)', text: '#475569', label: role };
+    const base = roleColorMap[key] ?? {
+        antTag: 'default',
+        bg: '#475569',
+        soft: 'rgba(71, 85, 105, 0.14)',
+        text: '#475569',
+        label: role,
+    };
     return {
         ...base,
         text: dark ? (ROLE_DARK_TEXT[key] ?? '#e2e8f0') : base.text,
@@ -135,21 +195,23 @@ export function buildAntdTokens(dark) {
             controlHeightLG: 46,
             fontSize: 14,
             fontFamily: 'Segoe UI, Helvetica Neue, Arial, sans-serif',
-            ...(dark ? {
-                colorBgBase: surfaces.dark.page,
-                colorBgContainer: surfaces.dark.card,
-                colorBgElevated: surfaces.dark.card,
-                colorBgLayout: surfaces.dark.page,
-                colorBgSpotlight: '#1a2540',
-                colorBorder: surfaces.dark.border,
-                colorBorderSecondary: surfaces.dark.border,
-                colorText: surfaces.dark.text,
-                colorTextSecondary: surfaces.dark.textSecondary,
-                colorTextTertiary: surfaces.dark.textMuted,
-                colorTextQuaternary: '#64748b',
-                colorFillAlter: 'rgba(30,45,71,0.6)',
-                colorFillContent: 'rgba(30,45,71,0.45)',
-            } : {}),
+            ...(dark
+                ? {
+                      colorBgBase: surfaces.dark.page,
+                      colorBgContainer: surfaces.dark.card,
+                      colorBgElevated: surfaces.dark.card,
+                      colorBgLayout: surfaces.dark.page,
+                      colorBgSpotlight: '#1a2540',
+                      colorBorder: surfaces.dark.border,
+                      colorBorderSecondary: surfaces.dark.border,
+                      colorText: surfaces.dark.text,
+                      colorTextSecondary: surfaces.dark.textSecondary,
+                      colorTextTertiary: surfaces.dark.textMuted,
+                      colorTextQuaternary: '#64748b',
+                      colorFillAlter: 'rgba(30,45,71,0.6)',
+                      colorFillContent: 'rgba(30,45,71,0.45)',
+                  }
+                : {}),
         },
         components: {
             Card: { borderRadiusLG: 22, headerFontSize: 14, headerFontSizeSM: 13, bodyPadding: 18 },

@@ -1,21 +1,21 @@
 <?php
 
+use App\Http\Controllers\Admin\InstitutionManagementController;
+use App\Http\Controllers\Admin\KeywordManagementController;
+use App\Http\Controllers\Admin\ResearchTaxonomyManagementController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\HierarchicalAccountController;
 use App\Http\Controllers\EditPermissionController;
+use App\Http\Controllers\HierarchicalAccountController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResearchProposalController;
 use App\Http\Controllers\SitemapController;
-use App\Http\Controllers\Admin\UserManagementController;
-use App\Http\Controllers\Admin\InstitutionManagementController;
-use App\Http\Controllers\Admin\KeywordManagementController;
-use App\Http\Controllers\Admin\ResearchTaxonomyManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/robots.txt', function () {
-    return response("User-agent: *\nDisallow:\nSitemap: " . url('/sitemap.xml'), 200, [
+    return response("User-agent: *\nDisallow:\nSitemap: ".url('/sitemap.xml'), 200, [
         'Content-Type' => 'text/plain; charset=UTF-8',
     ]);
 });
@@ -191,4 +191,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
-
