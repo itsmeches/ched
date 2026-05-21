@@ -250,8 +250,9 @@ export default function PublicInstitution({ institution, papers, stats, filters 
                                 <div className={`mt-2 rounded-2xl border p-4 ${dark ? 'border-[#1e2d47] bg-[#0d1526]' : 'border-slate-200 bg-slate-50'}`}>
                                     <Row gutter={[12, 12]}>
                                         <Col xs={24} md={12}>
-                                            <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Search Research</label>
+                                            <label htmlFor="inst-search" className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Search Research</label>
                                             <Input
+                                                id="inst-search"
                                                 placeholder="Title, author, school, or keyword"
                                                 value={searchTerm}
                                                 onChange={(event) => {
@@ -262,8 +263,9 @@ export default function PublicInstitution({ institution, papers, stats, filters 
                                             />
                                         </Col>
                                         <Col xs={24} md={6}>
-                                            <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Type of Research</label>
+                                            <label htmlFor="inst-category" className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Type of Research</label>
                                             <Select
+                                                id="inst-category"
                                                 value={category || undefined}
                                                 placeholder="All types"
                                                 allowClear
@@ -276,8 +278,9 @@ export default function PublicInstitution({ institution, papers, stats, filters 
                                             />
                                         </Col>
                                         <Col xs={24} md={6}>
-                                            <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Discipline</label>
+                                            <label htmlFor="inst-discipline" className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Discipline</label>
                                             <Select
+                                                id="inst-discipline"
                                                 value={disciplineCode || undefined}
                                                 placeholder="All disciplines"
                                                 allowClear
@@ -292,8 +295,9 @@ export default function PublicInstitution({ institution, papers, stats, filters 
                                             />
                                         </Col>
                                         <Col xs={24} md={6}>
-                                            <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Year</label>
+                                            <label htmlFor="inst-year" className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Year</label>
                                             <Select
+                                                id="inst-year"
                                                 value={year || undefined}
                                                 placeholder="All years"
                                                 allowClear
@@ -306,8 +310,9 @@ export default function PublicInstitution({ institution, papers, stats, filters 
                                             />
                                         </Col>
                                         <Col xs={24} md={12}>
-                                            <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Tags</label>
+                                            <label htmlFor="inst-tag" className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Tags</label>
                                             <Input
+                                                id="inst-tag"
                                                 placeholder="Enter a keyword tag"
                                                 value={tag}
                                                 onChange={(event) => {

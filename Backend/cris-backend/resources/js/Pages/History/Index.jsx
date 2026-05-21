@@ -286,7 +286,7 @@ export default function HistoryIndex({ history, filters, role, stats }) {
                             {/* Review comments */}
                             {(entry.action === 'approved' || entry.action === 'rejected') && entry.new_values?.comments && (
                                 <div style={{ marginTop: 4, fontSize: 12, color: textTertiary, fontStyle: 'italic' }}>
-                                    "{entry.new_values.comments}"
+                                    &ldquo;{entry.new_values.comments}&rdquo;
                                 </div>
                             )}
                         </div>

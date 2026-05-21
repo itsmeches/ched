@@ -49,7 +49,7 @@ export default function DisciplinesIndex({ disciplines = [] }) {
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
         return disciplines.filter((item) => {
-            const statusMatch = statusFilter === 'all' ? true : statusFilter === 'active' ? Boolean(item.is_active) : !Boolean(item.is_active);
+            const statusMatch = statusFilter === 'all' ? true : statusFilter === 'active' ? Boolean(item.is_active) : !item.is_active;
             const searchMatch = q === '' ? true :
                 String(item.code).toLowerCase().includes(q) ||
                 String(item.name).toLowerCase().includes(q);
