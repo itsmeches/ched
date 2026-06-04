@@ -30,7 +30,7 @@ export default function GuestLayout({ children }) {
 
                 <div>
                     <h1 className="text-4xl font-bold leading-tight">
-                        Calabarzon Research
+                        CALABARZON Research
                         <br />
                         <span style={{ color: '#b3d9ff' }}>Information System</span>
                     </h1>
@@ -71,7 +71,7 @@ export default function GuestLayout({ children }) {
                             CRIS
                         </p>
                         <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                            Calabarzon Research Information System
+                            CALABARZON Research Information System
                         </p>
                     </div>
                 </div>
